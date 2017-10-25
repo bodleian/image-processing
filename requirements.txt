@@ -1,0 +1,5 @@
+py==1.4.31
+pytest==2.9.0
+uuid==1.30
+Pillow
+jpylyzer
