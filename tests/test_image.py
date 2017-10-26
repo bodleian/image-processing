@@ -6,8 +6,8 @@ from image_processing import format_converter, transform, validation
 from test_utils import temporary_folder, filepaths, assert_lines_match
 
 
-class ImageFormatConverterTest:
-    def converts_jpg_to_tiff_test(self):
+class TestImageFormatConverter:
+    def test_converts_jpg_to_tiff(self):
         with temporary_folder() as output_folder:
             jpg_file = os.path.join(output_folder,'test.jpg')
             tiff_file = os.path.join(output_folder,'test.tif')
@@ -17,7 +17,7 @@ class ImageFormatConverterTest:
             assert os.path.isfile(tiff_file)
 
 
-    def converts_jpg_to_tiff_image_magick_test(self):
+    def test_converts_jpg_to_tiff_image_magick(self):
         with temporary_folder() as output_folder:
             jpg_file = os.path.join(output_folder,'test.jpg')
             tiff_file = os.path.join(output_folder,'test.tif')
@@ -27,7 +27,7 @@ class ImageFormatConverterTest:
             assert os.path.isfile(tiff_file)
 
 
-    # def converts_jpg_to_tiff_graphics_magick_test(self):
+    # def test_converts_jpg_to_tiff_graphics_magick(self):
     #     with temporary_folder() as output_folder:
     #         jpg_file = os.path.join(output_folder,'test.jpg')
     #         tiff_file = os.path.join(output_folder,'test.tif')
@@ -36,8 +36,7 @@ class ImageFormatConverterTest:
     #         format_converter.convert_to_tiff_with_library_choice(jpg_file, tiff_file, use_graphics_magick=True)
     #         assert os.path.isfile(tiff_file)
 
-
-    def converts_jpg_to_jpeg2000_test(self):
+    def test_converts_jpg_to_jpeg2000(self):
         with temporary_folder() as output_folder:
             jpg_file = os.path.join(output_folder,'test.jpg')
             output_file = os.path.join(output_folder,'output.jp2')
@@ -48,19 +47,19 @@ class ImageFormatConverterTest:
             #assert filecmp.cmp(output_file, filepaths.VALID_LOSSLESS_JP2)
 
 
-class ImageValidationTest:
-    def verifies_valid_jpeg2000_test(self):
+class TestImageValidation:
+    def test_verifies_valid_jpeg2000(self):
         assert validation.verify_jp2(filepaths.VALID_LOSSLESS_JP2)
 
-    def verifies_valid_lossy_jpeg2000_test(self):
+    def test_verifies_valid_lossy_jpeg2000(self):
         assert validation.verify_jp2(filepaths.VALID_LOSSY_JP2)
 
-    def recognises_invalid_jpeg2000_test(self):
+    def test_recognises_invalid_jpeg2000(self):
         assert not validation.verify_jp2(filepaths.INVALID_JP2)
 
 
-class ImageTransformTest:
-    def creates_correct_files_test(self):
+class TestImageTransform:
+    def test_creates_correct_files(self):
         with temporary_folder() as output_folder:
             transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder)
 
@@ -75,7 +74,7 @@ class ImageTransformTest:
             #assert filecmp.cmp(jp2_lossy_file, filepaths.VALID_LOSSY_JP2)
 
 
-    def does_not_generate_xmp_test(self):
+    def test_does_not_generate_xmp(self):
         with temporary_folder() as output_folder:
             transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder, save_xmp=False)
 
@@ -89,7 +88,7 @@ class ImageTransformTest:
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
             #assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
 
-    def generates_xmp_test(self):
+    def test_generates_xmp(self):
         with temporary_folder() as output_folder:
             transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder, save_xmp=True)
 
@@ -105,7 +104,7 @@ class ImageTransformTest:
             #assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
             assert_lines_match(xmp_file, filepaths.VALID_XMP)
 
-    def bad_image_metadata_input_test(self):
+    def test_bad_image_metadata_input(self):
         """"
         Tests that input images with invalid metadata can be valid once transformed. Transformed with metadata intact they create invalid jp2s
         """
