@@ -15,6 +15,10 @@ DEFAULT_BDLSS_OPTIONS = [
     'Cuse_eph=yes',
     '-flush_period', '1024']
 
+LOSSLESS_OPTIONS = [
+    "Creversible=yes",
+    "-rate", "-"]
+
 
 class KakaduError(Exception):
     pass
@@ -28,25 +32,19 @@ class Kakadu(object):
     def _kdu_compress_path(self):
         return os.path.join(self.kakadu_base_path, 'kdu_compress')
 
-    def kdu_compress(self, input, output, kakadu_options):
-        command_options = [self._kdu_compress_path(),'-i', input, '-o', output] + kakadu_options
+    def kdu_compress(self, input_file, output_file, kakadu_options):
+        command_options = [self._kdu_compress_path(), '-i', input_file, '-o', output_file] + kakadu_options
 
         # the -i parameter can have multiple files listed
-        for input_filepath in input.split(','):
-            if not os.access(input_filepath, os.R_OK):
-                raise (IOError("Couldn't access image file {0} to convert".format(input_filepath)))
+        for input_file_single in input_file.split(','):
+            if not os.access(input_file_single, os.R_OK):
+                raise (IOError("Couldn't access image file {0} to convert".format(input_file_single)))
 
-        if not os.access(os.path.dirname(output), os.W_OK):
-            raise (IOError("Couldn't write to output path {0}".format(output)))
+        if not os.access(os.path.dirname(output_file), os.W_OK):
+            raise (IOError("Couldn't write to output path {0}".format(output_file)))
         print ' '.join(command_options)
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise(KakaduError('Kakadu conversion to jpeg2000 failed on {0}. Command: {1}'.
                               format(input, ' '.join(command_options)), e))
-
-
-def test():
-    lossless = DEFAULT_BDLSS_OPTIONS + ["Creversible=yes", "-rate", "-"]
-    lossy = DEFAULT_BDLSS_OPTIONS+ ["-rate", "3"]
-    monochrome = DEFAULT_BDLSS_OPTIONS+ ["-no_palette"]

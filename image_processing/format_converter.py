@@ -2,7 +2,7 @@
 import os
 import subprocess
 from PIL import Image
-from kakadu import DEFAULT_BDLSS_OPTIONS, Kakadu, KakaduError
+from kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
 
 class ImageProcessingError(Exception):
     pass
@@ -28,7 +28,7 @@ def convert_to_jpeg2000(input_filepath, output_filepath, lossless=True):
     """
 
     if lossless:
-        extra_options = ["Creversible=yes", "-rate", "-"]
+        extra_options = LOSSLESS_OPTIONS
     else:
         extra_options = ["-rate", "3"]
 
@@ -90,7 +90,7 @@ def convert_monochrome_to_lossless_jpeg2000(input_filepath, output_filepath):
     """
     Converts an bitonal or greyscale image file supported by kakadu losslessly to jpeg2000
     """
-    kakadu_options = DEFAULT_BDLSS_OPTIONS + ["-no_palette"]
+    kakadu_options = DEFAULT_BDLSS_OPTIONS + LOSSLESS_OPTIONS + ["-no_palette"]
     kakadu = Kakadu(KAKADU_BASE_PATH)
     kakadu.kdu_compress("'{0}','{0}','{0}'".format(input_filepath), output_filepath, kakadu_options)
 
