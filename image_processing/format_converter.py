@@ -92,7 +92,7 @@ def convert_monochrome_to_lossless_jpeg2000(input_filepath, output_filepath):
     """
     kakadu_options = DEFAULT_BDLSS_OPTIONS + LOSSLESS_OPTIONS + ["-no_palette"]
     kakadu = Kakadu(KAKADU_BASE_PATH)
-    kakadu.kdu_compress("'{0}','{0}','{0}'".format(input_filepath), output_filepath, kakadu_options)
+    kakadu.kdu_compress([input_filepath for i in range(0,3)], output_filepath, kakadu_options)
 
 
 def convert_to_tiff(input_filepath, output_filepath, strip_metadata=False):

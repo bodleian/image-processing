@@ -47,6 +47,17 @@ class TestImageFormatConverter:
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.VALID_LOSSLESS_JP2)
 
+    def test_converts_jpg_to_jpeg2000_with_awful_filename(self):
+        with temporary_folder() as output_folder:
+            jpg_file = os.path.join(output_folder,'te.s-t(1)_[2]')
+            output_file = os.path.join(output_folder,'output.jp2')
+            shutil.copy(filepaths.VALID_JPG, jpg_file)
+
+            format_converter.convert_unsupported_file_to_jpeg2000(jpg_file, output_file)
+            assert os.path.isfile(output_file)
+            assert filecmp.cmp(output_file, filepaths.VALID_LOSSLESS_JP2)
+
+
     def test_converts_tif_to_jpeg2000(self):
         with temporary_folder() as output_folder:
             tif_file = os.path.join(output_folder,'test.tif')
@@ -92,6 +103,23 @@ class TestImageTransform:
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
             assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
             assert filecmp.cmp(jp2_lossy_file, filepaths.VALID_LOSSY_JP2)
+
+    def test_handles_monochrome_jpg(self):
+        with temporary_folder() as output_folder:
+
+            assert format_converter.is_monochrome(filepaths.MONOCHROME_JPG)
+
+            transform.transform_jpg_to_ingest_format(filepaths.MONOCHROME_JPG, output_folder)
+
+            jpg_file = os.path.join(output_folder,'full.jpg')
+            jp2_file = os.path.join(output_folder,'full_lossless.jp2')
+            jp2_lossy_file = os.path.join(output_folder,'full_lossy.jp2')
+            assert os.path.isfile(jpg_file)
+            assert os.path.isfile(jp2_file)
+            assert os.path.isfile(jp2_lossy_file)
+            assert filecmp.cmp(jpg_file, filepaths.MONOCHROME_JPG)
+            assert filecmp.cmp(jp2_file, filepaths.MONOCHROME_LOSSLESS_JP2)
+            assert filecmp.cmp(jp2_lossy_file, filepaths.MONOCHROME_LOSSY_JP2)
 
     def test_does_not_generate_xmp(self):
         with temporary_folder() as output_folder:

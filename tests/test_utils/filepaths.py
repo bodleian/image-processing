@@ -13,4 +13,7 @@ VALID_XMP = 'tests/data/valid_xmp.xml'
 BAD_METADATA_JPG = 'tests/data/bad_metadata.jpg'
 INVALID_TIF = 'tests/data/invalid.tif'
 VALID_TIF = 'tests/data/valid.tif'
+MONOCHROME_JPG = 'tests/data/monochrome.jpg'
+MONOCHROME_LOSSY_JP2 = 'tests/data/monochrome_lossy.jp2'
+MONOCHROME_LOSSLESS_JP2 = 'tests/data/monochrome_lossless.jp2'
 

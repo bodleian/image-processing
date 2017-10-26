@@ -32,19 +32,25 @@ class Kakadu(object):
     def _kdu_compress_path(self):
         return os.path.join(self.kakadu_base_path, 'kdu_compress')
 
-    def kdu_compress(self, input_file, output_file, kakadu_options):
-        command_options = [self._kdu_compress_path(), '-i', input_file, '-o', output_file] + kakadu_options
+    def kdu_compress(self, input_files, output_file, kakadu_options):
+        if not isinstance(input_files, list):
+            input_files = [input_files]
 
         # the -i parameter can have multiple files listed
-        for input_file_single in input_file.split(','):
-            if not os.access(input_file_single, os.R_OK):
-                raise (IOError("Couldn't access image file {0} to convert".format(input_file_single)))
+        for input_file in input_files:
+            if not os.access(input_file, os.R_OK):
+                raise (IOError("Couldn't access image file {0} to convert".format(input_file)))
 
         if not os.access(os.path.dirname(output_file), os.W_OK):
             raise (IOError("Couldn't write to output path {0}".format(output_file)))
+
+        input_option = ",".join(["{0}".format(item) for item in input_files])
+
+        command_options = [self._kdu_compress_path(), '-i', input_option, '-o', output_file] + kakadu_options
+
         print ' '.join(command_options)
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise(KakaduError('Kakadu conversion to jpeg2000 failed on {0}. Command: {1}'.
-                              format(input, ' '.join(command_options)), e))
+                              format(input_option, ' '.join(command_options)), e))
