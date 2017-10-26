@@ -22,7 +22,7 @@ def assert_lines_match(file1, file2, strip=True):
         with open(file2) as file2_ptr:
             lines1 = file1_ptr.readlines()
             lines2 = file2_ptr.readlines()
-            assert(len(lines1)==len(lines2))
+            assert(len(lines1) == len(lines2))
             for i in range(0, len(lines1)):
                 if strip:
                     assert(lines1[i].strip() == lines2[i].strip())

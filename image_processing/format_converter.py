@@ -2,10 +2,13 @@
 import os
 import subprocess
 from PIL import Image
+from kakadu import DEFAULT_BDLSS_OPTIONS, Kakadu, KakaduError
 
 class ImageProcessingError(Exception):
     pass
 
+#todo: make configurable
+KAKADU_BASE_PATH= '/opt/kakadu'
 
 def convert_unsupported_file_to_jpeg2000(input_filepath, output_filepath, strip_metadata=False):
     """
@@ -24,23 +27,15 @@ def convert_to_jpeg2000(input_filepath, output_filepath, lossless=True):
     Converts an image file supported by kakadu losslessly to jpeg2000
     """
 
-    if not os.access(input_filepath, os.R_OK):
-        raise(ImageProcessingError("Couldn't access image file {0} to convert".format(input_filepath)))
-
-    if not os.access(os.path.dirname(output_filepath), os.W_OK):
-        raise(ImageProcessingError("Couldn't write to output path {0}".format(output_filepath)))
-
     if lossless:
-        options = ' -jp2_space sRGB -rate - Creversible=yes Clevels=6 Clayers=6 "Cprecincts={256,256},{256,256},{128,128}" "Stiles={512,512}" Corder="RPCL" ORGgen_plt=yes ORGtparts="R" Cblk="{64,64}" Cuse_sop=yes Cuse_eph=yes -flush_period 1024'
+        extra_options = ["Creversible=yes", "-rate", "-"]
     else:
-        options = ' -jp2_space sRGB -rate 3 Clayers=6 Clevels=6 "Stiles={512,512}" "Cprecincts={256,256},{256,256},{128,128}" Corder="RPCL" ORGgen_plt=yes ORGtparts="R" Cblk="{64,64}" Cuse_sop=yes Cuse_eph=yes -flush_period 1024'
+        extra_options = ["-rate", "3"]
 
-    action = '/opt/kakadu/kdu_compress -i ' + "'" + input_filepath + "'" + ' -o ' + "'" + output_filepath + "'" + options
+    kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options
+    kakadu = Kakadu(KAKADU_BASE_PATH)
+    kakadu.kdu_compress(input_filepath, output_filepath, kakadu_options)
 
-    success = _run_trusted_shell_action(action)
-
-    if not success:
-        raise ImageProcessingError('Kakadu conversion to jpeg2000 failed on {0}'.format(input_filepath))
 
 def repage_image(input_filepath, output_filepath):
     """Fix negative image positions unsupported problems"""
@@ -95,21 +90,10 @@ def convert_monochrome_to_lossless_jpeg2000(input_filepath, output_filepath):
     """
     Converts an bitonal or greyscale image file supported by kakadu losslessly to jpeg2000
     """
+    kakadu_options = DEFAULT_BDLSS_OPTIONS + ["-no_palette"]
+    kakadu = Kakadu(KAKADU_BASE_PATH)
+    kakadu.kdu_compress("'{0}','{0}','{0}'".format(input_filepath), output_filepath, kakadu_options)
 
-    if not os.access(input_filepath, os.R_OK):
-        raise(ImageProcessingError("Couldn't access image file {0} to convert".format(input_filepath)))
-
-    if not os.access(os.path.dirname(output_filepath), os.W_OK):
-        raise(ImageProcessingError("Couldn't write to output path {0}".format(output_filepath)))
-
-    options = '-jp2_space sRGB -rate - Creversible=yes Clevels=6 Clayers=6 "Cprecincts={256,256},{256,256},{128,128}" "Stiles={512,512}" Corder="RPCL" ORGgen_plt=yes ORGtparts="R" Cblk="{64,64}" Cuse_sop=yes Cuse_eph=yes -flush_period 1024'
-
-    action = "/opt/kakadu/kdu_compress -i '{0}','{0}','{0}' -no_palette -o '{1}' {2}".format(input_filepath,output_filepath,options)
-
-    success = _run_trusted_shell_action(action)
-
-    if not success:
-        raise ImageProcessingError('monochrome kakadu conversion to jpeg2000 failed on {0}'.format(input_filepath))
 
 def convert_to_tiff(input_filepath, output_filepath, strip_metadata=False):
     """
@@ -183,10 +167,10 @@ def convert_to_format_with_library_choice(input_filepath, output_filepath, forma
         raise ImageProcessingError('Conversion to {0} failed on {1}'.format(format, input_filepath))
 
 
+
 def _run_trusted_shell_action(action):
     proc = subprocess.Popen(action, shell=True, stdout=subprocess.PIPE, close_fds=True)
     proc.wait()
-    print action
 
     if proc.returncode != 0:
         print('failed with return code: {0}'.format(proc.returncode))

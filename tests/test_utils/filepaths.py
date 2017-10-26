@@ -11,4 +11,6 @@ INVALID_JP2 = 'tests/data/invalid.jp2'
 VALID_XMP = 'tests/data/valid_xmp.xml'
 # image with ill-formed metadata
 BAD_METADATA_JPG = 'tests/data/bad_metadata.jpg'
+INVALID_TIF = 'tests/data/invalid.tif'
+VALID_TIF = 'tests/data/valid.tif'
 
