@@ -1,7 +1,4 @@
-import os
-import uuid
-import shutil
-from contextlib import contextmanager
+
 
 # test data
 VALID_JPG = 'tests/data/valid.jpg'
@@ -15,18 +12,3 @@ VALID_XMP = 'tests/data/valid_xmp.xml'
 # image with ill-formed metadata
 BAD_METADATA_JPG = 'tests/data/bad_metadata.jpg'
 
-# exe file locations - dependent on dev env
-EXEMPI_FILE = '/opt/exempi/exempi'
-
-
-@contextmanager
-def temporary_folder(name='test'):
-    """
-    Create unique temporary folder, yields the folderpath and deletes it after use. Will not delete if error occurs
-    :param name: Added to filepath as extra identifier.
-    """
-    path = 'tests/output/{}{}'.format(name, uuid.uuid4())
-    print('output folder: ' + path)
-    os.makedirs(path)
-    yield path
-    shutil.rmtree(path)

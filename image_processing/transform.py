@@ -3,25 +3,26 @@ import shutil
 
 import logging
 import tempfile
+import io
 
 from uuid import uuid4
 
 import format_converter, validation
-from exempi import Exempi
+import libxmp
 
-def transform_jpg_to_ingest_format(jpg_file, output_uuid_folder, strip_embedded_metadata=False, exempi_app=None):
+def transform_jpg_to_ingest_format(jpg_file, output_uuid_folder, strip_embedded_metadata=False, save_xmp=False):
     """
     Creates a copy of the jpg fil and a validated jpeg2000 file and stores both in the given folder
     :param jpg_file:
     :param output_uuid_folder: the folder where the related dc.xml will be stored, with the dataset's uuid as foldername
     :param strip_metadata: True if you want to remove the embedded image metadata during the tiff conversion process. (no effect if image is already a tiff)
-    :param exempi_app: the filepath to the exempi exe. If none, metadata will not be extracted and preserved from the image file
+    :param extract_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
     :return: filepaths of created images
     """
 
-    return transform_image_to_ingest_format(jpg_file, output_uuid_folder, 'jpg', strip_embedded_metadata, exempi_app)
+    return transform_image_to_ingest_format(jpg_file, output_uuid_folder, 'jpg', strip_embedded_metadata, save_xmp)
 
-def transform_image_to_ingest_format(image_file, output_uuid_folder, source_filetype, strip_embedded_metadata=False, exempi_app=None):
+def transform_image_to_ingest_format(image_file, output_uuid_folder, source_filetype, strip_embedded_metadata=False, save_xmp=False):
     """
     Creates a copy of the image_file and a validated lossy and lossless jpeg2000 file and stores both in the given folder
     :param image_file:
@@ -41,23 +42,29 @@ def transform_image_to_ingest_format(image_file, output_uuid_folder, source_file
         files = generate_images(working_source_file, output_uuid_folder, source_filetype,scratch_output_folder,
                                 strip_embedded_metadata=strip_embedded_metadata)
 
-        if exempi_app:
-            files.append(extract_xmp(working_source_file, output_uuid_folder, exempi_app))
+        if save_xmp:
+            files.append(extract_xmp(working_source_file, output_uuid_folder))
 
         return files
     finally:
         if scratch_output_folder:
             shutil.rmtree(scratch_output_folder, ignore_errors=True)
 
-def extract_xmp(image_file, output_folder, exempi_app):
-    if exempi_app is None:
-        raise Exception('Exempi exe file path is needed to extract xmp metadata')
-    xmp_file = os.path.join(output_folder, 'xmp.xml')
-    xmp_extractor = Exempi(exempi_app)
-    success = xmp_extractor.generate(image_file, xmp_file)
-    if not success:
-        raise Exception("Exempi error while extracting xmp data")
-    return xmp_file
+
+def extract_xmp(image_file, output_folder):
+    xmp_file_path = os.path.join(output_folder, 'xmp.xml')
+
+    image_xmp_file = libxmp.XMPFiles(file_path=image_file)
+    try:
+        xmp = image_xmp_file.get_xmp()
+
+        # using io.open for unicode compatibility
+        with io.open(xmp_file_path, 'a') as output_xmp_file:
+            output_xmp_file.write(xmp.serialize_to_unicode())
+        return xmp_file_path
+    finally:
+        image_xmp_file.close_file()
+
 
 def generate_images(source_file, output_folder, source_filetype, scratch_output_folder, strip_embedded_metadata=False):
 

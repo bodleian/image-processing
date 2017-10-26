@@ -3,8 +3,7 @@ import os
 import shutil
 
 from image_processing import format_converter, transform, validation
-from test_utils import filepaths
-from test_utils.filepaths import temporary_folder
+from test_utils import temporary_folder, filepaths, assert_lines_match
 
 
 class ImageFormatConverterTest:
@@ -78,7 +77,7 @@ class ImageTransformTest:
 
     def does_not_generate_xmp_test(self):
         with temporary_folder() as output_folder:
-            transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder, exempi_app=None)
+            transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder, save_xmp=False)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -92,7 +91,7 @@ class ImageTransformTest:
 
     def generates_xmp_test(self):
         with temporary_folder() as output_folder:
-            transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder, exempi_app=filepaths.EXEMPI_FILE)
+            transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder, save_xmp=True)
 
             jpg_file = os.path.join(output_folder, 'full.jpg')
             jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
@@ -104,7 +103,7 @@ class ImageTransformTest:
 
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
             #assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
-            assert filecmp.cmp(xmp_file, filepaths.VALID_XMP)
+            assert_lines_match(xmp_file, filepaths.VALID_XMP)
 
     def bad_image_metadata_input_test(self):
         """"
