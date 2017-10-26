@@ -44,7 +44,7 @@ class TestImageFormatConverter:
 
             format_converter.convert_unsupported_file_to_jpeg2000(jpg_file, output_file)
             assert os.path.isfile(output_file)
-            #assert filecmp.cmp(output_file, filepaths.VALID_LOSSLESS_JP2)
+            assert filecmp.cmp(output_file, filepaths.VALID_LOSSLESS_JP2)
 
 
 class TestImageValidation:
@@ -70,8 +70,8 @@ class TestImageTransform:
             assert os.path.isfile(jp2_file)
             assert os.path.isfile(jp2_lossy_file)
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
-            #assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
-            #assert filecmp.cmp(jp2_lossy_file, filepaths.VALID_LOSSY_JP2)
+            assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
+            assert filecmp.cmp(jp2_lossy_file, filepaths.VALID_LOSSY_JP2)
 
 
     def test_does_not_generate_xmp(self):
@@ -86,7 +86,7 @@ class TestImageTransform:
             assert os.path.isfile(jp2_lossy_file)
             assert not os.path.isfile(os.path.join(output_folder,'xmp.xml'))
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
-            #assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
+            assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
 
     def test_generates_xmp(self):
         with temporary_folder() as output_folder:
@@ -101,7 +101,7 @@ class TestImageTransform:
             assert os.path.isfile(xmp_file)
 
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
-            #assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
+            assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
             assert_lines_match(xmp_file, filepaths.VALID_XMP)
 
     def test_bad_image_metadata_input(self):
