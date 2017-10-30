@@ -27,15 +27,15 @@ class ImageMagick(object):
             post_options = []
 
         if not os.access(os.path.dirname(input_file), os.R_OK):
-            raise (IOError("Couldn't read input file {0}".format(input_file)))
+            raise IOError("Couldn't read input file {0}".format(input_file))
 
         if not os.access(os.path.dirname(output_file), os.W_OK):
-            raise (IOError("Couldn't write to output path {0}".format(output_file)))
+            raise IOError("Couldn't write to output path {0}".format(output_file))
 
         command_options = [self._command_location('convert')] + initial_options + [input_file] + post_options + [output_file]
 
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            raise(ImageMagickError('Image magick convert command failed: {0}'.
-                                   format(' '.join(command_options)), e))
+            raise ImageMagickError('Image magick convert command failed: {0}'.
+                                   format(' '.join(command_options)), e)

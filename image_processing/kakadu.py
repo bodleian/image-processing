@@ -39,10 +39,10 @@ class Kakadu(object):
         # the -i parameter can have multiple files listed
         for input_file in input_files:
             if not os.access(input_file, os.R_OK):
-                raise (IOError("Couldn't access image file {0} to convert".format(input_file)))
+                raise IOError("Couldn't access image file {0} to convert".format(input_file))
 
         if not os.access(os.path.dirname(output_file), os.W_OK):
-            raise (IOError("Couldn't write to output path {0}".format(output_file)))
+            raise IOError("Couldn't write to output path {0}".format(output_file))
 
         input_option = ",".join(["{0}".format(item) for item in input_files])
 
@@ -52,5 +52,5 @@ class Kakadu(object):
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            raise(KakaduError('Kakadu conversion to jpeg2000 failed on {0}. Command: {1}'.
-                              format(input_option, ' '.join(command_options)), e))
+            raise KakaduError('Kakadu conversion to jpeg2000 failed on {0}. Command: {1}'.
+                              format(input_option, ' '.join(command_options)), e)

@@ -56,12 +56,12 @@ def is_monochrome(input_filepath):
     elif image_mode in ['RGB', 'RGBA', 'sRGB']:
         return False
     else:
-        raise(ImageProcessingError("Could not identify image colour mode of "+ input_filepath))
+        raise ImageProcessingError("Could not identify image colour mode of "+ input_filepath)
 
 
 def get_colourspace(image_file):
     if not os.access(image_file, os.R_OK):
-        raise(IOError("Couldn't access image file {0} to test".format(image_file)))
+        raise IOError("Couldn't access image file {0} to test".format(image_file))
     # get properties of image
     try:
         #todo: consider removing PIL entirely. First need to make sure the imagemagick monotone colour space results are the same.
@@ -74,7 +74,7 @@ def get_colourspace(image_file):
         try:
             colourspace = subprocess.check_output(command).rstrip()
         except subprocess.CalledProcessError as e:
-            raise(image_magick.ImageMagickError('Image magick identify command failed: {0}'.format(command), e))
+            raise image_magick.ImageMagickError('Image magick identify command failed: {0}'.format(command), e)
         return colourspace
 
 
