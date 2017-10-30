@@ -3,3 +3,4 @@
 .idea/
 venv/
 tests/output
+.cache
