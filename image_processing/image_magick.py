@@ -1,9 +1,6 @@
 import os
 import subprocess
-
-
-class ImageMagickError(Exception):
-    pass
+from exceptions import ImageMagickError
 
 
 class ImageMagick(object):

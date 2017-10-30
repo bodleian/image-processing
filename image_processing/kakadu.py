@@ -1,5 +1,6 @@
 import os
 import subprocess
+from exceptions import KakaduError
 
 DEFAULT_BDLSS_OPTIONS = [
     '-jp2_space', 'sRGB',
@@ -20,8 +21,6 @@ LOSSLESS_OPTIONS = [
     "-rate", "-"]
 
 
-class KakaduError(Exception):
-    pass
 
 
 class Kakadu(object):

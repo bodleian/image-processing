@@ -6,8 +6,6 @@ from kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
 import image_magick
 
 
-class ImageProcessingError(Exception):
-    pass
 
 #todo: make configurable
 KAKADU_BASE_PATH = '/opt/kakadu'
