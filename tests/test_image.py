@@ -17,25 +17,14 @@ class TestImageFormatConverter:
             format_converter.convert_to_tiff(jpg_file, tiff_file)
             assert os.path.isfile(tiff_file)
 
-
     def test_converts_jpg_to_tiff_image_magick(self):
         with temporary_folder() as output_folder:
             jpg_file = os.path.join(output_folder,'test.jpg')
             tiff_file = os.path.join(output_folder,'test.tif')
             shutil.copy(filepaths.VALID_JPG, jpg_file)
 
-            format_converter.convert_to_tiff_with_library_choice(jpg_file, tiff_file, use_graphics_magick=False)
+            format_converter.convert_to_tiff(jpg_file, tiff_file)
             assert os.path.isfile(tiff_file)
-
-
-    # def test_converts_jpg_to_tiff_graphics_magick(self):
-    #     with temporary_folder() as output_folder:
-    #         jpg_file = os.path.join(output_folder,'test.jpg')
-    #         tiff_file = os.path.join(output_folder,'test.tif')
-    #         shutil.copy(filepaths.VALID_JPG, jpg_file)
-    #
-    #         format_converter.convert_to_tiff_with_library_choice(jpg_file, tiff_file, use_graphics_magick=True)
-    #         assert os.path.isfile(tiff_file)
 
     def test_converts_jpg_to_jpeg2000(self):
         with temporary_folder() as output_folder:
