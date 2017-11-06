@@ -43,7 +43,8 @@ def transform_image_to_ingest_format(image_file, output_uuid_folder, source_file
                                 strip_embedded_metadata=strip_embedded_metadata)
 
         if save_xmp:
-            files.append(extract_xmp(working_source_file, output_uuid_folder))
+            xmp_file_path = os.path.join(output_uuid_folder, 'xmp.xml')
+            files.append(extract_xmp(working_source_file, xmp_file_path))
 
         return files
     finally:
@@ -51,8 +52,7 @@ def transform_image_to_ingest_format(image_file, output_uuid_folder, source_file
             shutil.rmtree(scratch_output_folder, ignore_errors=True)
 
 
-def extract_xmp(image_file, output_folder):
-    xmp_file_path = os.path.join(output_folder, 'xmp.xml')
+def extract_xmp(image_file, xmp_file_path):
 
     image_xmp_file = libxmp.XMPFiles(file_path=image_file)
     try:
@@ -65,7 +65,6 @@ def extract_xmp(image_file, output_folder):
     finally:
         image_xmp_file.close_file()
 
-
 def generate_images(source_file, output_folder, source_filetype, scratch_output_folder, strip_embedded_metadata=False):
 
     jpeg_filepath = os.path.join(output_folder, 'full.jpg')
@@ -77,7 +76,7 @@ def generate_images(source_file, output_folder, source_filetype, scratch_output_
         tiff_filepath = os.path.join(scratch_output_folder, 'full.tiff')
         format_converter.convert_to_tiff(source_file,tiff_filepath,strip_embedded_metadata)
     elif source_filetype == 'tif':
-        format_converter.convert_to_format_with_library_choice(source_filetype, jpeg_filepath, 'jpeg')
+        format_converter.convert_image_to_format(source_filetype, jpeg_filepath, 'jpeg')
         tiff_filepath = source_file
         #todo: should tiff file be copied over too?
     else:
@@ -105,27 +104,31 @@ def generate_jp2_images(tiff_file, output_folder, scratch_output_folder, repage_
         format_converter.repage_image(tiff_file, tiff_file)
 
     if tiff_is_monochrome:
-        format_converter.convert_monochrome_to_lossless_jpeg2000(tiff_file, lossless_filepath)
+        format_converter.convert_monochrome_to_jpeg2000(tiff_file, lossless_filepath, lossless=True)
     else:
-        format_converter.convert_to_jpeg2000(tiff_file, lossless_filepath)
+        format_converter.convert_colour_to_jpeg2000(tiff_file, lossless_filepath)
 
     valid = validation.verify_jp2(lossless_filepath)
     if not valid:
         raise Exception('Lossless JP2 file is invalid')
     logging.debug('Lossless jp2 file {0} generated'.format(lossless_filepath))
 
+    lossy_filepath = generate_lossy_jp2(tiff_file, output_folder, scratch_output_folder, tiff_is_monochrome)
+    generated_files = [lossless_filepath, lossy_filepath]
+    return generated_files
+
+def generate_lossy_jp2(tiff_file, output_folder, scratch_output_folder, tiff_is_monochrome):
+
     lossy_filepath = os.path.join(output_folder, 'full_lossy.jp2')
     converted_tiff_file = os.path.join(scratch_output_folder, str(uuid4()) + '.tiff')
     try:
         format_converter.convert_tiff_colour_profile(tiff_file, converted_tiff_file, input_is_monochrome=tiff_is_monochrome)
-        format_converter.convert_to_jpeg2000(converted_tiff_file, lossy_filepath, lossless=False)
+        format_converter.convert_colour_to_jpeg2000(converted_tiff_file, lossy_filepath, lossless=False)
         valid = validation.verify_jp2(lossy_filepath)
         if not valid:
             raise Exception('Lossy JP2 file is invalid')
         logging.debug('Lossy jp2 file {0} generated'.format(lossy_filepath))
-
-        generated_files = [lossless_filepath, lossy_filepath]
-        return generated_files
+        return lossy_filepath
     finally:
         try:
             if os.path.isfile(converted_tiff_file):

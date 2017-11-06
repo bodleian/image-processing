@@ -53,7 +53,7 @@ class TestImageFormatConverter:
             output_file = os.path.join(output_folder,'output.jp2')
             shutil.copy(filepaths.VALID_TIF, tif_file)
 
-            format_converter.convert_to_jpeg2000(tif_file, output_file)
+            format_converter.convert_colour_to_jpeg2000(tif_file, output_file)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.VALID_LOSSLESS_JP2)
 
@@ -65,7 +65,7 @@ class TestImageFormatConverter:
 
             #this doesn't seem to recognise the raised error as a KakaduError, despite it being one when I inspect it
             with pytest.raises(Exception):
-                format_converter.convert_to_jpeg2000(tif_file, output_file)
+                format_converter.convert_colour_to_jpeg2000(tif_file, output_file)
 
 class TestImageValidation:
     def test_verifies_valid_jpeg2000(self):

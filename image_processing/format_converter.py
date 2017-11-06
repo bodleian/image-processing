@@ -4,7 +4,7 @@ import subprocess
 from PIL import Image
 from kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
 import image_magick
-
+from exceptions import ImageProcessingError
 
 
 #todo: make configurable
@@ -21,13 +21,25 @@ def convert_unsupported_file_to_jpeg2000(input_filepath, output_filepath, strip_
     """
     tiff_filepath = os.path.splitext(output_filepath)[0] + '.tif'
     convert_to_tiff(input_filepath, tiff_filepath, strip_metadata=strip_metadata)
-    convert_to_jpeg2000(tiff_filepath, output_filepath)
+    convert_colour_to_jpeg2000(tiff_filepath, output_filepath)
     os.remove(tiff_filepath)
 
 
 def convert_to_jpeg2000(input_filepath, output_filepath, lossless=True):
     """
-    Converts an image file supported by kakadu losslessly to jpeg2000
+    Converts an image file supported by kakadu to jpeg2000. Has special handling for monochrome images
+    """
+    image_is_monochrome = is_monochrome(input_filepath)
+
+    if image_is_monochrome:
+        convert_monochrome_to_jpeg2000(input_filepath, output_filepath, lossless=lossless)
+    else:
+        convert_colour_to_jpeg2000(input_filepath, output_filepath, lossless=lossless)
+
+
+def convert_colour_to_jpeg2000(input_filepath, output_filepath, lossless=True):
+    """
+    Converts an non-monochrome image file supported by kakadu to jpeg2000
     """
     if lossless:
         extra_options = LOSSLESS_OPTIONS
@@ -76,11 +88,15 @@ def get_colourspace(image_file):
         return colourspace
 
 
-def convert_monochrome_to_lossless_jpeg2000(input_filepath, output_filepath):
+def convert_monochrome_to_jpeg2000(input_filepath, output_filepath, lossless=True):
     """
-    Converts an bitonal or greyscale image file supported by kakadu losslessly to jpeg2000
+    Converts an bitonal or greyscale image file supported by kakadu to jpeg2000
     """
-    kakadu_options = DEFAULT_BDLSS_OPTIONS + LOSSLESS_OPTIONS + ["-no_palette"]
+    if lossless:
+        extra_options = LOSSLESS_OPTIONS
+    else:
+        extra_options = ["-rate", "3"]
+    kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options + ["-no_palette"]
     kakadu = Kakadu(KAKADU_BASE_PATH)
     kakadu.kdu_compress([input_filepath for i in range(0,3)], output_filepath, kakadu_options)
 
