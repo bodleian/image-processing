@@ -81,7 +81,7 @@ class TestImageValidation:
 class TestImageTransform:
     def test_creates_correct_files(self):
         with temporary_folder() as output_folder:
-            transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder)
+            transform.generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -93,12 +93,29 @@ class TestImageTransform:
             assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
             assert filecmp.cmp(jp2_lossy_file, filepaths.VALID_LOSSY_JP2)
 
+    def test_creates_correct_files_from_tiff(self):
+        with temporary_folder() as output_folder:
+            transform.generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder)
+
+            jpg_file = os.path.join(output_folder,'full.jpg')
+            tiff_file = os.path.join(output_folder,'full.tiff')
+            jp2_file = os.path.join(output_folder,'full_lossless.jp2')
+            jp2_lossy_file = os.path.join(output_folder,'full_lossy.jp2')
+            assert os.path.isfile(jpg_file)
+            assert os.path.isfile(jp2_file)
+            assert os.path.isfile(tiff_file)
+            assert os.path.isfile(jp2_lossy_file)
+            #assert filecmp.cmp(jpg_file, filepaths.VALID_JPG) #todo: get appropriate test image
+            assert filecmp.cmp(tiff_file, filepaths.VALID_TIF)
+            assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
+            assert filecmp.cmp(jp2_lossy_file, filepaths.VALID_LOSSY_JP2)
+
     def test_handles_monochrome_jpg(self):
         with temporary_folder() as output_folder:
 
             assert format_converter.is_monochrome(filepaths.MONOCHROME_JPG)
 
-            transform.transform_jpg_to_ingest_format(filepaths.MONOCHROME_JPG, output_folder)
+            transform.generate_derivatives_from_jpg(filepaths.MONOCHROME_JPG, output_folder)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -112,7 +129,7 @@ class TestImageTransform:
 
     def test_does_not_generate_xmp(self):
         with temporary_folder() as output_folder:
-            transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder, save_xmp=False)
+            transform.generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=False)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -126,7 +143,7 @@ class TestImageTransform:
 
     def test_generates_xmp(self):
         with temporary_folder() as output_folder:
-            transform.transform_jpg_to_ingest_format(filepaths.VALID_JPG, output_folder, save_xmp=True)
+            transform.generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=True)
 
             jpg_file = os.path.join(output_folder, 'full.jpg')
             jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
@@ -145,7 +162,7 @@ class TestImageTransform:
         Tests that input images with invalid metadata can be valid once transformed. Transformed with metadata intact they create invalid jp2s
         """
         with temporary_folder() as output_folder:
-            transform.transform_jpg_to_ingest_format(filepaths.BAD_METADATA_JPG, output_folder, strip_embedded_metadata=True)
+            transform.generate_derivatives_from_jpg(filepaths.BAD_METADATA_JPG, output_folder, strip_embedded_metadata=True)
             jpg_file = os.path.join(output_folder, 'full.jpg')
             jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
             assert os.path.isfile(jpg_file)

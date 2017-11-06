@@ -13,14 +13,14 @@ IMAGE_MAGICK_PATH = '/usr/bin/'
 ICC_PROFILE = "/opt/kakadu/sRGB_v4_ICC_preference.icc"
 
 
-def convert_unsupported_file_to_jpeg2000(input_filepath, output_filepath, strip_metadata=False):
+def convert_unsupported_file_to_jpeg2000(input_filepath, output_filepath):
     """
     Converts an image file unsupported by kakadu (e.g. jpg) losslessly to jpeg2000 by converting it to tiff first
     :param strip_metadata: True if you want to remove the metadata during the tif conversion process.
     Useful for images with badly formed metadata that wouldn't otherwise pass jp2 validation
     """
     tiff_filepath = os.path.splitext(output_filepath)[0] + '.tif'
-    convert_to_tiff(input_filepath, tiff_filepath, strip_metadata=strip_metadata)
+    convert_to_tiff(input_filepath, tiff_filepath)
     convert_colour_to_jpeg2000(tiff_filepath, output_filepath)
     os.remove(tiff_filepath)
 
@@ -101,12 +101,17 @@ def convert_monochrome_to_jpeg2000(input_filepath, output_filepath, lossless=Tru
     kakadu.kdu_compress([input_filepath for i in range(0,3)], output_filepath, kakadu_options)
 
 
-def convert_to_tiff(input_filepath, output_filepath, strip_metadata=False):
-    return convert_image_to_format(input_filepath, output_filepath, format='tif', strip_metadata=strip_metadata )
+def convert_to_tiff(input_filepath, output_filepath, extra_options=None):
+    return convert_image_to_format(input_filepath, output_filepath, format='tif', extra_options=extra_options)
 
 
-def convert_tiff_colour_profile(input_filepath, output_filepath, input_is_monochrome=False):
+def convert_to_jpg(input_filepath, output_filepath, extra_options=None):
+    return convert_image_to_format(input_filepath, output_filepath, format='jpg', extra_options=extra_options)
 
+
+def convert_tiff_colour_profile(input_filepath, output_filepath):
+
+    input_is_monochrome = is_monochrome(input_filepath)
     options = ['-profile', ICC_PROFILE]
     if input_is_monochrome:
         options += ['-compress', 'none',
@@ -118,13 +123,13 @@ def convert_tiff_colour_profile(input_filepath, output_filepath, input_is_monoch
     magick.convert(input_filepath, output_filepath, initial_options=options)
 
 
-def convert_image_to_format(input_filepath, output_filepath, format, strip_metadata=False):
+def convert_image_to_format(input_filepath, output_filepath, format, extra_options=None):
     """
     Uses image magick to convert the file to the given format
     """
 
     options = ['-format', format]
-    if strip_metadata:
+    if extra_options:
         options += ['-strip']
 
     magick = image_magick.ImageMagick(IMAGE_MAGICK_PATH)
