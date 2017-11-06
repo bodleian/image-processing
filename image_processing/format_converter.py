@@ -80,7 +80,7 @@ def get_colourspace(image_file):
     except IOError as e:
         # if PIP won't support the file, try imagemagick
         print "PIP doesn't support {0}: {1}. Trying image magick".format(image_file, e)
-        command = "{0} -format %[colorspace] '{1}'".format(os.path.join(IMAGE_MAGICK_PATH, 'identify'), image_file)
+        command = "{0} -format %[colorspace] '{1}[0]'".format(os.path.join(IMAGE_MAGICK_PATH, 'identify'), image_file)
         try:
             colourspace = subprocess.check_output(command).rstrip()
         except subprocess.CalledProcessError as e:
