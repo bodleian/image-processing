@@ -4,3 +4,6 @@
 venv/
 tests/output
 .cache
+/dist/
+/build/
+/*.egg-info
