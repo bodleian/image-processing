@@ -1,5 +1,6 @@
 import os
 import subprocess
+import logging
 from exceptions import ImageMagickError
 
 
@@ -33,6 +34,7 @@ class ImageMagick(object):
 
         command_options = [self._command_location('convert')] + initial_options + [input_file] + post_options + [output_file]
 
+        logging.debug(' '.join(command_options))
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:

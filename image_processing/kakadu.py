@@ -1,6 +1,7 @@
 import os
 import subprocess
-from exceptions import KakaduError
+import logging
+from image_processing.exceptions import KakaduError
 
 DEFAULT_BDLSS_OPTIONS = [
     '-jp2_space', 'sRGB',
@@ -19,8 +20,6 @@ DEFAULT_BDLSS_OPTIONS = [
 LOSSLESS_OPTIONS = [
     "Creversible=yes",
     "-rate", "-"]
-
-
 
 
 class Kakadu(object):
@@ -49,7 +48,7 @@ class Kakadu(object):
 
         command_options = [self._kdu_compress_path(), '-i', input_option, '-o', output_file] + kakadu_options
 
-        print ' '.join(command_options)
+        logging.debug(' '.join(command_options))
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:

@@ -5,7 +5,7 @@ import logging
 import tempfile
 import io
 
-from uuid import uuid4 #todo: use mktempfile instead and remove
+from uuid import uuid4
 
 import format_converter, validation
 import libxmp

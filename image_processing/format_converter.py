@@ -1,5 +1,6 @@
 
 import os
+import logging
 import subprocess
 from PIL import Image
 from kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
@@ -78,7 +79,7 @@ def get_colourspace(image_file):
         return colourspace
     except IOError as e:
         # if PIP won't support the file, try imagemagick
-        print "PIP doesn't support {0}: {1}. Trying image magick".format(image_file, e)
+        logging.info("PIP doesn't support {0}: {1}. Trying image magick".format(image_file, e))
         command = "{0} -format %[colorspace] '{1}[0]'".format(os.path.join(IMAGE_MAGICK_PATH, 'identify'), image_file)
         try:
             colourspace = subprocess.check_output(command).rstrip()
