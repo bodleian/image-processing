@@ -99,16 +99,14 @@ def generate_derivatives_from_tiff(tiff_file, output_folder, include_tiff=True, 
 def generate_jp2_derivatives_from_tiff(scratch_tiff_file, output_folder):
     lossless_filepath = os.path.join(output_folder,LOSSLESS_JP2_FILENAME)
     format_converter.convert_to_jpeg2000(scratch_tiff_file, lossless_filepath, lossless=True)
-    if not validation.verify_jp2(lossless_filepath):
-        raise Exception('Lossless JP2 file is invalid')
+    validation.validate_jp2(lossless_filepath)
     logging.debug('Lossless jp2 file {0} generated'.format(lossless_filepath))
 
     lossy_filepath = os.path.join(output_folder, LOSSY_JP2_FILENAME)
     #todo: should be mogrify
     format_converter.convert_tiff_colour_profile(scratch_tiff_file, scratch_tiff_file)
     format_converter.convert_colour_to_jpeg2000(scratch_tiff_file, lossy_filepath, lossless=False)
-    if not validation.verify_jp2(lossy_filepath):
-        raise Exception('Lossy JP2 file is invalid')
+    validation.validate_jp2(lossy_filepath)
     logging.debug('Lossy jp2 file {0} generated'.format(lossy_filepath))
 
     return [lossless_filepath, lossy_filepath]

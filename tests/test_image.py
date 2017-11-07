@@ -3,7 +3,7 @@ import os
 import shutil
 import pytest
 
-from image_processing import format_converter, transform, validation
+from image_processing import format_converter, transform, validation, exceptions
 from test_utils import temporary_folder, filepaths, assert_lines_match
 
 
@@ -63,19 +63,19 @@ class TestImageFormatConverter:
             output_file = os.path.join(output_folder,'output.jp2')
             shutil.copy(filepaths.INVALID_TIF, tif_file)
 
-            #this doesn't seem to recognise the raised error as a KakaduError, despite it being one when I inspect it
-            with pytest.raises(Exception):
+            with pytest.raises(exceptions.KakaduError):
                 format_converter.convert_colour_to_jpeg2000(tif_file, output_file)
 
 class TestImageValidation:
     def test_verifies_valid_jpeg2000(self):
-        assert validation.verify_jp2(filepaths.VALID_LOSSLESS_JP2)
+        validation.validate_jp2(filepaths.VALID_LOSSLESS_JP2)
 
     def test_verifies_valid_lossy_jpeg2000(self):
-        assert validation.verify_jp2(filepaths.VALID_LOSSY_JP2)
+        validation.validate_jp2(filepaths.VALID_LOSSY_JP2)
 
     def test_recognises_invalid_jpeg2000(self):
-        assert not validation.verify_jp2(filepaths.INVALID_JP2)
+        with pytest.raises(exceptions.ValidationError):
+            validation.validate_jp2(filepaths.INVALID_JP2)
 
 
 class TestImageTransform:

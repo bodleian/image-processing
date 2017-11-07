@@ -6,6 +6,8 @@ from exceptions import ImageMagickError
 class ImageMagick(object):
     def __init__(self, image_magick_location=""):
         self.image_magick_location = image_magick_location
+        if not os.access(self._command_location('convert'), os.X_OK):
+            raise IOError("Couldn't execute image magick convert at {0}".format(image_magick_location))
 
     def _command_location(self, command):
         return os.path.join(self.image_magick_location, command)
@@ -23,7 +25,7 @@ class ImageMagick(object):
         if post_options is None:
             post_options = []
 
-        if not os.access(os.path.dirname(input_file), os.R_OK):
+        if not os.access(input_file, os.R_OK):
             raise IOError("Couldn't read input file {0}".format(input_file))
 
         if not os.access(os.path.dirname(output_file), os.W_OK):

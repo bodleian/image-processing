@@ -3,11 +3,11 @@ import os
 import subprocess
 from PIL import Image
 from kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
-import image_magick
-from exceptions import ImageProcessingError
+from image_magick import ImageMagick
+from image_processing.exceptions import ImageProcessingError, ImageMagickError
 
 
-#todo: make configurable
+# todo: make configurable
 KAKADU_BASE_PATH = '/opt/kakadu'
 IMAGE_MAGICK_PATH = '/usr/bin/'
 ICC_PROFILE = "/opt/kakadu/sRGB_v4_ICC_preference.icc"
@@ -16,7 +16,6 @@ ICC_PROFILE = "/opt/kakadu/sRGB_v4_ICC_preference.icc"
 def convert_unsupported_file_to_jpeg2000(input_filepath, output_filepath):
     """
     Converts an image file unsupported by kakadu (e.g. jpg) losslessly to jpeg2000 by converting it to tiff first
-    :param strip_metadata: True if you want to remove the metadata during the tif conversion process.
     Useful for images with badly formed metadata that wouldn't otherwise pass jp2 validation
     """
     tiff_filepath = os.path.splitext(output_filepath)[0] + '.tif'
@@ -55,7 +54,7 @@ def repage_image(input_filepath, output_filepath):
     """Fix negative image positions unsupported problems"""
     options = ['+repage']
 
-    magick = image_magick.ImageMagick(IMAGE_MAGICK_PATH)
+    magick = ImageMagick(IMAGE_MAGICK_PATH)
     magick.convert(input_filepath, output_filepath, post_options=options)
 
 
@@ -66,7 +65,7 @@ def is_monochrome(input_filepath):
     elif image_mode in ['RGB', 'RGBA', 'sRGB']:
         return False
     else:
-        raise ImageProcessingError("Could not identify image colour mode of "+ input_filepath)
+        raise ImageProcessingError("Could not identify image colour mode of " + input_filepath)
 
 
 def get_colourspace(image_file):
@@ -84,7 +83,7 @@ def get_colourspace(image_file):
         try:
             colourspace = subprocess.check_output(command).rstrip()
         except subprocess.CalledProcessError as e:
-            raise image_magick.ImageMagickError('Image magick identify command failed: {0}'.format(command), e)
+            raise ImageMagickError('Image magick identify command failed: {0}'.format(command), e)
         return colourspace
 
 
@@ -102,11 +101,11 @@ def convert_monochrome_to_jpeg2000(input_filepath, output_filepath, lossless=Tru
 
 
 def convert_to_tiff(input_filepath, output_filepath, extra_options=None):
-    return convert_image_to_format(input_filepath, output_filepath, format='tif', extra_options=extra_options)
+    return convert_image_to_format(input_filepath, output_filepath, img_format='tif', extra_options=extra_options)
 
 
 def convert_to_jpg(input_filepath, output_filepath, extra_options=None):
-    return convert_image_to_format(input_filepath, output_filepath, format='jpg', extra_options=extra_options)
+    return convert_image_to_format(input_filepath, output_filepath, img_format='jpg', extra_options=extra_options)
 
 
 def convert_tiff_colour_profile(input_filepath, output_filepath):
@@ -119,18 +118,18 @@ def convert_tiff_colour_profile(input_filepath, output_filepath):
                     '-type', 'truecolor',
                     '-alpha', 'off']
 
-    magick = image_magick.ImageMagick(IMAGE_MAGICK_PATH)
+    magick = ImageMagick(IMAGE_MAGICK_PATH)
     magick.convert(input_filepath, output_filepath, initial_options=options)
 
 
-def convert_image_to_format(input_filepath, output_filepath, format, extra_options=None):
+def convert_image_to_format(input_filepath, output_filepath, img_format, extra_options=None):
     """
     Uses image magick to convert the file to the given format
     """
 
-    options = ['-format', format]
+    options = ['-format', img_format]
     if extra_options:
         options += ['-strip']
 
-    magick = image_magick.ImageMagick(IMAGE_MAGICK_PATH)
+    magick = ImageMagick(IMAGE_MAGICK_PATH)
     magick.convert(input_filepath, output_filepath, post_options=options)

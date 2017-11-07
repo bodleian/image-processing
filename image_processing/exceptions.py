@@ -9,3 +9,7 @@ class ImageMagickError(ImageProcessingError):
 
 class KakaduError(ImageProcessingError):
     pass
+
+
+class ValidationError(ImageProcessingError):
+    pass
