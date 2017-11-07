@@ -16,10 +16,12 @@ JPG_FILENAME = 'full.jpg'
 LOSSLESS_JP2_FILENAME = 'full_lossless.jp2'
 LOSSY_JP2_FILENAME = 'full_lossy.jp2'
 
+ICC_PROFILE = "/opt/kakadu/sRGB_v4_ICC_preference.icc"
+
 
 def generate_derivatives_from_jpg(jpg_file, output_folder, strip_embedded_metadata=False, save_xmp=False):
     """
-    Creates a copy of the jpg fil and a validated jpeg2000 file and stores both in the given folder
+    Creates a copy of the jpg file and a validated jpeg2000 file and stores both in the given folder
     :param jpg_file:
     :param output_folder: the folder where the related dc.xml will be stored, with the dataset's uuid as foldername
     :param strip_embedded_metadata: True if you want to remove the embedded image metadata during the tiff conversion process. (no effect if image is already a tiff)
@@ -104,7 +106,7 @@ def generate_jp2_derivatives_from_tiff(scratch_tiff_file, output_folder):
 
     lossy_filepath = os.path.join(output_folder, LOSSY_JP2_FILENAME)
     #todo: should be mogrify
-    format_converter.convert_tiff_colour_profile(scratch_tiff_file, scratch_tiff_file)
+    format_converter.convert_tiff_colour_profile(scratch_tiff_file, scratch_tiff_file, ICC_PROFILE)
     format_converter.convert_colour_to_jpeg2000(scratch_tiff_file, lossy_filepath, lossless=False)
     validation.validate_jp2(lossy_filepath)
     logging.debug('Lossy jp2 file {0} generated'.format(lossy_filepath))

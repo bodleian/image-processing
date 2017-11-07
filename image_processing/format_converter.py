@@ -11,7 +11,6 @@ from image_processing.exceptions import ImageProcessingError, ImageMagickError
 # todo: make configurable
 KAKADU_BASE_PATH = '/opt/kakadu'
 IMAGE_MAGICK_PATH = '/usr/bin/'
-ICC_PROFILE = "/opt/kakadu/sRGB_v4_ICC_preference.icc"
 
 
 def convert_unsupported_file_to_jpeg2000(input_filepath, output_filepath):
@@ -109,10 +108,10 @@ def convert_to_jpg(input_filepath, output_filepath, extra_options=None):
     return convert_image_to_format(input_filepath, output_filepath, img_format='jpg', extra_options=extra_options)
 
 
-def convert_tiff_colour_profile(input_filepath, output_filepath):
+def convert_tiff_colour_profile(input_filepath, output_filepath, profile):
 
     input_is_monochrome = is_monochrome(input_filepath)
-    options = ['-profile', ICC_PROFILE]
+    options = ['-profile', profile]
     if input_is_monochrome:
         options += ['-compress', 'none',
                     '-depth', '8',
