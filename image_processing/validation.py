@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+
 from jpylyzer.jpylyzer import checkOneFile
 from image_processing.exceptions import ValidationError
 

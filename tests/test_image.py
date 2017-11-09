@@ -4,7 +4,7 @@ import shutil
 import pytest
 
 from image_processing import format_converter, transform, validation, exceptions
-from test_utils import temporary_folder, filepaths, assert_lines_match
+from .test_utils import temporary_folder, filepaths, assert_lines_match
 
 
 class TestImageFormatConverter:

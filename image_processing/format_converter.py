@@ -1,12 +1,14 @@
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 
 import os
 import logging
 import subprocess
 from PIL import Image
-from kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
-from image_magick import ImageMagick
+from image_processing.kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
+from image_processing.image_magick import ImageMagick
 from image_processing.exceptions import ImageProcessingError, ImageMagickError
-
 
 # todo: make configurable
 KAKADU_BASE_PATH = '/opt/kakadu'
@@ -97,7 +99,7 @@ def convert_monochrome_to_jpeg2000(input_filepath, output_filepath, lossless=Tru
         extra_options = ["-rate", "3"]
     kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options + ["-no_palette"]
     kakadu = Kakadu(KAKADU_BASE_PATH)
-    kakadu.kdu_compress([input_filepath for i in range(0,3)], output_filepath, kakadu_options)
+    kakadu.kdu_compress([input_filepath for i in range(0, 3)], output_filepath, kakadu_options)
 
 
 def convert_to_tiff(input_filepath, output_filepath, extra_options=None):

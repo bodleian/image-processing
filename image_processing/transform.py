@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+
 import os
 import shutil
 
@@ -7,7 +11,7 @@ import io
 
 from uuid import uuid4
 
-import format_converter, validation
+from image_processing import format_converter, validation
 import libxmp
 
 TIFF_FILENAME = 'full.tiff'
