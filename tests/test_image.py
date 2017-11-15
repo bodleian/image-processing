@@ -3,18 +3,18 @@ import os
 import shutil
 import pytest
 
-from image_processing import format_converter, transform, validation, exceptions
+from image_processing import image_converter, derivative_files_generator, validation, exceptions
 from .test_utils import temporary_folder, filepaths, assert_lines_match
 
 KAKADU_BASE_PATH = '/opt/kakadu'
 
 
 def get_image_converter():
-    return format_converter.FormatConverter(kakadu_base_path=KAKADU_BASE_PATH)
+    return image_converter.ImageConverter(kakadu_base_path=KAKADU_BASE_PATH)
 
 
-def get_transform():
-    return transform.Transform(kakadu_base_path=KAKADU_BASE_PATH)
+def get_derivatives_generator():
+    return derivative_files_generator.DerivativeFilesGenerator(kakadu_base_path=KAKADU_BASE_PATH)
 
 
 class TestImageFormatConverter:
@@ -111,7 +111,7 @@ class TestImageValidation:
 class TestImageTransform:
     def test_creates_correct_files(self):
         with temporary_folder() as output_folder:
-            get_transform().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder)
+            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -123,7 +123,7 @@ class TestImageTransform:
 
     def test_creates_correct_files_from_tiff(self):
         with temporary_folder() as output_folder:
-            get_transform().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder, include_tiff=True)
+            get_derivatives_generator().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder, include_tiff=True)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             tiff_file = os.path.join(output_folder,'full.tiff')
@@ -138,7 +138,7 @@ class TestImageTransform:
 
     def test_excludes_tiff(self):
         with temporary_folder() as output_folder:
-            get_transform().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder, include_tiff=False)
+            get_derivatives_generator().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder, include_tiff=False)
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
             assert os.path.isfile(jpg_file)
@@ -150,7 +150,7 @@ class TestImageTransform:
 
             assert get_image_converter().is_monochrome(filepaths.MONOCHROME_JPG)
 
-            get_transform().generate_derivatives_from_jpg(filepaths.MONOCHROME_JPG, output_folder)
+            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.MONOCHROME_JPG, output_folder)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -162,7 +162,7 @@ class TestImageTransform:
 
     def test_does_not_generate_xmp(self):
         with temporary_folder() as output_folder:
-            get_transform().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=False)
+            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=False)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -175,7 +175,7 @@ class TestImageTransform:
 
     def test_generates_xmp(self):
         with temporary_folder() as output_folder:
-            get_transform().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=True)
+            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=True)
 
             jpg_file = os.path.join(output_folder, 'full.jpg')
             jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
@@ -195,7 +195,7 @@ class TestImageTransform:
         Tests that input images with invalid metadata can be valid once transformed. Transformed with metadata intact they create invalid jp2s
         """
         with temporary_folder() as output_folder:
-            get_transform().generate_derivatives_from_jpg(filepaths.BAD_METADATA_JPG, output_folder, strip_embedded_metadata=True)
+            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.BAD_METADATA_JPG, output_folder, strip_embedded_metadata=True)
             jpg_file = os.path.join(output_folder, 'full.jpg')
             jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
             assert os.path.isfile(jpg_file)

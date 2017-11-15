@@ -11,7 +11,7 @@ import io
 
 from uuid import uuid4
 
-from image_processing import format_converter, validation
+from image_processing import image_converter, validation
 import libxmp
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
@@ -22,7 +22,11 @@ DEFAULT_LOSSLESS_JP2_FILENAME = 'full_lossless.jp2'
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
 
 
-class Transform(object):
+class DerivativeFilesGenerator(object):
+    """
+    Given a source image file, generates the derivative files (preservation/display image formats, extracted
+    technical metadata etc.) we store in our repository
+    """
 
     def __init__(self, kakadu_base_path, image_magick_path=DEFAULT_IMAGE_MAGICK_PATH, tiff_filename=DEFAULT_TIFF_FILENAME,
                  xmp_filename=DEFAULT_XMP_FILENAME, jpg_filename=DEFAULT_JPG_FILENAME,
@@ -31,8 +35,8 @@ class Transform(object):
         self.xmp_filename = xmp_filename
         self.jpg_filename = jpg_filename
         self.lossless_jp2_filename = lossless_jp2_filename
-        self.format_converter = format_converter.FormatConverter(kakadu_base_path=kakadu_base_path,
-                                                                 image_magick_path=image_magick_path)
+        self.image_converter = image_converter.ImageConverter(kakadu_base_path=kakadu_base_path,
+                                                              image_magick_path=image_magick_path)
         self.log = logging.getLogger(__name__)
 
     def generate_derivatives_from_jpg(self, jpg_file, output_folder, strip_embedded_metadata=False, save_xmp=False):
@@ -41,7 +45,7 @@ class Transform(object):
         :param jpg_file:
         :param output_folder: the folder where the related dc.xml will be stored, with the dataset's uuid as foldername
         :param strip_embedded_metadata: True if you want to remove the embedded image metadata during the tiff
-        conversion process.
+        conversion process. Mostly used when the metadata is badly formatted in some way and causing errors
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
         :return: filepaths of created images
         """
@@ -60,7 +64,7 @@ class Transform(object):
 
             scratch_tiff_filepath = os.path.join(scratch_output_folder, str(uuid4()) + '.tif')
             tif_conversion_options = ['-strip'] if strip_embedded_metadata else []
-            self.format_converter.convert_to_tiff(jpeg_filepath, scratch_tiff_filepath, tif_conversion_options)
+            self.image_converter.convert_to_tiff(jpeg_filepath, scratch_tiff_filepath, tif_conversion_options)
 
             generated_files.append(self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder))
 
@@ -85,7 +89,7 @@ class Transform(object):
         try:
 
             jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
-            self.format_converter.convert_to_jpg(tiff_file, jpeg_filepath)
+            self.image_converter.convert_to_jpg(tiff_file, jpeg_filepath)
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
 
@@ -102,7 +106,7 @@ class Transform(object):
             if repage_image:
                 scratch_tiff_filepath = os.path.join(scratch_output_folder, str(uuid4()) + '.tiff')
                 shutil.copy(tiff_file, scratch_tiff_filepath)
-                self.format_converter.repage_image(scratch_tiff_filepath, scratch_tiff_filepath)
+                self.image_converter.repage_image(scratch_tiff_filepath, scratch_tiff_filepath)
                 tiff_filepath_for_jp2_conversion = scratch_tiff_filepath
             else:
                 tiff_filepath_for_jp2_conversion = tiff_file
@@ -117,13 +121,12 @@ class Transform(object):
 
     def generate_jp2_from_tiff(self, tiff_file, output_folder):
         lossless_filepath = os.path.join(output_folder, self.lossless_jp2_filename)
-        self.format_converter.convert_to_jpeg2000(tiff_file, lossless_filepath, lossless=True)
+        self.image_converter.convert_to_jpeg2000(tiff_file, lossless_filepath, lossless=True)
         validation.validate_jp2(lossless_filepath)
         self.log.debug('Lossless jp2 file {0} generated'.format(lossless_filepath))
 
         return lossless_filepath
 
-    # todo: move to format_converter
     def extract_xmp(self, image_file, xmp_file_path):
 
         image_xmp_file = libxmp.XMPFiles(file_path=image_file)

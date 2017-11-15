@@ -14,7 +14,7 @@ from image_processing.exceptions import ImageProcessingError, ImageMagickError
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
 
 
-class FormatConverter(object):
+class ImageConverter(object):
 
     def __init__(self, kakadu_base_path, image_magick_path=DEFAULT_IMAGE_MAGICK_PATH):
         self.image_magick_path = image_magick_path
