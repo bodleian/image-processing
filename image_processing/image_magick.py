@@ -12,7 +12,7 @@ class ImageMagick(object):
     def __init__(self, image_magick_location=""):
         self.image_magick_location = image_magick_location
         if not os.access(self._command_location('convert'), os.X_OK):
-            raise IOError("Couldn't execute image magick convert at {0}".format(image_magick_location))
+            raise IOError("Couldn't execute image magick convert at {0}".format(self._command_location('convert')))
 
     def _command_location(self, command):
         return os.path.join(self.image_magick_location, command)
@@ -21,7 +21,7 @@ class ImageMagick(object):
         """
         :param input_file:
         :param output_file:
-        :param inital_options: command line arguments which need to go before the input file
+        :param initial_options: command line arguments which need to go before the input file
         :param post_options: command line arguments which need to go after the input file
         :return:
         """
