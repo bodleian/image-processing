@@ -24,7 +24,7 @@ DEFAULT_ICC_PROFILE = "/opt/kakadu/sRGB_v4_ICC_preference.icc"
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
 
 
-class TransformRENAMEME(object):
+class Transform(object):
 
     def __init__(self, kakadu_base_path, image_magick_path=DEFAULT_IMAGE_MAGICK_PATH, tiff_filename=DEFAULT_TIFF_FILENAME,
                  xmp_filename=DEFAULT_XMP_FILENAME, jpg_filename=DEFAULT_JPG_FILENAME,
@@ -38,6 +38,7 @@ class TransformRENAMEME(object):
         self.icc_profile = icc_profile
         self.format_converter = format_converter.FormatConverter(kakadu_base_path=kakadu_base_path,
                                                                  image_magick_path=image_magick_path)
+        self.log = logging.getLogger(__name__)
 
     def generate_derivatives_from_jpg(self, jpg_file, output_folder, strip_embedded_metadata=False, save_xmp=False):
         """
@@ -91,7 +92,7 @@ class TransformRENAMEME(object):
 
             jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
             self.format_converter.convert_to_jpg(tiff_file, jpeg_filepath)
-            logging.debug('jpeg file {0} generated'.format(jpeg_filepath))
+            self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
 
             if save_xmp:
@@ -123,14 +124,14 @@ class TransformRENAMEME(object):
         lossless_filepath = os.path.join(output_folder, self.lossless_jp2_filename)
         self.format_converter.convert_to_jpeg2000(scratch_tiff_file, lossless_filepath, lossless=True)
         validation.validate_jp2(lossless_filepath)
-        logging.debug('Lossless jp2 file {0} generated'.format(lossless_filepath))
+        self.log.debug('Lossless jp2 file {0} generated'.format(lossless_filepath))
 
         lossy_filepath = os.path.join(output_folder, self.lossy_jp2_filename)
         # todo: should be mogrify
         self.format_converter.convert_tiff_colour_profile(scratch_tiff_file, scratch_tiff_file, self.icc_profile)
         self.format_converter.convert_colour_to_jpeg2000(scratch_tiff_file, lossy_filepath, lossless=False)
         validation.validate_jp2(lossy_filepath)
-        logging.debug('Lossy jp2 file {0} generated'.format(lossy_filepath))
+        self.log.debug('Lossy jp2 file {0} generated'.format(lossy_filepath))
 
         return [lossless_filepath, lossy_filepath]
 
@@ -144,5 +145,6 @@ class TransformRENAMEME(object):
             # using io.open for unicode compatibility
             with io.open(xmp_file_path, 'a') as output_xmp_file:
                 output_xmp_file.write(xmp.serialize_to_unicode())
+            self.log.debug('XMP file {0} generated'.format(xmp_file_path))
         finally:
             image_xmp_file.close_file()

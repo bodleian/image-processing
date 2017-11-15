@@ -13,6 +13,7 @@ class ImageMagick(object):
         self.image_magick_location = image_magick_location
         if not os.access(self._command_location('convert'), os.X_OK):
             raise IOError("Couldn't execute image magick convert at {0}".format(self._command_location('convert')))
+        self.log = logging.getLogger(__name__)
 
     def _command_location(self, command):
         return os.path.join(self.image_magick_location, command)
@@ -38,7 +39,7 @@ class ImageMagick(object):
 
         command_options = [self._command_location('convert')] + initial_options + [input_file] + post_options + [output_file]
 
-        logging.debug(' '.join(command_options))
+        self.log.debug(' '.join(command_options))
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:

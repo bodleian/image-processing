@@ -14,7 +14,7 @@ def get_image_converter():
 
 
 def get_transform():
-    return transform.TransformRENAMEME(kakadu_base_path=KAKADU_BASE_PATH)
+    return transform.Transform(kakadu_base_path=KAKADU_BASE_PATH)
 
 
 class TestImageFormatConverter:

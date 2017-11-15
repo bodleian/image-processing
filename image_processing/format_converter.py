@@ -20,6 +20,7 @@ class FormatConverter(object):
         self.image_magick_path = image_magick_path
         self.kakadu = Kakadu(kakadu_base_path)
         self.image_magick = ImageMagick(image_magick_path)
+        self.log = logging.getLogger(__name__)
 
     def convert_unsupported_file_to_jpeg2000(self, input_filepath, output_filepath):
         """
@@ -79,7 +80,7 @@ class FormatConverter(object):
             return colourspace
         except IOError as e:
             # if PIP won't support the file, try imagemagick
-            logging.info("PIP doesn't support {0}: {1}. Trying image magick".format(image_file, e))
+            self.log.info("PIP doesn't support {0}: {1}. Trying image magick".format(image_file, e))
             command = "{0} -format %[colorspace] '{1}[0]'".format(os.path.join(self.image_magick_path, 'identify'), image_file)
             try:
                 colourspace = subprocess.check_output(command).rstrip()

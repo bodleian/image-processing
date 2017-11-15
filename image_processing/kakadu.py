@@ -32,6 +32,7 @@ class Kakadu(object):
         self.kakadu_base_path = kakadu_base_path
         if not os.access(self._kdu_compress_path(), os.X_OK):
             raise IOError("Couldn't execute kdu_compress at {0}".format(self._kdu_compress_path()))
+        self.log = logging.getLogger(__name__)
 
     def _kdu_compress_path(self):
         return os.path.join(self.kakadu_base_path, 'kdu_compress')
@@ -52,7 +53,7 @@ class Kakadu(object):
 
         command_options = [self._kdu_compress_path(), '-i', input_option, '-o', output_file] + kakadu_options
 
-        logging.debug(' '.join(command_options))
+        self.log.debug(' '.join(command_options))
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
