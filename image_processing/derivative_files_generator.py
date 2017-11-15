@@ -64,7 +64,8 @@ class DerivativeFilesGenerator(object):
 
             scratch_tiff_filepath = os.path.join(scratch_output_folder, str(uuid4()) + '.tif')
             tif_conversion_options = ['-strip'] if strip_embedded_metadata else []
-            self.image_converter.convert_to_tiff(jpeg_filepath, scratch_tiff_filepath, tif_conversion_options)
+            self.image_converter.convert_to_tiff(jpeg_filepath, scratch_tiff_filepath,
+                                                 post_options=tif_conversion_options)
 
             generated_files.append(self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder))
 

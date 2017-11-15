@@ -99,11 +99,23 @@ class ImageConverter(object):
         kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options + ["-no_palette"]
         self.kakadu.kdu_compress([input_filepath for i in range(0, 3)], output_filepath, kakadu_options)
 
-    def convert_to_tiff(self, input_filepath, output_filepath, extra_options=None):
-        return self.convert_image_to_format(input_filepath, output_filepath, img_format='tif', extra_options=extra_options)
+    def convert_to_tiff(self, input_filepath, output_filepath, post_options=None, initial_options=None):
+        """
+        :param initial_options: command line arguments which need to go before the input file
+        :param post_options: command line arguments which need to go after the input file
+        :return:
+        """
+        return self.convert_image_to_format(input_filepath, output_filepath, img_format='tif',
+                                            post_options=post_options, initial_options=initial_options)
 
-    def convert_to_jpg(self, input_filepath, output_filepath, extra_options=None):
-        return self.convert_image_to_format(input_filepath, output_filepath, img_format='jpg', extra_options=extra_options)
+    def convert_to_jpg(self, input_filepath, output_filepath, post_options=None, initial_options=None):
+        """
+        :param initial_options: command line arguments which need to go before the input file
+        :param post_options: command line arguments which need to go after the input file
+        :return:
+        """
+        return self.convert_image_to_format(input_filepath, output_filepath, img_format='jpg',
+                                            post_options=post_options, initial_options=initial_options)
 
     def convert_tiff_colour_profile(self, input_filepath, output_filepath, profile):
 
@@ -117,13 +129,20 @@ class ImageConverter(object):
 
         self.image_magick.convert(input_filepath, output_filepath, initial_options=options)
 
-    def convert_image_to_format(self, input_filepath, output_filepath, img_format, extra_options=None):
+    def convert_image_to_format(self, input_filepath, output_filepath, img_format,
+                                post_options=None, initial_options=None):
         """
         Uses image magick to convert the file to the given format
+        :param initial_options: command line arguments which need to go before the input file
+        :param post_options: command line arguments which need to go after the input file
         """
 
-        options = ['-format', img_format]
-        if extra_options:
-            options += ['-strip']
+        if post_options is None:
+            post_options = []
+        if initial_options is None:
+            initial_options = []
 
-        self.image_magick.convert(input_filepath, output_filepath, post_options=options)
+        post_options += ['-format', img_format]
+
+        self.image_magick.convert(input_filepath, output_filepath, post_options=post_options,
+                                  initial_options=initial_options)
