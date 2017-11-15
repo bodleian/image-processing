@@ -29,7 +29,7 @@ class FormatConverter(object):
         """
         tiff_filepath = os.path.splitext(output_filepath)[0] + '.tif'
         self.convert_to_tiff(input_filepath, tiff_filepath)
-        self.convert_colour_to_jpeg2000(tiff_filepath, output_filepath)
+        self.convert_to_jpeg2000(tiff_filepath, output_filepath)
         os.remove(tiff_filepath)
 
     def convert_to_jpeg2000(self, input_filepath, output_filepath, lossless=True):
