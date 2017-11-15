@@ -56,6 +56,16 @@ class TestImageFormatConverter:
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.VALID_LOSSLESS_JP2)
 
+    def test_converts_monochrome_jpg_to_jpeg2000(self):
+        with temporary_folder() as output_folder:
+            jpg_file = os.path.join(output_folder,'test.jpg')
+            output_file = os.path.join(output_folder,'output.jp2')
+            shutil.copy(filepaths.MONOCHROME_JPG, jpg_file)
+
+            assert get_image_converter().is_monochrome(jpg_file)
+            get_image_converter().convert_unsupported_file_to_jpeg2000(jpg_file, output_file)
+            assert os.path.isfile(output_file)
+            assert filecmp.cmp(output_file, filepaths.MONOCHROME_LOSSLESS_JP2)
 
     def test_converts_tif_to_jpeg2000(self):
         with temporary_folder() as output_folder:
@@ -66,6 +76,16 @@ class TestImageFormatConverter:
             get_image_converter().convert_colour_to_jpeg2000(tif_file, output_file)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.VALID_LOSSLESS_JP2)
+
+    def test_converts_tif_to_lossy_jpeg2000(self):
+        with temporary_folder() as output_folder:
+            tif_file = os.path.join(output_folder,'test.tif')
+            output_file = os.path.join(output_folder,'output.jp2')
+            shutil.copy(filepaths.VALID_TIF, tif_file)
+
+            get_image_converter().convert_colour_to_jpeg2000(tif_file, output_file, lossless=False)
+            assert os.path.isfile(output_file)
+            assert filecmp.cmp(output_file, filepaths.VALID_LOSSY_JP2)
 
     def test_kakadu_errors_are_raised(self):
         with temporary_folder() as output_folder:
@@ -95,30 +115,35 @@ class TestImageTransform:
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
-            jp2_lossy_file = os.path.join(output_folder,'full_lossy.jp2')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
-            assert os.path.isfile(jp2_lossy_file)
+            assert len(os.listdir(output_folder)) == 2
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
             assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
-            assert filecmp.cmp(jp2_lossy_file, filepaths.VALID_LOSSY_JP2)
 
     def test_creates_correct_files_from_tiff(self):
         with temporary_folder() as output_folder:
-            get_transform().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder)
+            get_transform().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder, include_tiff=True)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             tiff_file = os.path.join(output_folder,'full.tiff')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
-            jp2_lossy_file = os.path.join(output_folder,'full_lossy.jp2')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
             assert os.path.isfile(tiff_file)
-            assert os.path.isfile(jp2_lossy_file)
+            assert len(os.listdir(output_folder)) == 3
             #assert filecmp.cmp(jpg_file, filepaths.VALID_JPG) #todo: get appropriate test image
             assert filecmp.cmp(tiff_file, filepaths.VALID_TIF)
             assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
-            assert filecmp.cmp(jp2_lossy_file, filepaths.VALID_LOSSY_JP2)
+
+    def test_excludes_tiff(self):
+        with temporary_folder() as output_folder:
+            get_transform().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder, include_tiff=False)
+            jpg_file = os.path.join(output_folder,'full.jpg')
+            jp2_file = os.path.join(output_folder,'full_lossless.jp2')
+            assert os.path.isfile(jpg_file)
+            assert os.path.isfile(jp2_file)
+            assert len(os.listdir(output_folder)) == 2
 
     def test_handles_monochrome_jpg(self):
         with temporary_folder() as output_folder:
@@ -129,13 +154,11 @@ class TestImageTransform:
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
-            jp2_lossy_file = os.path.join(output_folder,'full_lossy.jp2')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
-            assert os.path.isfile(jp2_lossy_file)
+            assert len(os.listdir(output_folder)) == 2
             assert filecmp.cmp(jpg_file, filepaths.MONOCHROME_JPG)
             assert filecmp.cmp(jp2_file, filepaths.MONOCHROME_LOSSLESS_JP2)
-            assert filecmp.cmp(jp2_lossy_file, filepaths.MONOCHROME_LOSSY_JP2)
 
     def test_does_not_generate_xmp(self):
         with temporary_folder() as output_folder:
@@ -143,10 +166,9 @@ class TestImageTransform:
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
-            jp2_lossy_file = os.path.join(output_folder,'full_lossy.jp2')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
-            assert os.path.isfile(jp2_lossy_file)
+            assert len(os.listdir(output_folder)) == 2
             assert not os.path.isfile(os.path.join(output_folder,'xmp.xml'))
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
             assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
@@ -162,6 +184,7 @@ class TestImageTransform:
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
             assert os.path.isfile(xmp_file)
+            assert len(os.listdir(output_folder)) == 3
 
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
             assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
