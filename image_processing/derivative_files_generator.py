@@ -33,16 +33,17 @@ class DerivativeFilesGenerator(object):
 
     def __init__(self, kakadu_base_path, image_magick_path=DEFAULT_IMAGE_MAGICK_PATH,
                  jpg_high_quality_value=DEFAULT_JPG_HIGH_QUALITY_VALUE,
-                 jpg_thumbail_resize_value=DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE,
+                 jpg_thumbnail_resize_value=DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE,
                  tiff_filename=DEFAULT_TIFF_FILENAME,
-                 xmp_filename=DEFAULT_XMP_FILENAME, jpg_filename=DEFAULT_JPG_FILENAME,
+                 xmp_filename=DEFAULT_XMP_FILENAME,
+                 jpg_filename=DEFAULT_JPG_FILENAME,
                  lossless_jp2_filename=DEFAULT_LOSSLESS_JP2_FILENAME):
         self.tiff_filename = tiff_filename
         self.xmp_filename = xmp_filename
         self.jpg_filename = jpg_filename
         self.lossless_jp2_filename = lossless_jp2_filename
         self.jpg_high_quality_value = jpg_high_quality_value
-        self.jpg_thumbail_resize_value = jpg_thumbail_resize_value
+        self.jpg_thumbnail_resize_value = jpg_thumbnail_resize_value
         self.image_converter = image_converter.ImageConverter(kakadu_base_path=kakadu_base_path,
                                                               image_magick_path=image_magick_path)
         self.log = logging.getLogger(__name__)
@@ -90,7 +91,8 @@ class DerivativeFilesGenerator(object):
         :param tiff_file:
         :param output_folder: the folder where the related dc.xml will be stored, with the dataset's uuid as foldername
         :param include_tiff: Include copy of source tiff file in derivatives
-        :param repage_image: remove negative offsets by repaging the image. (It's the most common error during conversion)
+        :param repage_image: remove negative offsets by repaging the image.
+        (It's a common error during conversion)
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
         :return: filepaths of created images
         """
@@ -100,7 +102,7 @@ class DerivativeFilesGenerator(object):
             jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
 
             jpg_quality = None if create_jpg_as_thumbnail else self.jpg_high_quality_value
-            jpg_resize = self.jpg_thumbail_resize_value if create_jpg_as_thumbnail else None
+            jpg_resize = self.jpg_thumbnail_resize_value if create_jpg_as_thumbnail else None
 
             self.image_converter.convert_to_jpg(tiff_file, jpeg_filepath, quality=jpg_quality, resize=jpg_resize)
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))

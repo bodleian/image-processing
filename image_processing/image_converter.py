@@ -76,13 +76,14 @@ class ImageConverter(object):
             raise IOError("Couldn't access image file {0} to test".format(image_file))
         # get properties of image
         try:
-            #todo: consider removing PIL entirely. First need to make sure the imagemagick monotone colour space results are the same.
+            # todo: consider removing PIL entirely. First need to make sure the imagemagick monotone colour space results are the same.
             colourspace = Image.open(image_file).mode  # colour mode of image
             return colourspace
         except IOError as e:
             # if PIP won't support the file, try imagemagick
             self.log.info("PIP doesn't support {0}: {1}. Trying image magick".format(image_file, e))
-            command = "{0} -format %[colorspace] '{1}[0]'".format(os.path.join(self.image_magick_path, 'identify'), image_file)
+            command = "{0} -format %[colorspace] '{1}[0]'".format(os.path.join(self.image_magick_path, 'identify'),
+                                                                  image_file)
             try:
                 colourspace = subprocess.check_output(command).rstrip()
             except subprocess.CalledProcessError as e:
