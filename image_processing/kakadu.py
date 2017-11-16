@@ -30,8 +30,6 @@ class Kakadu(object):
 
     def __init__(self, kakadu_base_path):
         self.kakadu_base_path = kakadu_base_path
-        if not os.access(self._kdu_compress_path(), os.X_OK):
-            raise IOError("Couldn't execute kdu_compress at {0}".format(self._kdu_compress_path()))
         self.log = logging.getLogger(__name__)
 
     def _kdu_compress_path(self):
@@ -57,5 +55,5 @@ class Kakadu(object):
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            raise KakaduError('Kakadu conversion to jpeg2000 failed on {0}. Command: {1}'.
-                              format(input_option, ' '.join(command_options)), e)
+            raise KakaduError('Kakadu conversion to jpeg2000 failed on {0}. Command: {1}, Error: {2}'.
+                              format(input_option, ' '.join(command_options), e.message))

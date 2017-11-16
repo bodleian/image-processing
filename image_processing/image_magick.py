@@ -11,8 +11,6 @@ from image_processing.exceptions import ImageMagickError
 class ImageMagick(object):
     def __init__(self, image_magick_location):
         self.image_magick_location = image_magick_location
-        if not os.access(self._command_location('convert'), os.X_OK):
-            raise IOError("Couldn't execute image magick convert at {0}".format(self._command_location('convert')))
         self.log = logging.getLogger(__name__)
 
     def _command_location(self, command):
@@ -71,5 +69,5 @@ class ImageMagick(object):
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            raise ImageMagickError('Image magick command failed: {0}'.
-                                   format(' '.join(command_options)), e)
+            raise ImageMagickError('Image magick command {0} failed: {1}'.
+                                   format(' '.join(command_options), e.message))
