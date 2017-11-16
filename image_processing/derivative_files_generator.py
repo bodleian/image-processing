@@ -21,6 +21,9 @@ DEFAULT_LOSSLESS_JP2_FILENAME = 'full_lossless.jp2'
 
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
 
+DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE = "60%"
+DEFAULT_JPG_HIGH_QUALITY_VALUE = "92"
+
 
 class DerivativeFilesGenerator(object):
     """
@@ -28,13 +31,19 @@ class DerivativeFilesGenerator(object):
     technical metadata etc.) we store in our repository
     """
 
-    def __init__(self, kakadu_base_path, image_magick_path=DEFAULT_IMAGE_MAGICK_PATH, tiff_filename=DEFAULT_TIFF_FILENAME,
-                 xmp_filename=DEFAULT_XMP_FILENAME, jpg_filename=DEFAULT_JPG_FILENAME,
+    def __init__(self, kakadu_base_path, image_magick_path=DEFAULT_IMAGE_MAGICK_PATH,
+                 jpg_high_quality_value=DEFAULT_JPG_HIGH_QUALITY_VALUE,
+                 jpg_thumbnail_resize_value=DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE,
+                 tiff_filename=DEFAULT_TIFF_FILENAME,
+                 xmp_filename=DEFAULT_XMP_FILENAME,
+                 jpg_filename=DEFAULT_JPG_FILENAME,
                  lossless_jp2_filename=DEFAULT_LOSSLESS_JP2_FILENAME):
         self.tiff_filename = tiff_filename
         self.xmp_filename = xmp_filename
         self.jpg_filename = jpg_filename
         self.lossless_jp2_filename = lossless_jp2_filename
+        self.jpg_high_quality_value = jpg_high_quality_value
+        self.jpg_thumbnail_resize_value = jpg_thumbnail_resize_value
         self.image_converter = image_converter.ImageConverter(kakadu_base_path=kakadu_base_path,
                                                               image_magick_path=image_magick_path)
         self.log = logging.getLogger(__name__)
@@ -63,9 +72,8 @@ class DerivativeFilesGenerator(object):
                 generated_files += [xmp_file_path]
 
             scratch_tiff_filepath = os.path.join(scratch_output_folder, str(uuid4()) + '.tif')
-            tif_conversion_options = ['-strip'] if strip_embedded_metadata else []
             self.image_converter.convert_to_tiff(jpeg_filepath, scratch_tiff_filepath,
-                                                 post_options=tif_conversion_options)
+                                                 strip_embedded_metadata=strip_embedded_metadata)
 
             generated_files.append(self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder))
 
@@ -74,23 +82,29 @@ class DerivativeFilesGenerator(object):
             if scratch_output_folder:
                 shutil.rmtree(scratch_output_folder, ignore_errors=True)
 
-    def generate_derivatives_from_tiff(self, tiff_file, output_folder, include_tiff=True, save_xmp=False,
-                                       repage_image=False):
+    def generate_derivatives_from_tiff(self, tiff_file, output_folder, include_tiff=False, save_xmp=False,
+                                       repage_image=False, create_jpg_as_thumbnail=True):
         """
         Creates a copy of the jpg fil and a validated jpeg2000 file and stores both in the given folder
+        :param create_jpg_as_thumbnail: create the jpg as a resized thumbnail, not a high quality image
+        Parameters for resize and quality are set on a class level
         :param tiff_file:
         :param output_folder: the folder where the related dc.xml will be stored, with the dataset's uuid as foldername
         :param include_tiff: Include copy of source tiff file in derivatives
-        :param repage_image: remove negative offsets by repaging the image. (It's the most common error during conversion)
+        :param repage_image: remove negative offsets by repaging the image.
+        (It's a common error during conversion)
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
         :return: filepaths of created images
         """
 
         scratch_output_folder = tempfile.mkdtemp(prefix='image_ingest_')
         try:
-
             jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
-            self.image_converter.convert_to_jpg(tiff_file, jpeg_filepath)
+
+            jpg_quality = None if create_jpg_as_thumbnail else self.jpg_high_quality_value
+            jpg_resize = self.jpg_thumbnail_resize_value if create_jpg_as_thumbnail else None
+
+            self.image_converter.convert_to_jpg(tiff_file, jpeg_filepath, quality=jpg_quality, resize=jpg_resize)
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
 
@@ -106,8 +120,7 @@ class DerivativeFilesGenerator(object):
 
             if repage_image:
                 scratch_tiff_filepath = os.path.join(scratch_output_folder, str(uuid4()) + '.tiff')
-                shutil.copy(tiff_file, scratch_tiff_filepath)
-                self.image_converter.repage_image(scratch_tiff_filepath, scratch_tiff_filepath)
+                self.image_converter.repage_image(tiff_file, scratch_tiff_filepath)
                 tiff_filepath_for_jp2_conversion = scratch_tiff_filepath
             else:
                 tiff_filepath_for_jp2_conversion = tiff_file

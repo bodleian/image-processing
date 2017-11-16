@@ -2,6 +2,8 @@
 
 # test data
 VALID_JPG = 'tests/data/valid.jpg'
+RESIZED_JPG = 'tests/data/resized.jpg'
+HIGH_QUALITY_JPG = 'tests/data/high_quality.jpg'
 # should be VALID_JPG file transformed
 VALID_LOSSY_JP2 = 'tests/data/valid_lossy.jp2'
 VALID_LOSSLESS_JP2 = 'tests/data/valid_lossless.jp2'
