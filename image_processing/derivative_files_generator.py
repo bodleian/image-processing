@@ -118,8 +118,7 @@ class DerivativeFilesGenerator(object):
 
             if repage_image:
                 scratch_tiff_filepath = os.path.join(scratch_output_folder, str(uuid4()) + '.tiff')
-                shutil.copy(tiff_file, scratch_tiff_filepath)
-                self.image_converter.repage_image(scratch_tiff_filepath, scratch_tiff_filepath)
+                self.image_converter.repage_image(tiff_file, scratch_tiff_filepath)
                 tiff_filepath_for_jp2_conversion = scratch_tiff_filepath
             else:
                 tiff_filepath_for_jp2_conversion = tiff_file
