@@ -34,7 +34,8 @@ class ImageConverter(object):
 
     def convert_to_jpeg2000(self, input_filepath, output_filepath, lossless=True):
         """
-        Converts an image file supported by kakadu to jpeg2000. Has special handling for monochrome images
+        Converts an image file supported by kakadu to jpeg2000.
+        Handles colour conversion of greyscale and bitonal files to 3 colour channels of information.
         """
         image_is_monochrome = self.is_monochrome(input_filepath)
 
@@ -91,6 +92,9 @@ class ImageConverter(object):
     def convert_monochrome_to_jpeg2000(self, input_filepath, output_filepath, lossless=True):
         """
         Converts an bitonal or greyscale image file supported by kakadu to jpeg2000
+        The same input is copied to each of the
+        three colour channels, with no colour palette applied, to create a 24-bit
+        [3 x 8] image
         """
         if lossless:
             extra_options = LOSSLESS_OPTIONS
@@ -99,23 +103,19 @@ class ImageConverter(object):
         kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options + ["-no_palette"]
         self.kakadu.kdu_compress([input_filepath for i in range(0, 3)], output_filepath, kakadu_options)
 
-    def convert_to_tiff(self, input_filepath, output_filepath, post_options=None, initial_options=None):
-        """
-        :param initial_options: command line arguments which need to go before the input file
-        :param post_options: command line arguments which need to go after the input file
-        :return:
-        """
+    def convert_to_tiff(self, input_filepath, output_filepath, strip_embedded_metadata=False):
+        post_options = ['-strip'] if strip_embedded_metadata else []
         return self.convert_image_to_format(input_filepath, output_filepath, img_format='tif',
-                                            post_options=post_options, initial_options=initial_options)
+                                            post_options=post_options)
 
-    def convert_to_jpg(self, input_filepath, output_filepath, post_options=None, initial_options=None):
-        """
-        :param initial_options: command line arguments which need to go before the input file
-        :param post_options: command line arguments which need to go after the input file
-        :return:
-        """
+    def convert_to_jpg(self, input_filepath, output_filepath, resize=None, quality=None):
+        initial_options = []
+        if resize is not None:
+            initial_options += ['-resize', resize]
+        if quality is not None:
+            initial_options += ['-quality', quality]
         return self.convert_image_to_format(input_filepath, output_filepath, img_format='jpg',
-                                            post_options=post_options, initial_options=initial_options)
+                                            initial_options=initial_options)
 
     def convert_tiff_colour_profile(self, input_filepath, output_filepath, profile):
 
