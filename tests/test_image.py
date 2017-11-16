@@ -1,12 +1,13 @@
 import filecmp
-import os
+import os, sys, logging
 import shutil
 import pytest
 
-from image_processing import image_converter, derivative_files_generator, validation, exceptions
+from image_processing import image_converter, derivative_files_generator, validation, exceptions, image_magick
 from .test_utils import temporary_folder, filepaths, assert_lines_match
 
 KAKADU_BASE_PATH = '/opt/kakadu'
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 def get_image_converter():
@@ -26,15 +27,17 @@ class TestImageFormatConverter(object):
 
             get_image_converter().convert_to_tiff(jpg_file, tiff_file)
             assert os.path.isfile(tiff_file)
+            assert filecmp.cmp(tiff_file, filepaths.VALID_TIF)
 
-    def test_converts_jpg_to_tiff_image_magick(self):
+    def test_converts_jpg_to_tiff_without_extension(self):
         with temporary_folder() as output_folder:
-            jpg_file = os.path.join(output_folder,'test.jpg')
-            tiff_file = os.path.join(output_folder,'test.tif')
+            jpg_file = os.path.join(output_folder,'testj')
+            tiff_file = os.path.join(output_folder,'testt')
             shutil.copy(filepaths.VALID_JPG, jpg_file)
 
             get_image_converter().convert_to_tiff(jpg_file, tiff_file)
             assert os.path.isfile(tiff_file)
+            assert filecmp.cmp(tiff_file, filepaths.VALID_TIF)
 
     def test_converts_jpg_to_jpeg2000(self):
         with temporary_folder() as output_folder:
@@ -95,6 +98,17 @@ class TestImageFormatConverter(object):
 
             with pytest.raises(exceptions.KakaduError):
                 get_image_converter().convert_colour_to_jpeg2000(tif_file, output_file)
+
+
+class TestImageMagick(object):
+    def test_mogrify_tif(self):
+        with temporary_folder() as output_folder:
+            file_to_mogrify = os.path.join(output_folder,'test.tif')
+            shutil.copy(filepaths.VALID_JPG, file_to_mogrify)
+
+            magick = image_magick.ImageMagick('/usr/bin')
+            magick.mogrify(file_to_mogrify, initial_options=['-format', 'tif'])
+            assert filecmp.cmp(file_to_mogrify, filepaths.VALID_TIF)
 
 
 class TestImageValidation(object):

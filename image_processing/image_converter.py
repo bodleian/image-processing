@@ -119,7 +119,6 @@ class ImageConverter(object):
                                             initial_options=initial_options)
 
     def convert_tiff_colour_profile(self, input_filepath, output_filepath, profile):
-
         input_is_monochrome = self.is_monochrome(input_filepath)
         options = ['-profile', profile]
         if input_is_monochrome:
@@ -137,13 +136,7 @@ class ImageConverter(object):
         :param initial_options: command line arguments which need to go before the input file
         :param post_options: command line arguments which need to go after the input file
         """
+        output_path_with_format_prefix = "{0}:{1}".format(img_format, output_filepath)
 
-        if post_options is None:
-            post_options = []
-        if initial_options is None:
-            initial_options = []
-
-        post_options += ['-format', img_format]
-
-        self.image_magick.convert(input_filepath, output_filepath, post_options=post_options,
+        self.image_magick.convert(input_filepath, output_path_with_format_prefix, post_options=post_options,
                                   initial_options=initial_options)
