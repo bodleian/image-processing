@@ -76,11 +76,11 @@ class ImageConverter(object):
             raise IOError("Couldn't access image file {0} to test".format(image_file))
         # get properties of image
         try:
-            # todo: consider removing PIL entirely. First need to make sure the imagemagick monotone colour space results are the same.
             colourspace = Image.open(image_file).mode  # colour mode of image
             return colourspace
         except IOError as e:
             # if PIP won't support the file, try imagemagick
+            # newer versions of PIP have better support, so we may be able to remove this backup option
             self.log.info("PIP doesn't support {0}: {1}. Trying image magick".format(image_file, e))
             command = "{0} -format %[colorspace] '{1}[0]'".format(os.path.join(self.image_magick_path, 'identify'),
                                                                   image_file)
@@ -104,18 +104,22 @@ class ImageConverter(object):
         kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options + ["-no_palette"]
         self.kakadu.kdu_compress([input_filepath for i in range(0, 3)], output_filepath, kakadu_options)
 
-    def convert_to_tiff(self, input_filepath, output_filepath, strip_embedded_metadata=False):
-        post_options = ['-strip'] if strip_embedded_metadata else []
-        return self.convert_image_to_format(input_filepath, output_filepath, img_format='tif',
+    def convert_to_tiff(self, input_filepath, output_filepath_with_tif_extension, strip_embedded_metadata=False,
+                        colourspace="sRGB"):
+        post_options = ['-colorspace', colourspace,
+                        '-compress', 'None']
+        if strip_embedded_metadata:
+            post_options += ['-strip']
+        return self.image_magick.convert(input_filepath, output_filepath_with_tif_extension,
                                             post_options=post_options)
 
-    def convert_to_jpg(self, input_filepath, output_filepath, resize=None, quality=None):
+    def convert_to_jpg(self, input_filepath, output_filepath_with_jpg_extension, resize=None, quality=None):
         initial_options = []
         if resize is not None:
             initial_options += ['-resize', resize]
         if quality is not None:
             initial_options += ['-quality', quality]
-        return self.convert_image_to_format(input_filepath, output_filepath, img_format='jpg',
+        return self.image_magick.convert('{0}[0]'.format(input_filepath), output_filepath_with_jpg_extension,
                                             initial_options=initial_options)
 
     def convert_tiff_colour_profile(self, input_filepath, output_filepath, profile):
@@ -129,14 +133,18 @@ class ImageConverter(object):
 
         self.image_magick.convert(input_filepath, output_filepath, initial_options=options)
 
-    def convert_image_to_format(self, input_filepath, output_filepath, img_format,
-                                post_options=None, initial_options=None):
+    def normalise_tiff(self, input_filepath, output_filepath, colour_space="sRGB", repage=False):
+        # todo: should i be converting colour space here? May stop it being lossless
         """
-        Uses image magick to convert the file to the given format
-        :param initial_options: command line arguments which need to go before the input file
-        :param post_options: command line arguments which need to go after the input file
+        Remove thumbnail layers, convert to a set colour space, and repage if needed
+        :param repage:
+        :param output_filepath:
+        :param colour_space:
+        :param input_filepath:
+        :return:
         """
-        output_path_with_format_prefix = "{0}:{1}".format(img_format, output_filepath)
+        options = ['-colorspace', colour_space]
+        if repage:
+            options += ['+repage']
 
-        self.image_magick.convert(input_filepath, output_path_with_format_prefix, post_options=post_options,
-                                  initial_options=initial_options)
+        self.image_magick.convert('{0}[0]'.format(input_filepath), output_filepath, post_options=options)

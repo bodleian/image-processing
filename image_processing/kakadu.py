@@ -32,10 +32,16 @@ class Kakadu(object):
         self.kakadu_base_path = kakadu_base_path
         self.log = logging.getLogger(__name__)
 
-    def _kdu_compress_path(self):
-        return os.path.join(self.kakadu_base_path, 'kdu_compress')
+    def _command_path(self, command):
+        return os.path.join(self.kakadu_base_path, command)
 
     def kdu_compress(self, input_files, output_file, kakadu_options):
+        self.run_command('kdu_compress', input_files, output_file, kakadu_options)
+
+    def kdu_expand(self, input_files, output_file, kakadu_options):
+        self.run_command('kdu_expand', input_files, output_file, kakadu_options)
+
+    def run_command(self, command, input_files, output_file, kakadu_options):
         if not isinstance(input_files, list):
             input_files = [input_files]
 
@@ -49,11 +55,11 @@ class Kakadu(object):
 
         input_option = ",".join(["{0}".format(item) for item in input_files])
 
-        command_options = [self._kdu_compress_path(), '-i', input_option, '-o', output_file] + kakadu_options
+        command_options = [self._command_path(command), '-i', input_option, '-o', output_file] + kakadu_options
 
         self.log.debug(' '.join(command_options))
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            raise KakaduError('Kakadu conversion to jpeg2000 failed on {0}. Command: {1}, Error: {2}'.
-                              format(input_option, ' '.join(command_options), e.message))
+            raise KakaduError('Kakadu {0} failed on {1}. Command: {2}, Error: {3}'.
+                              format(command, input_option, ' '.join(command_options), e.message))
