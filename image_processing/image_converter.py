@@ -66,29 +66,17 @@ class ImageConverter(object):
         image_mode = self.get_colourspace(input_filepath)  # colour mode of image
         if image_mode in ['L', '1']:  # greyscale, Bitonal
             return True
-        elif image_mode in ['RGB', 'RGBA', 'sRGB']:
+        elif image_mode in ['RGB']:
             return False
         else:
-            raise ImageProcessingError("Could not identify image colour mode of " + input_filepath)
+            raise ImageProcessingError("Unsupported colour mode {0} for {1}".format(image_mode, input_filepath))
 
     def get_colourspace(self, image_file):
         if not os.access(image_file, os.R_OK):
             raise IOError("Couldn't access image file {0} to test".format(image_file))
         # get properties of image
-        try:
-            colourspace = Image.open(image_file).mode  # colour mode of image
-            return colourspace
-        except IOError as e:
-            # if PIP won't support the file, try imagemagick
-            # newer versions of PIP have better support, so we may be able to remove this backup option
-            self.log.info("PIP doesn't support {0}: {1}. Trying image magick".format(image_file, e))
-            command = "{0} -format %[colorspace] '{1}[0]'".format(os.path.join(self.image_magick_path, 'identify'),
-                                                                  image_file)
-            try:
-                colourspace = subprocess.check_output(command).rstrip()
-            except subprocess.CalledProcessError as e:
-                raise ImageMagickError('Image magick identify command failed: {0}'.format(command), e)
-            return colourspace
+        colourspace = Image.open(image_file).mode  # colour mode of image
+        return colourspace
 
     def convert_monochrome_to_jpeg2000(self, input_filepath, output_filepath, lossless=True):
         """
