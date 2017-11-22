@@ -12,5 +12,5 @@ setup(name='image_processing',
       author='Bodleian Libraries',
       #author_email='',
       packages=['image_processing'],
-      install_requires=['Pillow', 'jpylyzer', 'python-xmp-toolkit','uuid']
+      install_requires=['Pillow', 'jpylyzer', 'python-xmp-toolkit']
 )
