@@ -4,11 +4,10 @@ from __future__ import division
 
 import os
 import logging
-import subprocess
 from PIL import Image
 from image_processing.kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
 from image_processing.image_magick import ImageMagick
-from image_processing.exceptions import ImageProcessingError, ImageMagickError
+from image_processing.exceptions import ImageProcessingError
 
 
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
