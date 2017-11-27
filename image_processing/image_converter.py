@@ -98,7 +98,7 @@ class ImageConverter(object):
         if strip_embedded_metadata:
             post_options += ['-strip']
         return self.image_magick.convert(input_filepath, output_filepath_with_tif_extension,
-                                            post_options=post_options)
+                                         post_options=post_options)
 
     def convert_to_jpg(self, input_filepath, output_filepath_with_jpg_extension, resize=None, quality=None):
         initial_options = []
@@ -107,7 +107,7 @@ class ImageConverter(object):
         if quality is not None:
             initial_options += ['-quality', quality]
         return self.image_magick.convert('{0}[0]'.format(input_filepath), output_filepath_with_jpg_extension,
-                                            initial_options=initial_options)
+                                         initial_options=initial_options)
 
     def convert_tiff_colour_profile(self, input_filepath, output_filepath, profile):
         input_is_monochrome = self.is_monochrome(input_filepath)
@@ -120,7 +120,7 @@ class ImageConverter(object):
 
         self.image_magick.convert(input_filepath, output_filepath, initial_options=options)
 
-    def normalise_tiff(self, input_filepath, output_filepath, colour_space="sRGB", repage=False):
+    def normalise_tiff(self, input_filepath, output_filepath, repage=False, profile=None):
         # todo: should i be converting colour space here? May stop it being lossless
         """
         Remove thumbnail layers, convert to a set colour space, and repage if needed
@@ -130,8 +130,10 @@ class ImageConverter(object):
         :param input_filepath:
         :return:
         """
-        options = ['-colorspace', colour_space]
+        options = []
         if repage:
             options += ['+repage']
+        if profile:
+            options += ['-profile', profile]
 
         self.image_magick.convert('{0}[0]'.format(input_filepath), output_filepath, post_options=options)

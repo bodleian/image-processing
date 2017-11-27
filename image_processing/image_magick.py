@@ -1,10 +1,12 @@
 from __future__ import absolute_import
-from __future__ import print_function
 from __future__ import division
+from __future__ import print_function
 
-import os, re
-import subprocess
 import logging
+import os
+import re
+import subprocess
+
 from image_processing.exceptions import ImageMagickError
 
 
@@ -16,7 +18,8 @@ class ImageMagick(object):
     def _command_location(self, command):
         return os.path.join(self.image_magick_location, command)
 
-    def _check_input_file_readable(self, input_file):
+    @staticmethod
+    def _check_input_file_readable(input_file):
         # may specify image sequence
         actual_input_filepath = re.sub(r'\[\d+\]$', '', input_file)
         if not os.access(actual_input_filepath, os.R_OK):
@@ -52,6 +55,7 @@ class ImageMagick(object):
 
     def run_command(self, command, input_file, output_file=None, initial_options=None, post_options=None):
         """
+        :param command:
         :param input_file:
         :param output_file:
         :param initial_options: command line arguments which need to go before the input file

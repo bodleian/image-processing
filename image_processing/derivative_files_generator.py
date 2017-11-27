@@ -106,7 +106,8 @@ class DerivativeFilesGenerator(object):
             jpg_quality = None if create_jpg_as_thumbnail else self.jpg_high_quality_value
             jpg_resize = self.jpg_thumbnail_resize_value if create_jpg_as_thumbnail else None
 
-            self.image_converter.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath, quality=jpg_quality, resize=jpg_resize)
+            self.image_converter.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath,
+                                                quality=jpg_quality, resize=jpg_resize)
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
 
@@ -159,10 +160,11 @@ class DerivativeFilesGenerator(object):
         """
         with tempfile.NamedTemporaryFile(suffix='.tif') as reconverted_tiff_file_obj:
             reconverted_tiff_filepath = reconverted_tiff_file_obj.name
-            self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath, kakadu_options=['-fussy'])
+            self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath,
+                                                   kakadu_options=['-fussy'])
             identical_to_original = validation.compare_images_visually(source_file, reconverted_tiff_filepath, )
             if not identical_to_original:
                 raise exceptions.ImageProcessingError(
                     'File {0} reconverted from {1} does not visually match original {2}'
-                        .format(reconverted_tiff_filepath, lossless_jpg_2000_file, source_file)
+                    .format(reconverted_tiff_filepath, lossless_jpg_2000_file, source_file)
                 )

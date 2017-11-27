@@ -26,6 +26,6 @@ def compare_images_visually(image_file1, image_file2, adjust_for_monochrome=True
 
 def _adjust_pixels_for_monochrome(pixels_list):
     if isinstance(pixels_list[0], Number):
-        return [(a,a,a) for a in pixels_list]
+        return [(a, a, a) for a in pixels_list]
     else:
         return pixels_list
