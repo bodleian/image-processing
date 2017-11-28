@@ -43,7 +43,8 @@ class ImageConverter(object):
         else:
             self.convert_colour_to_jpeg2000(input_filepath, output_filepath, lossless=lossless)
 
-    def convert_colour_to_jpeg2000(self, input_filepath, output_filepath, lossless=True):
+    def convert_colour_to_jpeg2000(self, input_filepath, output_filepath, lossless=True,
+                                   kakadu_options=DEFAULT_BDLSS_OPTIONS):
         """
         Converts an non-monochrome image file supported by kakadu to jpeg2000
         """
@@ -52,7 +53,7 @@ class ImageConverter(object):
         else:
             extra_options = ["-rate", "3"]
 
-        kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options
+        kakadu_options = kakadu_options + extra_options
         self.kakadu.kdu_compress(input_filepath, output_filepath, kakadu_options)
 
     def repage_image(self, input_filepath, output_filepath):
@@ -61,8 +62,9 @@ class ImageConverter(object):
 
         self.image_magick.convert(input_filepath, output_filepath, post_options=options)
 
-    def is_monochrome(self, input_filepath):
-        image_mode = self.get_colourspace(input_filepath)  # colour mode of image
+    @staticmethod
+    def is_monochrome(input_filepath):
+        image_mode = Image.open(input_filepath).mode  # colour mode of image
         if image_mode in ['L', '1']:  # greyscale, Bitonal
             return True
         elif image_mode in ['RGB']:
@@ -70,14 +72,8 @@ class ImageConverter(object):
         else:
             raise ImageProcessingError("Unsupported colour mode {0} for {1}".format(image_mode, input_filepath))
 
-    def get_colourspace(self, image_file):
-        if not os.access(image_file, os.R_OK):
-            raise IOError("Couldn't access image file {0} to test".format(image_file))
-        # get properties of image
-        colourspace = Image.open(image_file).mode  # colour mode of image
-        return colourspace
-
-    def convert_monochrome_to_jpeg2000(self, input_filepath, output_filepath, lossless=True):
+    def convert_monochrome_to_jpeg2000(self, input_filepath, output_filepath, lossless=True,
+                                       kakadu_options=DEFAULT_BDLSS_OPTIONS):
         """
         Converts an bitonal or greyscale image file supported by kakadu to jpeg2000
         The same input is copied to each of the
@@ -88,8 +84,9 @@ class ImageConverter(object):
             extra_options = LOSSLESS_OPTIONS
         else:
             extra_options = ["-rate", "3"]
-        kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options + ["-no_palette"]
-        self.kakadu.kdu_compress([input_filepath for i in range(0, 3)], output_filepath, kakadu_options)
+        # todo: should this be left without jp2_space?
+        kakadu_options = kakadu_options + extra_options + ["-no_palette", '-jp2_space', 'sRGB']
+        self.kakadu.kdu_compress([input_filepath for _ in range(0, 3)], output_filepath, kakadu_options)
 
     def convert_to_tiff(self, input_filepath, output_filepath_with_tif_extension, strip_embedded_metadata=False,
                         colourspace="sRGB"):
@@ -121,13 +118,13 @@ class ImageConverter(object):
         self.image_magick.convert(input_filepath, output_filepath, initial_options=options)
 
     def normalise_tiff(self, input_filepath, output_filepath, repage=False, profile=None):
-        # todo: should i be converting colour space here? May stop it being lossless
         """
-        Remove thumbnail layers, convert to a set colour space, and repage if needed
+        Remove thumbnail layers, convert to a set colour space, and repage if needed.
+        May be lossy (.e.g removal of thumbnail, colour conversion)
         :param repage:
         :param output_filepath:
-        :param colour_space:
         :param input_filepath:
+        :param profile: filepath to an icc profile. if included, this conversion may be lossy
         :return:
         """
         options = []

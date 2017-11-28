@@ -9,7 +9,8 @@ import logging
 import tempfile
 import io
 
-from image_processing import image_converter, validation, exceptions
+from image_processing import image_converter, validation
+from PIL import Image
 import libxmp
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
@@ -46,6 +47,11 @@ class DerivativeFilesGenerator(object):
                                                               image_magick_path=image_magick_path)
         self.log = logging.getLogger(__name__)
 
+    def _check_icc_profile(self, image_filepath):
+        icc = Image.open(image_filepath).info.get('icc_profile')
+        if icc is None:
+            self.log.warn('No icc profile embedded in {0}'.format(image_filepath))
+
     def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, strip_embedded_metadata=False, save_xmp=False,
                                       check_lossless=False):
         """
@@ -58,6 +64,7 @@ class DerivativeFilesGenerator(object):
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created images
         """
+        self._check_icc_profile(jpg_filepath)
         jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
         shutil.copy(jpg_filepath, jpeg_filepath)
         generated_files = [jpeg_filepath]
@@ -97,6 +104,8 @@ class DerivativeFilesGenerator(object):
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created images
         """
+        self._check_icc_profile(tiff_filepath)
+
         with tempfile.NamedTemporaryFile(suffix='.tif') as normalised_tiff_file_obj:
             normalised_tiff_filepath = normalised_tiff_file_obj.name
             self.image_converter.normalise_tiff(tiff_filepath, normalised_tiff_filepath, repage=repage_image)
@@ -162,9 +171,5 @@ class DerivativeFilesGenerator(object):
             reconverted_tiff_filepath = reconverted_tiff_file_obj.name
             self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath,
                                                    kakadu_options=['-fussy'])
-            identical_to_original = validation.compare_images_visually(source_file, reconverted_tiff_filepath, )
-            if not identical_to_original:
-                raise exceptions.ImageProcessingError(
-                    'File {0} reconverted from {1} does not visually match original {2}'
-                    .format(reconverted_tiff_filepath, lossless_jpg_2000_file, source_file)
-                )
+            validation.check_conversion_was_lossless(source_file, reconverted_tiff_filepath,
+                                                     allow_monochrome_to_rgb=True)

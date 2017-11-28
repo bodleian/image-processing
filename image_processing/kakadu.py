@@ -8,7 +8,6 @@ import logging
 from image_processing.exceptions import KakaduError
 
 DEFAULT_BDLSS_OPTIONS = [
-    '-jp2_space', 'sRGB',
     'Clevels=6',
     'Clayers=6',
     'Cprecincts={256,256},{256,256},{128,128}',
