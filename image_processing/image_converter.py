@@ -64,7 +64,8 @@ class ImageConverter(object):
 
     @staticmethod
     def is_monochrome(input_filepath):
-        image_mode = Image.open(input_filepath).mode  # colour mode of image
+        with Image.open(input_filepath) as input_pil:
+            image_mode = input_pil.mode  # colour mode of image
         if image_mode in ['L', '1']:  # greyscale, Bitonal
             return True
         elif image_mode in ['RGB']:

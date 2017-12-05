@@ -48,7 +48,8 @@ class DerivativeFilesGenerator(object):
         self.log = logging.getLogger(__name__)
 
     def _check_icc_profile(self, image_filepath):
-        icc = Image.open(image_filepath).info.get('icc_profile')
+        with Image.open(image_filepath) as image_pil:
+            icc = image_pil.info.get('icc_profile')
         if icc is None:
             self.log.warn('No icc profile embedded in {0}'.format(image_filepath))
 
