@@ -53,14 +53,12 @@ class DerivativeFilesGenerator(object):
         if icc is None:
             self.log.warn('No icc profile embedded in {0}'.format(image_filepath))
 
-    def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, strip_embedded_metadata=False, save_xmp=False,
+    def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=False,
                                       check_lossless=False):
         """
         Creates a copy of the jpg file and a validated jpeg2000 file and stores both in the given folder
         :param jpg_filepath:
         :param output_folder: the folder where the related dc.xml will be stored
-        :param strip_embedded_metadata: True if you want to remove the embedded image metadata during the tiff
-        conversion process. Mostly used when the metadata is badly formatted in some way and causing errors
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created images
@@ -77,8 +75,7 @@ class DerivativeFilesGenerator(object):
 
         with tempfile.NamedTemporaryFile(suffix='.tif') as scratch_tiff_file_obj:
             scratch_tiff_filepath = scratch_tiff_file_obj.name
-            self.image_converter.convert_to_tiff(jpeg_filepath, scratch_tiff_filepath,
-                                                 strip_embedded_metadata=strip_embedded_metadata)
+            self.image_converter.convert_to_tiff(jpeg_filepath, scratch_tiff_filepath)
 
             generated_files.append(self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder))
 
@@ -107,9 +104,16 @@ class DerivativeFilesGenerator(object):
         """
         self._check_icc_profile(tiff_filepath)
 
-        with tempfile.NamedTemporaryFile(suffix='.tif') as normalised_tiff_file_obj:
-            normalised_tiff_filepath = normalised_tiff_file_obj.name
-            self.image_converter.normalise_tiff(tiff_filepath, normalised_tiff_filepath, repage=repage_image)
+        with tempfile.NamedTemporaryFile(suffix='.tif') as temp_tiff_file_obj:
+            # only work from a temporary file if we need to - e.g. if the tiff filepath is invalid,
+            # or if we need to normalise the tiff. Otherwise just use the original tiff
+            temp_tiff_filepath = temp_tiff_file_obj.name
+            if os.path.splitext(tiff_filepath)[1].lower() not in ['tif', 'tiff']:
+                shutil.copy(tiff_filepath, temp_tiff_filepath)
+                normalised_tiff_filepath = temp_tiff_filepath
+            else:
+                normalised_tiff_filepath = tiff_filepath
+
 
             jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
 

@@ -56,12 +56,6 @@ class ImageConverter(object):
         kakadu_options = kakadu_options + extra_options
         self.kakadu.kdu_compress(input_filepath, output_filepath, kakadu_options)
 
-    def repage_image(self, input_filepath, output_filepath):
-        """Fix negative image positions unsupported problems"""
-        options = ['+repage']
-
-        self.image_magick.convert(input_filepath, output_filepath, post_options=options)
-
     @staticmethod
     def is_monochrome(input_filepath):
         with Image.open(input_filepath) as input_pil:
@@ -89,12 +83,8 @@ class ImageConverter(object):
         kakadu_options = kakadu_options + extra_options + ["-no_palette", '-jp2_space', 'sRGB']
         self.kakadu.kdu_compress([input_filepath for _ in range(0, 3)], output_filepath, kakadu_options)
 
-    def convert_to_tiff(self, input_filepath, output_filepath_with_tif_extension, strip_embedded_metadata=False,
-                        colourspace="sRGB"):
-        post_options = ['-colorspace', colourspace,
-                        '-compress', 'None']
-        if strip_embedded_metadata:
-            post_options += ['-strip']
+    def convert_to_tiff(self, input_filepath, output_filepath_with_tif_extension):
+        post_options = ['-compress', 'None']
         return self.image_magick.convert(input_filepath, output_filepath_with_tif_extension,
                                          post_options=post_options)
 
@@ -106,32 +96,3 @@ class ImageConverter(object):
             initial_options += ['-quality', quality]
         return self.image_magick.convert('{0}[0]'.format(input_filepath), output_filepath_with_jpg_extension,
                                          initial_options=initial_options)
-
-    def convert_tiff_colour_profile(self, input_filepath, output_filepath, profile):
-        input_is_monochrome = self.is_monochrome(input_filepath)
-        options = ['-profile', profile]
-        if input_is_monochrome:
-            options += ['-compress', 'none',
-                        '-depth', '8',
-                        '-type', 'truecolor',
-                        '-alpha', 'off']
-
-        self.image_magick.convert(input_filepath, output_filepath, initial_options=options)
-
-    def normalise_tiff(self, input_filepath, output_filepath, repage=False, profile=None):
-        """
-        Remove thumbnail layers, convert to a set colour space, and repage if needed.
-        May be lossy (.e.g removal of thumbnail, colour conversion)
-        :param repage:
-        :param output_filepath:
-        :param input_filepath:
-        :param profile: filepath to an icc profile. if included, this conversion may be lossy
-        :return:
-        """
-        options = []
-        if repage:
-            options += ['+repage']
-        if profile:
-            options += ['-profile', profile]
-
-        self.image_magick.convert('{0}[0]'.format(input_filepath), output_filepath, post_options=options)

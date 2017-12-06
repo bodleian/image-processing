@@ -229,14 +229,3 @@ class TestDerivativeGenerator(object):
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
             assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
             assert_lines_match(xmp_file, filepaths.VALID_XMP)
-
-    def test_bad_image_metadata_input_with_strip(self):
-        """"
-        Tests that input images with invalid metadata can be valid once transformed. Transformed with metadata intact they create invalid jp2s
-        """
-        with temporary_folder() as output_folder:
-            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.BAD_METADATA_JPG, output_folder, strip_embedded_metadata=True)
-            jpg_file = os.path.join(output_folder, 'full.jpg')
-            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
-            assert os.path.isfile(jpg_file)
-            assert os.path.isfile(jp2_file)
