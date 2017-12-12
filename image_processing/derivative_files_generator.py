@@ -48,10 +48,14 @@ class DerivativeFilesGenerator(object):
         self.log = logging.getLogger(__name__)
 
     def _check_icc_profile(self, image_filepath):
+        # todo: remove these errors once I've implemented and tested these cases
         with Image.open(image_filepath) as image_pil:
             icc = image_pil.info.get('icc_profile')
         if icc is None:
             self.log.warn('No icc profile embedded in {0}'.format(image_filepath))
+            raise NotImplementedError('No icc profile embedded in {0}. Unsupported case.'.format(image_filepath))
+        if self.image_converter.is_monochrome(image_filepath):
+            raise NotImplementedError('{0} is monochrome. Unsupported case'.format(image_filepath))
 
     def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=False,
                                       check_lossless=False):
