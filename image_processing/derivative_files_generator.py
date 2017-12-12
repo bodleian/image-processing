@@ -88,7 +88,7 @@ class DerivativeFilesGenerator(object):
         return generated_files
 
     def generate_derivatives_from_tiff(self, tiff_filepath, output_folder, include_tiff=False, save_xmp=False,
-                                       repage_image=False, create_jpg_as_thumbnail=True, check_lossless=False):
+                                       create_jpg_as_thumbnail=True, check_lossless=False):
         """
         Creates a copy of the jpg fil and a validated jpeg2000 file and stores both in the given folder
         :param create_jpg_as_thumbnail: create the jpg as a resized thumbnail, not a high quality image
@@ -96,7 +96,6 @@ class DerivativeFilesGenerator(object):
         :param tiff_filepath:
         :param output_folder: the folder where the related dc.xml will be stored
         :param include_tiff: Include copy of source tiff file in derivatives
-        :param repage_image: remove negative offsets by repaging the image.
         (It's a common error during conversion)
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
@@ -113,7 +112,6 @@ class DerivativeFilesGenerator(object):
                 normalised_tiff_filepath = temp_tiff_filepath
             else:
                 normalised_tiff_filepath = tiff_filepath
-
 
             jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
 
