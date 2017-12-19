@@ -10,7 +10,6 @@ import tempfile
 import io
 
 from image_processing import image_converter, validation
-from PIL import Image
 import libxmp
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
@@ -175,10 +174,11 @@ class DerivativeFilesGenerator(object):
         :param lossless_jpg_2000_file:
         :return:
         """
-        self.log.debug('Checking conversion from {0} to {1} was lossless'.format(source_file, lossless_jpg_2000_file))
+        self.log.debug('Checking conversion from source file {0} to jp2 file {1} was lossless'.format(source_file, lossless_jpg_2000_file))
         with tempfile.NamedTemporaryFile(suffix='.tif') as reconverted_tiff_file_obj:
             reconverted_tiff_filepath = reconverted_tiff_file_obj.name
             self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath,
                                                    kakadu_options=['-fussy'])
             validation.check_conversion_was_lossless(source_file, reconverted_tiff_filepath,
                                                      allow_monochrome_to_rgb=True)
+        self.log.info('Conversion from source file {0} to jp2 file {1} was lossless'.format(source_file, lossless_jpg_2000_file))

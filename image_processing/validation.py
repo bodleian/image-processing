@@ -32,6 +32,21 @@ def check_conversion_was_lossless(source_filepath, converted_filepath, allow_mon
             else:
                 monochrome_to_rgb = False
 
+            if not monochrome_to_rgb:
+                if source_image.mode != converted_image.mode:
+                    raise exceptions.ValidationError(
+                        'Converted file {0} has different colour mode from {1}'
+                            .format(converted_filepath, source_filepath)
+                    )
+
+                source_icc = source_image.info.get('icc_profile')
+                converted_icc = converted_image.info.get('icc_profile')
+                if source_icc != converted_icc:
+                    raise exceptions.ValidationError(
+                        'Converted file {0} has different colour profile from {1}'
+                            .format(converted_filepath, source_filepath)
+                    )
+
             source_pixels = list(source_image.getdata())
             converted_pixels = list(converted_image.getdata())
 
@@ -43,21 +58,6 @@ def check_conversion_was_lossless(source_filepath, converted_filepath, allow_mon
                     'Converted file {0} does not visually match original {1}'
                         .format(converted_filepath, source_filepath)
                 )
-
-            if not monochrome_to_rgb:
-                source_icc = source_image.info.get('icc_profile')
-                converted_icc = converted_image.info.get('icc_profile')
-                if source_icc != converted_icc:
-                    raise exceptions.ValidationError(
-                        'Converted file {0} has different colour profile from {1}'
-                            .format(converted_filepath, source_filepath)
-                    )
-
-                if source_image.mode != converted_image.mode:
-                    raise exceptions.ValidationError(
-                        'Converted file {0} has different colour mode from {1}'
-                            .format(converted_filepath, source_filepath)
-                    )
 
 
 def _adjust_pixels_for_monochrome(pixels_list):
