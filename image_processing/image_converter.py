@@ -100,7 +100,8 @@ class ImageConverter(object):
         :return: must_check_lossless: if true, there are unsupported edge cases where this format doesn't convert
         losslessly, so the jp2 must be checked against the source image after conversion
         """
-        # todo: remove these errors once I've implemented and tested these cases
+        # todo: remove these errors once I've implemented and tested these cases, and add monochrome to accepted modes
+        ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA']
         must_check_lossless = False
         with Image.open(image_filepath) as image_pil:
             icc = image_pil.info.get('icc_profile')
@@ -110,16 +111,17 @@ class ImageConverter(object):
 
             if self.is_monochrome(image_filepath):
                 raise NotImplementedError('{0} is monochrome. Unsupported case'.format(image_filepath))
-            else:
-                colour_mode = image_pil.mode
-                if colour_mode == 'RGBA':
-                    # In some cases alpha channel data is lost during jp2 conversion
-                    # As we rarely encounter these, we just put in a check to see if it was lossless and error otherwise
-                    self.log.warn("{0} is an RGBA image, and may not be converted correctly into jp2. "
-                                  "The result should be checked to make sure it's lossless".format(image_filepath))
-                    must_check_lossless = True
-                elif colour_mode == 'RGB':
-                    pass
-                else:
-                    raise ImageProcessingError("Unsupported colour mode {0} for {1}".format(colour_mode, image_filepath))
+
+            colour_mode = image_pil.mode
+
+            if colour_mode not in ACCEPTED_COLOUR_MODES:
+                raise ImageProcessingError("Unsupported colour mode {0} for {1}".format(colour_mode, image_filepath))
+
+            if colour_mode == 'RGBA':
+                # In some cases alpha channel data is lost during jp2 conversion
+                # As we rarely encounter these, we just put in a check to see if it was lossless and error otherwise
+                self.log.warn("{0} is an RGBA image, and may not be converted correctly into jp2. "
+                              "The result should be checked to make sure it's lossless".format(image_filepath))
+                must_check_lossless = True
+
         return must_check_lossless
