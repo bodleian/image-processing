@@ -47,16 +47,6 @@ class DerivativeFilesGenerator(object):
                                                               image_magick_path=image_magick_path)
         self.log = logging.getLogger(__name__)
 
-    def _check_icc_profile(self, image_filepath):
-        # todo: remove these errors once I've implemented and tested these cases
-        with Image.open(image_filepath) as image_pil:
-            icc = image_pil.info.get('icc_profile')
-        if icc is None:
-            self.log.warn('No icc profile embedded in {0}'.format(image_filepath))
-            raise NotImplementedError('No icc profile embedded in {0}. Unsupported case.'.format(image_filepath))
-        if self.image_converter.is_monochrome(image_filepath):
-            raise NotImplementedError('{0} is monochrome. Unsupported case'.format(image_filepath))
-
     def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=False,
                                       check_lossless=False):
         """
@@ -67,19 +57,23 @@ class DerivativeFilesGenerator(object):
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created images
         """
-        self._check_icc_profile(jpg_filepath)
-        jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
-        shutil.copy(jpg_filepath, jpeg_filepath)
-        generated_files = [jpeg_filepath]
+        self.log.debug("Processing {0}".format(jpg_filepath))
+
+        must_check_lossless = self.image_converter.check_image_suitable_for_jp2_conversion(jpg_filepath)
+        check_lossless = must_check_lossless or check_lossless
+
+        output_jpg_filepath = os.path.join(output_folder, self.jpg_filename)
+        shutil.copy(jpg_filepath, output_jpg_filepath)
+        generated_files = [output_jpg_filepath]
 
         if save_xmp:
             xmp_file_path = os.path.join(output_folder, self.xmp_filename)
-            self.extract_xmp(jpeg_filepath, xmp_file_path)
+            self.extract_xmp(jpg_filepath, xmp_file_path)
             generated_files += [xmp_file_path]
 
         with tempfile.NamedTemporaryFile(suffix='.tif') as scratch_tiff_file_obj:
             scratch_tiff_filepath = scratch_tiff_file_obj.name
-            self.image_converter.convert_to_tiff(jpeg_filepath, scratch_tiff_filepath)
+            self.image_converter.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
 
             generated_files.append(self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder))
 
@@ -88,6 +82,8 @@ class DerivativeFilesGenerator(object):
 
             if check_lossless:
                 self.check_conversion_was_lossless(scratch_tiff_filepath, lossless_filepath)
+
+        self.log.debug("Successfully generated derivatives for {0} in {1}".format(jpg_filepath, output_folder))
 
         return generated_files
 
@@ -105,7 +101,10 @@ class DerivativeFilesGenerator(object):
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created images
         """
-        self._check_icc_profile(tiff_filepath)
+        self.log.debug("Processing {0}".format(tiff_filepath))
+
+        must_check_lossless = self.image_converter.check_image_suitable_for_jp2_conversion(tiff_filepath)
+        check_lossless = must_check_lossless or check_lossless
 
         with tempfile.NamedTemporaryFile(suffix='.tif') as temp_tiff_file_obj:
             # only work from a temporary file if we need to - e.g. if the tiff filepath is invalid,
@@ -143,6 +142,8 @@ class DerivativeFilesGenerator(object):
             if check_lossless:
                 self.check_conversion_was_lossless(tiff_filepath, lossless_filepath)
 
+            self.log.debug("Successfully generated derivatives for {0} in {1}".format(tiff_filepath, output_folder))
+
             return generated_files
 
     def generate_jp2_from_tiff(self, tiff_file, output_folder):
@@ -174,6 +175,7 @@ class DerivativeFilesGenerator(object):
         :param lossless_jpg_2000_file:
         :return:
         """
+        self.log.debug('Checking conversion from {0} to {1} was lossless'.format(source_file, lossless_jpg_2000_file))
         with tempfile.NamedTemporaryFile(suffix='.tif') as reconverted_tiff_file_obj:
             reconverted_tiff_filepath = reconverted_tiff_file_obj.name
             self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath,
