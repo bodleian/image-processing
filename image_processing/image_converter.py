@@ -4,11 +4,10 @@ from __future__ import division
 
 import os
 import logging
-import subprocess
 from PIL import Image
 from image_processing.kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
 from image_processing.image_magick import ImageMagick
-from image_processing.exceptions import ImageProcessingError, ImageMagickError
+from image_processing.exceptions import ImageProcessingError
 
 
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
@@ -44,7 +43,8 @@ class ImageConverter(object):
         else:
             self.convert_colour_to_jpeg2000(input_filepath, output_filepath, lossless=lossless)
 
-    def convert_colour_to_jpeg2000(self, input_filepath, output_filepath, lossless=True):
+    def convert_colour_to_jpeg2000(self, input_filepath, output_filepath, lossless=True,
+                                   kakadu_options=DEFAULT_BDLSS_OPTIONS):
         """
         Converts an non-monochrome image file supported by kakadu to jpeg2000
         """
@@ -53,44 +53,17 @@ class ImageConverter(object):
         else:
             extra_options = ["-rate", "3"]
 
-        kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options
+        kakadu_options = kakadu_options + extra_options
         self.kakadu.kdu_compress(input_filepath, output_filepath, kakadu_options)
 
-    def repage_image(self, input_filepath, output_filepath):
-        """Fix negative image positions unsupported problems"""
-        options = ['+repage']
+    @staticmethod
+    def is_monochrome(input_filepath):
+        with Image.open(input_filepath) as input_pil:
+            image_mode = input_pil.mode  # colour mode of image
+            return image_mode in ['L', '1']  # greyscale, Bitonal
 
-        self.image_magick.convert(input_filepath, output_filepath, post_options=options)
-
-    def is_monochrome(self, input_filepath):
-        image_mode = self.get_colourspace(input_filepath)  # colour mode of image
-        if image_mode in ['L', '1']:  # greyscale, Bitonal
-            return True
-        elif image_mode in ['RGB', 'RGBA', 'sRGB']:
-            return False
-        else:
-            raise ImageProcessingError("Could not identify image colour mode of " + input_filepath)
-
-    def get_colourspace(self, image_file):
-        if not os.access(image_file, os.R_OK):
-            raise IOError("Couldn't access image file {0} to test".format(image_file))
-        # get properties of image
-        try:
-            # todo: consider removing PIL entirely. First need to make sure the imagemagick monotone colour space results are the same.
-            colourspace = Image.open(image_file).mode  # colour mode of image
-            return colourspace
-        except IOError as e:
-            # if PIP won't support the file, try imagemagick
-            self.log.info("PIP doesn't support {0}: {1}. Trying image magick".format(image_file, e))
-            command = "{0} -format %[colorspace] '{1}[0]'".format(os.path.join(self.image_magick_path, 'identify'),
-                                                                  image_file)
-            try:
-                colourspace = subprocess.check_output(command).rstrip()
-            except subprocess.CalledProcessError as e:
-                raise ImageMagickError('Image magick identify command failed: {0}'.format(command), e)
-            return colourspace
-
-    def convert_monochrome_to_jpeg2000(self, input_filepath, output_filepath, lossless=True):
+    def convert_monochrome_to_jpeg2000(self, input_filepath, output_filepath, lossless=True,
+                                       kakadu_options=DEFAULT_BDLSS_OPTIONS):
         """
         Converts an bitonal or greyscale image file supported by kakadu to jpeg2000
         The same input is copied to each of the
@@ -101,42 +74,54 @@ class ImageConverter(object):
             extra_options = LOSSLESS_OPTIONS
         else:
             extra_options = ["-rate", "3"]
-        kakadu_options = DEFAULT_BDLSS_OPTIONS + extra_options + ["-no_palette"]
-        self.kakadu.kdu_compress([input_filepath for i in range(0, 3)], output_filepath, kakadu_options)
+        # todo: should this be left without jp2_space?
+        kakadu_options = kakadu_options + extra_options + ["-no_palette", '-jp2_space', 'sRGB']
+        self.kakadu.kdu_compress([input_filepath for _ in range(0, 3)], output_filepath, kakadu_options)
 
-    def convert_to_tiff(self, input_filepath, output_filepath, strip_embedded_metadata=False):
-        post_options = ['-strip'] if strip_embedded_metadata else []
-        return self.convert_image_to_format(input_filepath, output_filepath, img_format='tif',
-                                            post_options=post_options)
+    def convert_to_tiff(self, input_filepath, output_filepath_with_tif_extension):
+        post_options = ['-compress', 'None']
+        return self.image_magick.convert(input_filepath, output_filepath_with_tif_extension,
+                                         post_options=post_options)
 
-    def convert_to_jpg(self, input_filepath, output_filepath, resize=None, quality=None):
+    def convert_to_jpg(self, input_filepath, output_filepath_with_jpg_extension, resize=None, quality=None):
         initial_options = []
         if resize is not None:
             initial_options += ['-resize', resize]
         if quality is not None:
             initial_options += ['-quality', quality]
-        return self.convert_image_to_format(input_filepath, output_filepath, img_format='jpg',
-                                            initial_options=initial_options)
+        return self.image_magick.convert('{0}[0]'.format(input_filepath), output_filepath_with_jpg_extension,
+                                         initial_options=initial_options)
 
-    def convert_tiff_colour_profile(self, input_filepath, output_filepath, profile):
-        input_is_monochrome = self.is_monochrome(input_filepath)
-        options = ['-profile', profile]
-        if input_is_monochrome:
-            options += ['-compress', 'none',
-                        '-depth', '8',
-                        '-type', 'truecolor',
-                        '-alpha', 'off']
-
-        self.image_magick.convert(input_filepath, output_filepath, initial_options=options)
-
-    def convert_image_to_format(self, input_filepath, output_filepath, img_format,
-                                post_options=None, initial_options=None):
+    def check_image_suitable_for_jp2_conversion(self, image_filepath):
         """
-        Uses image magick to convert the file to the given format
-        :param initial_options: command line arguments which need to go before the input file
-        :param post_options: command line arguments which need to go after the input file
+        Check over the image and make sure it's in a supported and tested format for conversion to jp2
+        Raises exception if there are problems
+        :param image_filepath:
+        :return: must_check_lossless: if true, there are unsupported edge cases where this format doesn't convert
+        losslessly, so the jp2 must be checked against the source image after conversion
         """
-        output_path_with_format_prefix = "{0}:{1}".format(img_format, output_filepath)
+        # todo: remove these errors once I've implemented and tested these cases, and add monochrome to accepted modes
+        ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA']
+        must_check_lossless = False
+        with Image.open(image_filepath) as image_pil:
+            icc = image_pil.info.get('icc_profile')
+            if icc is None:
+                self.log.warn('No icc profile embedded in {0}'.format(image_filepath))
+                raise NotImplementedError('No icc profile embedded in {0}. Unsupported case.'.format(image_filepath))
 
-        self.image_magick.convert(input_filepath, output_path_with_format_prefix, post_options=post_options,
-                                  initial_options=initial_options)
+            if self.is_monochrome(image_filepath):
+                raise NotImplementedError('{0} is monochrome. Unsupported case'.format(image_filepath))
+
+            colour_mode = image_pil.mode
+
+            if colour_mode not in ACCEPTED_COLOUR_MODES:
+                raise ImageProcessingError("Unsupported colour mode {0} for {1}".format(colour_mode, image_filepath))
+
+            if colour_mode == 'RGBA':
+                # In some cases alpha channel data is lost during jp2 conversion
+                # As we rarely encounter these, we just put in a check to see if it was lossless and error otherwise
+                self.log.warn("{0} is an RGBA image, and may not be converted correctly into jp2. "
+                              "The result should be checked to make sure it's lossless".format(image_filepath))
+                must_check_lossless = True
+
+        return must_check_lossless

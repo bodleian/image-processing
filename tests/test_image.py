@@ -29,16 +29,6 @@ class TestImageFormatConverter(object):
             assert os.path.isfile(tiff_file)
             assert filecmp.cmp(tiff_file, filepaths.VALID_TIF)
 
-    def test_converts_jpg_to_tiff_without_extension(self):
-        with temporary_folder() as output_folder:
-            jpg_file = os.path.join(output_folder,'testj')
-            tiff_file = os.path.join(output_folder,'testt')
-            shutil.copy(filepaths.VALID_JPG, jpg_file)
-
-            get_image_converter().convert_to_tiff(jpg_file, tiff_file)
-            assert os.path.isfile(tiff_file)
-            assert filecmp.cmp(tiff_file, filepaths.VALID_TIF)
-
     def test_converts_jpg_to_jpeg2000(self):
         with temporary_folder() as output_folder:
             jpg_file = os.path.join(output_folder,'test.jpg')
@@ -51,7 +41,7 @@ class TestImageFormatConverter(object):
 
     def test_converts_jpg_to_jpeg2000_with_awful_filename(self):
         with temporary_folder() as output_folder:
-            jpg_file = os.path.join(output_folder,'te.s-t(1)_[2]')
+            jpg_file = os.path.join(output_folder,'te.s-t(1)_[2]s')
             output_file = os.path.join(output_folder,'output.jp2')
             shutil.copy(filepaths.VALID_JPG, jpg_file)
 
@@ -126,7 +116,8 @@ class TestImageValidation(object):
 class TestDerivativeGenerator(object):
     def test_creates_correct_files(self):
         with temporary_folder() as output_folder:
-            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder)
+            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder,
+                                                                      check_lossless=True)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -139,7 +130,8 @@ class TestDerivativeGenerator(object):
     def test_creates_high_quality_jpg(self):
         with temporary_folder() as output_folder:
             get_derivatives_generator().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder,
-                                                                       create_jpg_as_thumbnail=False)
+                                                                       create_jpg_as_thumbnail=False,
+                                                                       check_lossless=True)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -151,7 +143,8 @@ class TestDerivativeGenerator(object):
 
     def test_creates_correct_files_from_tiff(self):
         with temporary_folder() as output_folder:
-            get_derivatives_generator().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder)
+            get_derivatives_generator().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder,
+                                                                       check_lossless=True)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -161,9 +154,25 @@ class TestDerivativeGenerator(object):
             assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG)
             assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
 
+    def test_creates_correct_files_from_tiff_with_awful_filename(self):
+        with temporary_folder() as output_folder:
+            awful_filepath = os.path.join(output_folder, 'te.s-t(1)_[2]a')
+            shutil.copy(filepaths.VALID_TIF, awful_filepath)
+            get_derivatives_generator().generate_derivatives_from_tiff(awful_filepath, output_folder,
+                                                                       check_lossless=True)
+
+            jpg_file = os.path.join(output_folder, 'full.jpg')
+            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
+            assert os.path.isfile(jpg_file)
+            assert os.path.isfile(jp2_file)
+            assert len(os.listdir(output_folder)) == 3
+            assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG)
+            assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
+
     def test_includes_tiff(self):
         with temporary_folder() as output_folder:
-            get_derivatives_generator().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder, include_tiff=True)
+            get_derivatives_generator().generate_derivatives_from_tiff(filepaths.VALID_TIF, output_folder, include_tiff=True,
+                                                                       check_lossless=True)
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
             tiff_file = os.path.join(output_folder,'full.tiff')
@@ -178,10 +187,11 @@ class TestDerivativeGenerator(object):
 
             assert get_image_converter().is_monochrome(filepaths.MONOCHROME_JPG)
 
-            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.MONOCHROME_JPG, output_folder)
+            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.MONOCHROME_JPG, output_folder,
+                                                                      check_lossless=True)
 
-            jpg_file = os.path.join(output_folder,'full.jpg')
-            jp2_file = os.path.join(output_folder,'full_lossless.jp2')
+            jpg_file = os.path.join(output_folder, 'full.jpg')
+            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
             assert len(os.listdir(output_folder)) == 2
@@ -190,7 +200,8 @@ class TestDerivativeGenerator(object):
 
     def test_does_not_generate_xmp(self):
         with temporary_folder() as output_folder:
-            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=False)
+            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=False,
+                                                                      check_lossless=True)
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
@@ -203,7 +214,8 @@ class TestDerivativeGenerator(object):
 
     def test_generates_xmp(self):
         with temporary_folder() as output_folder:
-            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=True)
+            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.VALID_JPG, output_folder, save_xmp=True,
+                                                                      check_lossless=True)
 
             jpg_file = os.path.join(output_folder, 'full.jpg')
             jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
@@ -217,14 +229,3 @@ class TestDerivativeGenerator(object):
             assert filecmp.cmp(jpg_file, filepaths.VALID_JPG)
             assert filecmp.cmp(jp2_file, filepaths.VALID_LOSSLESS_JP2)
             assert_lines_match(xmp_file, filepaths.VALID_XMP)
-
-    def test_bad_image_metadata_input_with_strip(self):
-        """"
-        Tests that input images with invalid metadata can be valid once transformed. Transformed with metadata intact they create invalid jp2s
-        """
-        with temporary_folder() as output_folder:
-            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.BAD_METADATA_JPG, output_folder, strip_embedded_metadata=True)
-            jpg_file = os.path.join(output_folder, 'full.jpg')
-            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
-            assert os.path.isfile(jpg_file)
-            assert os.path.isfile(jp2_file)

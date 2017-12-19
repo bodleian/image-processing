@@ -9,9 +9,8 @@ import logging
 import tempfile
 import io
 
-from uuid import uuid4
-
 from image_processing import image_converter, validation
+from PIL import Image
 import libxmp
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
@@ -48,90 +47,104 @@ class DerivativeFilesGenerator(object):
                                                               image_magick_path=image_magick_path)
         self.log = logging.getLogger(__name__)
 
-    def generate_derivatives_from_jpg(self, jpg_file, output_folder, strip_embedded_metadata=False, save_xmp=False):
+    def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=False,
+                                      check_lossless=False):
         """
         Creates a copy of the jpg file and a validated jpeg2000 file and stores both in the given folder
-        :param jpg_file:
-        :param output_folder: the folder where the related dc.xml will be stored, with the dataset's uuid as foldername
-        :param strip_embedded_metadata: True if you want to remove the embedded image metadata during the tiff
-        conversion process. Mostly used when the metadata is badly formatted in some way and causing errors
+        :param jpg_filepath:
+        :param output_folder: the folder where the related dc.xml will be stored
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
+        :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created images
         """
+        self.log.debug("Processing {0}".format(jpg_filepath))
 
-        scratch_output_folder = tempfile.mkdtemp(prefix='image_ingest_')
-        try:
+        must_check_lossless = self.image_converter.check_image_suitable_for_jp2_conversion(jpg_filepath)
+        check_lossless = must_check_lossless or check_lossless
 
-            jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
-            shutil.copy(jpg_file, jpeg_filepath)
-            generated_files = [jpeg_filepath]
+        output_jpg_filepath = os.path.join(output_folder, self.jpg_filename)
+        shutil.copy(jpg_filepath, output_jpg_filepath)
+        generated_files = [output_jpg_filepath]
 
-            if save_xmp:
-                xmp_file_path = os.path.join(output_folder, self.xmp_filename)
-                self.extract_xmp(jpeg_filepath, xmp_file_path)
-                generated_files += [xmp_file_path]
+        if save_xmp:
+            xmp_file_path = os.path.join(output_folder, self.xmp_filename)
+            self.extract_xmp(jpg_filepath, xmp_file_path)
+            generated_files += [xmp_file_path]
 
-            scratch_tiff_filepath = os.path.join(scratch_output_folder, str(uuid4()) + '.tif')
-            self.image_converter.convert_to_tiff(jpeg_filepath, scratch_tiff_filepath,
-                                                 strip_embedded_metadata=strip_embedded_metadata)
+        with tempfile.NamedTemporaryFile(suffix='.tif') as scratch_tiff_file_obj:
+            scratch_tiff_filepath = scratch_tiff_file_obj.name
+            self.image_converter.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
 
             generated_files.append(self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder))
 
-            return generated_files
-        finally:
-            if scratch_output_folder:
-                shutil.rmtree(scratch_output_folder, ignore_errors=True)
+            lossless_filepath = self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder)
+            generated_files.append(lossless_filepath)
 
-    def generate_derivatives_from_tiff(self, tiff_file, output_folder, include_tiff=False, save_xmp=False,
-                                       repage_image=False, create_jpg_as_thumbnail=True):
+            if check_lossless:
+                self.check_conversion_was_lossless(scratch_tiff_filepath, lossless_filepath)
+
+        self.log.debug("Successfully generated derivatives for {0} in {1}".format(jpg_filepath, output_folder))
+
+        return generated_files
+
+    def generate_derivatives_from_tiff(self, tiff_filepath, output_folder, include_tiff=False, save_xmp=False,
+                                       create_jpg_as_thumbnail=True, check_lossless=False):
         """
         Creates a copy of the jpg fil and a validated jpeg2000 file and stores both in the given folder
         :param create_jpg_as_thumbnail: create the jpg as a resized thumbnail, not a high quality image
         Parameters for resize and quality are set on a class level
-        :param tiff_file:
-        :param output_folder: the folder where the related dc.xml will be stored, with the dataset's uuid as foldername
+        :param tiff_filepath:
+        :param output_folder: the folder where the related dc.xml will be stored
         :param include_tiff: Include copy of source tiff file in derivatives
-        :param repage_image: remove negative offsets by repaging the image.
         (It's a common error during conversion)
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
+        :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created images
         """
+        self.log.debug("Processing {0}".format(tiff_filepath))
 
-        scratch_output_folder = tempfile.mkdtemp(prefix='image_ingest_')
-        try:
+        must_check_lossless = self.image_converter.check_image_suitable_for_jp2_conversion(tiff_filepath)
+        check_lossless = must_check_lossless or check_lossless
+
+        with tempfile.NamedTemporaryFile(suffix='.tif') as temp_tiff_file_obj:
+            # only work from a temporary file if we need to - e.g. if the tiff filepath is invalid,
+            # or if we need to normalise the tiff. Otherwise just use the original tiff
+            temp_tiff_filepath = temp_tiff_file_obj.name
+            if os.path.splitext(tiff_filepath)[1].lower() not in ['tif', 'tiff']:
+                shutil.copy(tiff_filepath, temp_tiff_filepath)
+                normalised_tiff_filepath = temp_tiff_filepath
+            else:
+                normalised_tiff_filepath = tiff_filepath
+
             jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
 
             jpg_quality = None if create_jpg_as_thumbnail else self.jpg_high_quality_value
             jpg_resize = self.jpg_thumbnail_resize_value if create_jpg_as_thumbnail else None
 
-            self.image_converter.convert_to_jpg(tiff_file, jpeg_filepath, quality=jpg_quality, resize=jpg_resize)
+            self.image_converter.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath,
+                                                quality=jpg_quality, resize=jpg_resize)
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
 
             if save_xmp:
                 xmp_file_path = os.path.join(output_folder, self.xmp_filename)
-                self.extract_xmp(tiff_file, xmp_file_path)
+                self.extract_xmp(tiff_filepath, xmp_file_path)
                 generated_files += [xmp_file_path]
 
             if include_tiff:
-                tiff_filepath = os.path.join(output_folder, self.tiff_filename)
-                shutil.copy(tiff_file, tiff_filepath)
-                generated_files += [tiff_filepath]
+                output_tiff_filepath = os.path.join(output_folder, self.tiff_filename)
+                shutil.copy(tiff_filepath, output_tiff_filepath)
+                generated_files += [output_tiff_filepath]
 
-            if repage_image:
-                scratch_tiff_filepath = os.path.join(scratch_output_folder, str(uuid4()) + '.tiff')
-                self.image_converter.repage_image(tiff_file, scratch_tiff_filepath)
-                tiff_filepath_for_jp2_conversion = scratch_tiff_filepath
-            else:
-                tiff_filepath_for_jp2_conversion = tiff_file
+            lossless_filepath = self.generate_jp2_from_tiff(normalised_tiff_filepath, output_folder)
+            generated_files.append(lossless_filepath)
 
-            generated_files.append(self.generate_jp2_from_tiff(tiff_filepath_for_jp2_conversion, output_folder))
+            if check_lossless:
+                self.check_conversion_was_lossless(tiff_filepath, lossless_filepath)
+
+            self.log.debug("Successfully generated derivatives for {0} in {1}".format(tiff_filepath, output_folder))
 
             return generated_files
-
-        finally:
-            if scratch_output_folder:
-                shutil.rmtree(scratch_output_folder, ignore_errors=True)
 
     def generate_jp2_from_tiff(self, tiff_file, output_folder):
         lossless_filepath = os.path.join(output_folder, self.lossless_jp2_filename)
@@ -153,3 +166,19 @@ class DerivativeFilesGenerator(object):
             self.log.debug('XMP file {0} generated'.format(xmp_file_path))
         finally:
             image_xmp_file.close_file()
+
+    def check_conversion_was_lossless(self, source_file, lossless_jpg_2000_file):
+        """
+        Visually compare the source file to the tiff generated by expanding the lossless jp2,
+        and throw an exception if they don't match.
+        :param source_file: Must be tiff - can't seem to convert completely losslessly from jpg to tiff
+        :param lossless_jpg_2000_file:
+        :return:
+        """
+        self.log.debug('Checking conversion from {0} to {1} was lossless'.format(source_file, lossless_jpg_2000_file))
+        with tempfile.NamedTemporaryFile(suffix='.tif') as reconverted_tiff_file_obj:
+            reconverted_tiff_filepath = reconverted_tiff_file_obj.name
+            self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath,
+                                                   kakadu_options=['-fussy'])
+            validation.check_conversion_was_lossless(source_file, reconverted_tiff_filepath,
+                                                     allow_monochrome_to_rgb=True)
