@@ -70,7 +70,7 @@ class DerivativeFilesGenerator(object):
             self.extract_xmp(jpg_filepath, xmp_file_path)
             generated_files += [xmp_file_path]
 
-        with tempfile.NamedTemporaryFile(suffix='.tif') as scratch_tiff_file_obj:
+        with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as scratch_tiff_file_obj:
             scratch_tiff_filepath = scratch_tiff_file_obj.name
             self.image_converter.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
 
@@ -105,7 +105,7 @@ class DerivativeFilesGenerator(object):
         must_check_lossless = self.image_converter.check_image_suitable_for_jp2_conversion(tiff_filepath)
         check_lossless = must_check_lossless or check_lossless
 
-        with tempfile.NamedTemporaryFile(suffix='.tif') as temp_tiff_file_obj:
+        with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as temp_tiff_file_obj:
             # only work from a temporary file if we need to - e.g. if the tiff filepath is invalid,
             # or if we need to normalise the tiff. Otherwise just use the original tiff
             temp_tiff_filepath = temp_tiff_file_obj.name
@@ -175,7 +175,7 @@ class DerivativeFilesGenerator(object):
         :return:
         """
         self.log.debug('Checking conversion from source file {0} to jp2 file {1} was lossless'.format(source_file, lossless_jpg_2000_file))
-        with tempfile.NamedTemporaryFile(suffix='.tif') as reconverted_tiff_file_obj:
+        with tempfile.NamedTemporaryFile(prefix='jp2_reconvert_', suffix='.tif') as reconverted_tiff_file_obj:
             reconverted_tiff_filepath = reconverted_tiff_file_obj.name
             self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath,
                                                    kakadu_options=['-fussy'])
