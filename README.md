@@ -17,7 +17,7 @@ Used for converting source images (tiff or jpg) to the derivative files we inges
 
 Needs some image packages installed (may not need lcms2 if you won't be processing images using it)
 
-`yum install lcms2 ylcms-devel libtiff libtiff-devel libjpeg libjpeg-devel`
+`yum install lcms2 lcms2-devel libtiff libtiff-devel libjpeg libjpeg-devel`
 
 The virtual environment python needs to match the Python.h used by gcc. If need be, use `export C_INCLUDE_PATH=/usr/local/include/python2.7/`
 
