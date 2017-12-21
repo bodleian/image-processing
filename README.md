@@ -24,7 +24,3 @@ The virtual environment python needs to match the Python.h used by gcc. If need 
 #### Jypylyzer
 
 Needs a relatively recent pip version to install - it fails on 1.4.
-
-## Used by
-- [talbot-image-ingest](https://gitlab.bodleian.ox.ac.uk/digital.bodleian/talbot-image-ingest)
-- [goobi/bdlss](https://gitlab.bodleian.ox.ac.uk/goobi/bdlss) (still in progress)
