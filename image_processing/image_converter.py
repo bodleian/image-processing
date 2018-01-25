@@ -4,7 +4,7 @@ from __future__ import division
 
 import os
 import logging
-from PIL import Image
+from PIL import Image, ImageSequence
 from image_processing.kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
 from image_processing.image_magick import ImageMagick
 from image_processing.exceptions import ImageProcessingError
@@ -23,8 +23,7 @@ class ImageConverter(object):
 
     def convert_unsupported_file_to_jpeg2000(self, input_filepath, output_filepath):
         """
-        Converts an image file unsupported by kakadu (e.g. jpg) losslessly to jpeg2000 by converting it to tiff first
-        Useful for images with badly formed metadata that wouldn't otherwise pass jp2 validation
+        Converts an image file unsupported by kakadu (e.g. jpg) mostly losslessly to jpeg2000 by converting it to tiff first
         """
         tiff_filepath = os.path.splitext(output_filepath)[0] + '.tif'
         self.convert_to_tiff(input_filepath, tiff_filepath)
@@ -104,6 +103,9 @@ class ImageConverter(object):
         ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA']
         must_check_lossless = False
         with Image.open(image_filepath) as image_pil:
+            frames = len(list(ImageSequence.Iterator(image_pil)))
+            if frames > 1:
+                self.log.warn('File has multiple layers: only the first one will be converted')
             icc = image_pil.info.get('icc_profile')
             if icc is None:
                 self.log.warn('No icc profile embedded in {0}'.format(image_filepath))
