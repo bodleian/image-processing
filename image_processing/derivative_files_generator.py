@@ -53,10 +53,12 @@ class DerivativeFilesGenerator(object):
         :param jpg_filepath:
         :param output_folder: the folder where the related dc.xml will be stored
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
-        :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
+        :param check_lossless: If true, check the created jpg2000 file is visually identical to the tiff created from the source file
         :return: filepaths of created images
         """
         self.log.debug("Processing {0}".format(jpg_filepath))
+        self.log.info("There may be some loss in converting from jpg to jpg2000, as jpg compression is lossy. "
+                      "The lossless check is against the tiff created from the jpg")
 
         must_check_lossless = self.image_converter.check_image_suitable_for_jp2_conversion(jpg_filepath)
         check_lossless = must_check_lossless or check_lossless
