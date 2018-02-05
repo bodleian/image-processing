@@ -20,9 +20,9 @@ def validate_jp2(image_file):
     logger.debug('{0} is a valid jp2 file'.format(image_file))
 
 
-def check_conversion_was_lossless(source_filepath, converted_filepath, allow_monochrome_to_rgb=False):
+def check_visually_identical(source_filepath, converted_filepath, allow_monochrome_to_rgb=False):
     """
-    Visually compare the source file to the converted file, and throw an exception if they don't match.
+    Visually compare the files, and throw an exception if they don't match.
     :param source_filepath:
     :param converted_filepath:
     :param allow_monochrome_to_rgb: allow conversions where the monochrome source has been converted losslessly to rgb

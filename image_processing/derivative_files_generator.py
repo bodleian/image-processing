@@ -181,6 +181,6 @@ class DerivativeFilesGenerator(object):
             reconverted_tiff_filepath = reconverted_tiff_file_obj.name
             self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath,
                                                    kakadu_options=['-fussy'])
-            validation.check_conversion_was_lossless(source_file, reconverted_tiff_filepath,
-                                                     allow_monochrome_to_rgb=True)
+            validation.check_visually_identical(source_file, reconverted_tiff_filepath,
+                                                allow_monochrome_to_rgb=True)
         self.log.info('Conversion from source file {0} to jp2 file {1} was lossless'.format(source_file, lossless_jpg_2000_file))
