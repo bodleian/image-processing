@@ -162,7 +162,7 @@ class DerivativeFilesGenerator(object):
             xmp = image_xmp_file.get_xmp()
 
             # using io.open for unicode compatibility
-            with io.open(xmp_file_path, 'a') as output_xmp_file:
+            with io.open(xmp_file_path, 'w') as output_xmp_file:
                 output_xmp_file.write(xmp.serialize_to_unicode())
             self.log.debug('XMP file {0} generated'.format(xmp_file_path))
         finally:
