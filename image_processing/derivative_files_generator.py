@@ -60,7 +60,7 @@ class DerivativeFilesGenerator(object):
         self.log.info("There may be some loss in converting from jpg to jpg2000, as jpg compression is lossy. "
                       "The lossless check is against the tiff created from the jpg")
 
-        must_check_lossless = self.image_converter.check_image_suitable_for_jp2_conversion(jpg_filepath)
+        must_check_lossless = validation.check_image_suitable_for_jp2_conversion(jpg_filepath)
         check_lossless = must_check_lossless or check_lossless
 
         output_jpg_filepath = os.path.join(output_folder, self.jpg_filename)
@@ -104,7 +104,7 @@ class DerivativeFilesGenerator(object):
         """
         self.log.debug("Processing {0}".format(tiff_filepath))
 
-        must_check_lossless = self.image_converter.check_image_suitable_for_jp2_conversion(tiff_filepath)
+        must_check_lossless = validation.check_image_suitable_for_jp2_conversion(tiff_filepath)
         check_lossless = must_check_lossless or check_lossless
 
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as temp_tiff_file_obj:

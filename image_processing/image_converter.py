@@ -4,10 +4,9 @@ from __future__ import division
 
 import os
 import logging
-from PIL import Image, ImageSequence
+from PIL import Image
 from image_processing.kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
 from image_processing.image_magick import ImageMagick
-from image_processing.exceptions import ImageProcessingError
 
 
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
@@ -90,40 +89,3 @@ class ImageConverter(object):
             initial_options += ['-quality', quality]
         return self.image_magick.convert('{0}[0]'.format(input_filepath), output_filepath_with_jpg_extension,
                                          initial_options=initial_options)
-
-    def check_image_suitable_for_jp2_conversion(self, image_filepath):
-        """
-        Check over the image and make sure it's in a supported and tested format for conversion to jp2
-        Raises exception if there are problems
-        :param image_filepath:
-        :return: must_check_lossless: if true, there are unsupported edge cases where this format doesn't convert
-        losslessly, so the jp2 must be checked against the source image after conversion
-        """
-        # todo: remove these errors once I've implemented and tested these cases, and add monochrome to accepted modes
-        ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA']
-        must_check_lossless = False
-        with Image.open(image_filepath) as image_pil:
-            frames = len(list(ImageSequence.Iterator(image_pil)))
-            if frames > 1:
-                self.log.warn('File has multiple layers: only the first one will be converted')
-            icc = image_pil.info.get('icc_profile')
-            if icc is None:
-                self.log.warn('No icc profile embedded in {0}'.format(image_filepath))
-                raise NotImplementedError('No icc profile embedded in {0}. Unsupported case.'.format(image_filepath))
-
-            if self.is_monochrome(image_filepath):
-                raise NotImplementedError('{0} is monochrome. Unsupported case'.format(image_filepath))
-
-            colour_mode = image_pil.mode
-
-            if colour_mode not in ACCEPTED_COLOUR_MODES:
-                raise ImageProcessingError("Unsupported colour mode {0} for {1}".format(colour_mode, image_filepath))
-
-            if colour_mode == 'RGBA':
-                # In some cases alpha channel data is lost during jp2 conversion
-                # As we rarely encounter these, we just put in a check to see if it was lossless and error otherwise
-                self.log.warn("{0} is an RGBA image, and may not be converted correctly into jp2. "
-                              "The result should be checked to make sure it's lossless".format(image_filepath))
-                must_check_lossless = True
-
-        return must_check_lossless
