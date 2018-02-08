@@ -105,6 +105,26 @@ class TestImageValidation(object):
         with pytest.raises(exceptions.ValidationError):
             validation.validate_jp2(filepaths.INVALID_JP2)
 
+    def test_pixel_checksum_matches_visually_identical_files(self):
+        tif_checksum = validation.generate_pixel_checksum(filepaths.STANDARD_TIF)
+        assert tif_checksum == validation.generate_pixel_checksum(filepaths.STANDARD_TIF)
+
+        assert tif_checksum == validation.generate_pixel_checksum(filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+
+        assert validation.generate_pixel_checksum(filepaths.SMALL_TIF) == \
+               validation.generate_pixel_checksum(filepaths.SMALL_TIF_WITH_CHANGED_METADATA)
+
+    def test_pixel_checksum_doesnt_match_different_files(self):
+        tif_checksum = validation.generate_pixel_checksum(filepaths.STANDARD_TIF)
+        assert not tif_checksum == validation.generate_pixel_checksum(filepaths.TIF_FROM_STANDARD_JPG)
+
+        assert not validation.generate_pixel_checksum(filepaths.SMALL_TIF) == \
+                   validation.generate_pixel_checksum(filepaths.SMALL_TIF_WITH_CHANGED_PIXELS)
+
+    #todo: once we have monochrome enabled
+    # def test_monochrome_to_rgb_pixel_checksums(self):
+    #     pass
+
 
 class TestJpegInput(object):
 

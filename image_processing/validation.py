@@ -7,6 +7,7 @@ from PIL import Image
 from numbers import Number
 from image_processing import exceptions
 import logging
+from hashlib import sha256
 
 
 def validate_jp2(image_file):
@@ -18,6 +19,16 @@ def validate_jp2(image_file):
         logger.error(str(jp2_element))
         raise exceptions.ValidationError('{0} failed jypylzer validation'.format(image_file))
     logger.debug('{0} is a valid jp2 file'.format(image_file))
+
+
+def generate_pixel_checksum(image_filepath, normalise_to_rgb=False):
+    logger = logging.getLogger(__name__)
+    with Image.open(image_filepath) as pil_image:
+        logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
+        pixels = repr(list(pil_image.getdata()))
+        if normalise_to_rgb:
+            pixels = _adjust_pixels_for_monochrome(pixels)
+        return sha256(pixels).hexdigest()
 
 
 def check_visually_identical(source_filepath, converted_filepath, allow_monochrome_to_rgb=False):
