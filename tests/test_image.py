@@ -80,6 +80,7 @@ class TestImageFormatConverter(object):
 
             get_image_converter().convert_colour_to_jpeg2000(tif_file, output_file, lossless=False)
             assert os.path.isfile(output_file)
+    lossy conversions to jp2 don't seem to produce deterministic results, even if we only look at the pixels
             validation.check_visually_identical(output_file, filepaths.LOSSY_JP2_FROM_STANDARD_TIF)
 
     def test_kakadu_errors_are_raised(self):
