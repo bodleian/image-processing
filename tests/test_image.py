@@ -112,26 +112,11 @@ class TestJpegInput(object):
                                                                       check_lossless=True)
             jpg_file = os.path.join(output_folder, 'full.jpg')
             jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
-            assert os.path.isfile(jpg_file)
-            assert os.path.isfile(jp2_file)
-            assert len(os.listdir(output_folder)) == 2
-            assert filecmp.cmp(jpg_file, filepaths.STANDARD_JPG)
-            assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG)
-
-    def test_generates_xmp(self):
-        with temporary_folder() as output_folder:
-            get_derivatives_generator().generate_derivatives_from_jpg(filepaths.STANDARD_JPG, output_folder, save_xmp=True,
-                                                                      check_lossless=True)
-
-            jpg_file = os.path.join(output_folder, 'full.jpg')
-            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
             xmp_file = os.path.join(output_folder, 'xmp.xml')
-
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
             assert os.path.isfile(xmp_file)
             assert len(os.listdir(output_folder)) == 3
-
             assert filecmp.cmp(jpg_file, filepaths.STANDARD_JPG)
             assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG)
             assert_lines_match(xmp_file, filepaths.STANDARD_JPG_XMP)
@@ -147,9 +132,11 @@ class TestDerivativeGeneratorTiff(object):
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
+            xmp_file = os.path.join(output_folder, 'xmp.xml')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
-            assert len(os.listdir(output_folder)) == 2
+            assert os.path.isfile(xmp_file)
+            assert len(os.listdir(output_folder)) == 3
             assert filecmp.cmp(jpg_file, filepaths.HIGH_QUALITY_JPG_FROM_STANDARD_TIF)
             assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
 
@@ -160,9 +147,11 @@ class TestDerivativeGeneratorTiff(object):
 
             jpg_file = os.path.join(output_folder,'full.jpg')
             jp2_file = os.path.join(output_folder,'full_lossless.jp2')
+            xmp_file = os.path.join(output_folder, 'xmp.xml')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
-            assert len(os.listdir(output_folder)) == 2
+            assert os.path.isfile(xmp_file)
+            assert len(os.listdir(output_folder)) == 3
             assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_STANDARD_TIF)
             assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
 
@@ -172,11 +161,14 @@ class TestDerivativeGeneratorTiff(object):
             shutil.copy(filepaths.STANDARD_TIF, awful_filepath)
             get_derivatives_generator().generate_derivatives_from_tiff(awful_filepath, output_folder,
                                                                        check_lossless=True)
+            os.remove(awful_filepath)
 
             jpg_file = os.path.join(output_folder, 'full.jpg')
             jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
+            xmp_file = os.path.join(output_folder, 'xmp.xml')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
+            assert os.path.isfile(xmp_file)
             assert len(os.listdir(output_folder)) == 3
             assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_STANDARD_TIF)
             assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
@@ -189,10 +181,12 @@ class TestDerivativeGeneratorTiff(object):
             jpg_file = os.path.join(output_folder, 'full.jpg')
             jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
             tiff_file = os.path.join(output_folder, 'full.tiff')
+            xmp_file = os.path.join(output_folder, 'xmp.xml')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
             assert os.path.isfile(tiff_file)
-            assert len(os.listdir(output_folder)) == 3
+            assert os.path.isfile(xmp_file)
+            assert len(os.listdir(output_folder)) == 4
             assert filecmp.cmp(tiff_file, filepaths.STANDARD_TIF)
 
 
