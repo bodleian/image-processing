@@ -1,21 +1,37 @@
 
 
-# test data
-VALID_JPG = 'tests/data/valid.jpg'
-RESIZED_JPG = 'tests/data/resized.jpg'
-HIGH_QUALITY_JPG = 'tests/data/high_quality.jpg'
-# should be VALID_JPG file transformed
-VALID_LOSSY_JP2 = 'tests/data/valid_lossy.jp2'
-VALID_LOSSLESS_JP2 = 'tests/data/valid_lossless.jp2'
-# just a truncated jp2 file
+# adobe rgb 1998 8 bit tiff file (our most common input format) + expected derivatives
+STANDARD_TIF = 'tests/data/standard_adobe.tif'
+STANDARD_TIF_SINGLE_LAYER = 'tests/data/standard_adobe_tif_single_layer.tif'  # same tif but without thumbnail
+LOSSY_JP2_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_lossy.jp2'
+LOSSLESS_JP2_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif.jp2'
+RESIZED_JPG_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_resized.jpg'
+HIGH_QUALITY_JPG_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_hq.jpg'
+STANDARD_TIF_XMP = 'tests/data/standard_adobe_tif_xmp.xml'
+
+
+# Monochrome tifs
+GREYSCALE_TIF = 'tests/data/greyscale.tif'
+
+
+BILEVEL_TIF = 'tests/data/greyscale.tif'
+LOSSLESS_JP2_FROM_BILEVEL_TIF = 'tests/data/greyscale.tif'
+RESIZED_JPG_FROM_BILEVEL_TIF = 'tests/data/greyscale.tif'
+
+GREYSCALE_NO_PROFILE_TIF = 'tests/data/greyscale_without_profile.tif'
+RESIZED_JPG_FROM_GREYSCALE_NO_PROFILE_TIF = 'tests/data/greyscale_without_profile_tif_resized.jpg'
+LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF = 'tests/data/greyscale_without_profile_tif.jp2'
+
+# adobe rgb 1998 8 bit jpg file (converted from tif) + expected derivatives
+STANDARD_JPG = 'tests/data/standard_adobe.jpg'
+TIF_FROM_STANDARD_JPG = 'tests/data/standard_adobe_jpg.tif'
+LOSSLESS_JP2_FROM_STANDARD_JPG = 'tests/data/standard_adobe_jpg.jp2'
+STANDARD_JPG_XMP = 'tests/data/standard_adobe_jpg_xmp.xml'
+
+# just truncated files
 INVALID_JP2 = 'tests/data/invalid.jp2'
-# extracted from the JP2 version of VALID_JPG
-VALID_XMP = 'tests/data/valid_xmp.xml'
-# image with ill-formed metadata
-BAD_METADATA_JPG = 'tests/data/bad_metadata.jpg'
 INVALID_TIF = 'tests/data/invalid.tif'
-VALID_TIF = 'tests/data/valid.tif'
-MONOCHROME_JPG = 'tests/data/monochrome.jpg'
-MONOCHROME_LOSSY_JP2 = 'tests/data/monochrome_lossy.jp2'
-MONOCHROME_LOSSLESS_JP2 = 'tests/data/monochrome_lossless.jp2'
+
+KAKADU_BASE_PATH = '/opt/kakadu'
+DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
 
