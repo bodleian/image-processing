@@ -80,7 +80,7 @@ class TestImageFormatConverter(object):
 
             get_image_converter().convert_colour_to_jpeg2000(tif_file, output_file, lossless=False)
             assert os.path.isfile(output_file)
-            assert filecmp.cmp(output_file, filepaths.LOSSY_JP2_FROM_STANDARD_TIF)
+            validation.check_visually_identical(output_file, filepaths.LOSSY_JP2_FROM_STANDARD_TIF)
 
     def test_kakadu_errors_are_raised(self):
         with temporary_folder() as output_folder:
