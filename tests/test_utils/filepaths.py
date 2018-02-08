@@ -14,9 +14,9 @@ STANDARD_TIF_XMP = 'tests/data/standard_adobe_tif_xmp.xml'
 GREYSCALE_TIF = 'tests/data/greyscale.tif'
 
 
-BILEVEL_TIF = 'tests/data/greyscale.tif'
-LOSSLESS_JP2_FROM_BILEVEL_TIF = 'tests/data/greyscale.tif'
-RESIZED_JPG_FROM_BILEVEL_TIF = 'tests/data/greyscale.tif'
+BILEVEL_TIF = 'tests/data/bilevel.tif'
+LOSSLESS_JP2_FROM_BILEVEL_TIF = 'tests/data/bilevel_tif.jp2'
+RESIZED_JPG_FROM_BILEVEL_TIF = 'tests/data/bilevel_tif_resized.jpg'
 
 GREYSCALE_NO_PROFILE_TIF = 'tests/data/greyscale_without_profile.tif'
 RESIZED_JPG_FROM_GREYSCALE_NO_PROFILE_TIF = 'tests/data/greyscale_without_profile_tif_resized.jpg'

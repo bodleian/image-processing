@@ -211,21 +211,36 @@ class TestDerivativeGeneratorTiff(object):
             assert len(os.listdir(output_folder)) == 4
             assert filecmp.cmp(tiff_file, filepaths.STANDARD_TIF)
 
+    def test_creates_correct_files_greyscale_without_profile(self):
+        with temporary_folder() as output_folder:
 
-    #todo: monochrome isn't supported yet
-    # def test_creates_correct_files_greyscale_without_profile(self):
+            get_derivatives_generator().generate_derivatives_from_tiff(filepaths.GREYSCALE_NO_PROFILE_TIF,
+                                                                       output_folder, check_lossless=True,
+                                                                       save_xmp=False)
+
+            jpg_file = os.path.join(output_folder, 'full.jpg')
+            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
+            assert os.path.isfile(jpg_file)
+            assert os.path.isfile(jp2_file)
+            assert len(os.listdir(output_folder)) == 2
+            assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_GREYSCALE_NO_PROFILE_TIF)
+            assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF)
+
+    # todo: bilevel conversion doesn't work yet
+    # def test_creates_correct_files_bilevel_monochrome(self):
     #     with temporary_folder() as output_folder:
     #
-    #         get_derivatives_generator().generate_derivatives_from_tiff(filepaths.GREYSCALE_NO_PROFILE_TIF,
-    #                                                                    output_folder, check_lossless=True)
+    #         get_derivatives_generator().generate_derivatives_from_tiff(filepaths.BILEVEL_TIF,
+    #                                                                    output_folder, check_lossless=True,
+    #                                                                    save_xmp=False)
     #
     #         jpg_file = os.path.join(output_folder, 'full.jpg')
     #         jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
     #         assert os.path.isfile(jpg_file)
     #         assert os.path.isfile(jp2_file)
     #         assert len(os.listdir(output_folder)) == 2
-    #         assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_STANDARD_TIF)
-    #         assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+    #         assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_GREYSCALE_NO_PROFILE_TIF)
+    #         assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF)
 
     def test_does_not_generate_xmp(self):
         with temporary_folder() as output_folder:
