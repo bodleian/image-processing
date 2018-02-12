@@ -35,7 +35,8 @@ class DerivativeFilesGenerator(object):
                  tiff_filename=DEFAULT_TIFF_FILENAME,
                  xmp_filename=DEFAULT_XMP_FILENAME,
                  jpg_filename=DEFAULT_JPG_FILENAME,
-                 lossless_jp2_filename=DEFAULT_LOSSLESS_JP2_FILENAME):
+                 lossless_jp2_filename=DEFAULT_LOSSLESS_JP2_FILENAME,
+                 allow_no_icc_profile=False):
         self.tiff_filename = tiff_filename
         self.xmp_filename = xmp_filename
         self.jpg_filename = jpg_filename
@@ -44,6 +45,7 @@ class DerivativeFilesGenerator(object):
         self.jpg_thumbnail_resize_value = jpg_thumbnail_resize_value
         self.image_converter = image_converter.ImageConverter(kakadu_base_path=kakadu_base_path,
                                                               image_magick_path=image_magick_path)
+        self.allow_no_icc_profile = allow_no_icc_profile
         self.log = logging.getLogger(__name__)
 
     def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=True,
@@ -60,7 +62,9 @@ class DerivativeFilesGenerator(object):
         self.log.info("There may be some loss in converting from jpg to jpg2000, as jpg compression is lossy. "
                       "The lossless check is against the tiff created from the jpg")
 
-        must_check_lossless = validation.check_image_suitable_for_jp2_conversion(jpg_filepath)
+        must_check_lossless = validation.check_image_suitable_for_jp2_conversion(
+            jpg_filepath, allow_no_icc_profile=self.allow_no_icc_profile)
+
         check_lossless = must_check_lossless or check_lossless
 
         output_jpg_filepath = os.path.join(output_folder, self.jpg_filename)
@@ -104,7 +108,8 @@ class DerivativeFilesGenerator(object):
         """
         self.log.debug("Processing {0}".format(tiff_filepath))
 
-        must_check_lossless = validation.check_image_suitable_for_jp2_conversion(tiff_filepath)
+        must_check_lossless = validation.check_image_suitable_for_jp2_conversion(
+            tiff_filepath, allow_no_icc_profile=self.allow_no_icc_profile)
         check_lossless = must_check_lossless or check_lossless
 
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as temp_tiff_file_obj:

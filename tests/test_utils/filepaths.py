@@ -34,6 +34,8 @@ SMALL_TIF = 'tests/data/small.tif'
 SMALL_TIF_WITH_CHANGED_PIXELS = 'tests/data/small_different_pixel.tif'
 SMALL_TIF_WITH_CHANGED_METADATA = 'tests/data/small_different_metadata.tif'
 
+NO_PROFILE_TIF = 'tests/data/no_profile.tif'
+
 # just truncated files
 INVALID_JP2 = 'tests/data/invalid.jp2'
 INVALID_TIF = 'tests/data/invalid.tif'
