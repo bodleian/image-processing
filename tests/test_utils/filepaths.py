@@ -11,8 +11,11 @@ STANDARD_TIF_XMP = 'tests/data/standard_adobe_tif_xmp.xml'
 
 
 # Monochrome tifs
-GREYSCALE_TIF = 'tests/data/greyscale.tif'
 
+# tif with grayscale gamma 2.2 icc profile
+GREYSCALE_TIF = 'tests/data/greyscale_gamma.tif'
+RESIZED_JPG_FROM_GREYSCALE_TIF = 'tests/data/greyscale_gamma_tif_resized.jpg'
+LOSSLESS_JP2_FROM_GREYSCALE_TIF = 'tests/data/greyscale_gamma_tif.jp2'
 
 BILEVEL_TIF = 'tests/data/bilevel.tif'
 LOSSLESS_JP2_FROM_BILEVEL_TIF = 'tests/data/bilevel_tif.jp2'

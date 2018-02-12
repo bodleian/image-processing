@@ -50,25 +50,13 @@ class TestImageFormatConverter(object):
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG)
 
-#todo: monochrome isn't supported yet
-    # def test_converts_monochrome_jpg_to_jpeg2000(self):
-    #     with temporary_folder() as output_folder:
-    #         jpg_file = os.path.join(output_folder, 'test.jpg')
-    #         output_file = os.path.join(output_folder, 'output.jp2')
-    #         shutil.copy(filepaths.MONOCHROME_JPG, jpg_file)
-    #
-    #         assert get_image_converter().is_monochrome(jpg_file)
-    #         get_image_converter().convert_unsupported_file_to_jpeg2000(jpg_file, output_file)
-    #         assert os.path.isfile(output_file)
-    #         assert filecmp.cmp(output_file, filepaths.MONOCHROME_LOSSLESS_JP2)
-
     def test_converts_tif_to_jpeg2000(self):
         with temporary_folder() as output_folder:
             tif_file = os.path.join(output_folder,'test.tif')
             output_file = os.path.join(output_folder,'output.jp2')
             shutil.copy(filepaths.STANDARD_TIF, tif_file)
 
-            get_image_converter().convert_colour_to_jpeg2000(tif_file, output_file)
+            get_image_converter().convert_to_jpeg2000(tif_file, output_file)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
 
@@ -78,7 +66,7 @@ class TestImageFormatConverter(object):
             output_file = os.path.join(output_folder,'output.jp2')
             shutil.copy(filepaths.STANDARD_TIF, tif_file)
 
-            get_image_converter().convert_colour_to_jpeg2000(tif_file, output_file, lossless=False)
+            get_image_converter().convert_to_jpeg2000(tif_file, output_file, lossless=False)
             assert os.path.isfile(output_file)
             validation.validate_jp2(output_file)
             #lossy conversions to jp2 don't seem to produce deterministic results, even if we only look at the pixels
@@ -91,7 +79,7 @@ class TestImageFormatConverter(object):
             shutil.copy(filepaths.INVALID_TIF, tif_file)
 
             with pytest.raises(exceptions.KakaduError):
-                get_image_converter().convert_colour_to_jpeg2000(tif_file, output_file)
+                get_image_converter().convert_to_jpeg2000(tif_file, output_file)
 
 
 class TestImageValidation(object):
@@ -120,11 +108,6 @@ class TestImageValidation(object):
 
         assert not validation.generate_pixel_checksum(filepaths.SMALL_TIF) == \
                    validation.generate_pixel_checksum(filepaths.SMALL_TIF_WITH_CHANGED_PIXELS)
-
-    #todo: once we have monochrome enabled
-    # def test_monochrome_to_rgb_pixel_checksums(self):
-    #     pass
-
 
 class TestJpegInput(object):
 
@@ -212,6 +195,9 @@ class TestDerivativeGeneratorTiff(object):
             assert filecmp.cmp(tiff_file, filepaths.STANDARD_TIF)
 
     def test_creates_correct_files_greyscale_without_profile(self):
+        with pytest.raises(exceptions.ValidationError):
+            validation.check_image_suitable_for_jp2_conversion(filepaths.GREYSCALE_NO_PROFILE_TIF,
+                                                               allow_no_icc_profile_for_greyscale=False)
         with temporary_folder() as output_folder:
 
             get_derivatives_generator().generate_derivatives_from_tiff(filepaths.GREYSCALE_NO_PROFILE_TIF,
@@ -226,21 +212,37 @@ class TestDerivativeGeneratorTiff(object):
             assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_GREYSCALE_NO_PROFILE_TIF)
             assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF)
 
-    # todo: bilevel conversion doesn't work yet
-    # def test_creates_correct_files_bilevel_monochrome(self):
-    #     with temporary_folder() as output_folder:
-    #
-    #         get_derivatives_generator().generate_derivatives_from_tiff(filepaths.BILEVEL_TIF,
-    #                                                                    output_folder, check_lossless=True,
-    #                                                                    save_xmp=False)
-    #
-    #         jpg_file = os.path.join(output_folder, 'full.jpg')
-    #         jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
-    #         assert os.path.isfile(jpg_file)
-    #         assert os.path.isfile(jp2_file)
-    #         assert len(os.listdir(output_folder)) == 2
-    #         assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_GREYSCALE_NO_PROFILE_TIF)
-    #         assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF)
+    def test_creates_correct_files_greyscale(self):
+        validation.check_image_suitable_for_jp2_conversion(filepaths.GREYSCALE_TIF,
+                                                           allow_no_icc_profile_for_greyscale=False)
+        with temporary_folder() as output_folder:
+
+            get_derivatives_generator().generate_derivatives_from_tiff(filepaths.GREYSCALE_TIF,
+                                                                       output_folder, check_lossless=True,
+                                                                       save_xmp=False)
+
+            jpg_file = os.path.join(output_folder, 'full.jpg')
+            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
+            assert os.path.isfile(jpg_file)
+            assert os.path.isfile(jp2_file)
+            assert len(os.listdir(output_folder)) == 2
+            assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_GREYSCALE_TIF)
+            assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_GREYSCALE_TIF)
+
+    def test_creates_correct_files_bilevel_monochrome(self):
+        with temporary_folder() as output_folder:
+
+            get_derivatives_generator().generate_derivatives_from_tiff(filepaths.BILEVEL_TIF,
+                                                                       output_folder, check_lossless=True,
+                                                                       save_xmp=False)
+
+            jpg_file = os.path.join(output_folder, 'full.jpg')
+            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
+            assert os.path.isfile(jpg_file)
+            assert os.path.isfile(jp2_file)
+            assert len(os.listdir(output_folder)) == 2
+            assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_BILEVEL_TIF)
+            assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_BILEVEL_TIF)
 
     def test_does_not_generate_xmp(self):
         with temporary_folder() as output_folder:

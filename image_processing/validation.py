@@ -26,24 +26,21 @@ def validate_jp2(image_file):
     logger.debug('{0} is a valid jp2 file'.format(image_file))
 
 
-def generate_pixel_checksum(image_filepath, normalise_to_rgb=False):
+def generate_pixel_checksum(image_filepath):
     logger = logging.getLogger(__name__)
     with Image.open(image_filepath) as pil_image:
         logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
         pixels = repr(list(pil_image.getdata()))
-        if normalise_to_rgb:
-            pixels = _adjust_pixels_for_monochrome(pixels)
         return sha256(pixels).hexdigest()
 
 
 def check_visually_identical(source_filepath, converted_filepath,
-                             source_pixel_checksum=None, allow_monochrome_to_rgb=False):
+                             source_pixel_checksum=None):
     """
     Visually compare the files, and throw an exception if they don't match.
     :param source_filepath:
     :param converted_filepath:
     :param source_pixel_checksum: if not None, uses this instead of reading out the source pixels again
-    :param allow_monochrome_to_rgb: allow conversions where the monochrome source has been converted losslessly to rgb
     :return:
     """
 
@@ -53,25 +50,22 @@ def check_visually_identical(source_filepath, converted_filepath,
     with Image.open(source_filepath) as source_image:
         with Image.open(converted_filepath) as converted_image:
 
-            if allow_monochrome_to_rgb:
-                monochrome_to_rgb = source_image.mode in [GREYSCALE, BITONAL] and converted_image.mode == 'RGB'
-            else:
-                monochrome_to_rgb = False
-
-            if not monochrome_to_rgb:
-                if source_image.mode != converted_image.mode:
+            if source_image.mode != converted_image.mode:
+                if source_image.mode == BITONAL and converted_image.mode == GREYSCALE:
+                    logger.debug('Converted image is greyscale, not bitonal. This is expected')
+                else:
                     raise exceptions.ValidationError(
                         'Converted file {0} has different colour mode from {1}'
                         .format(converted_filepath, source_filepath)
                     )
 
-                source_icc = source_image.info.get('icc_profile')
-                converted_icc = converted_image.info.get('icc_profile')
-                if source_icc != converted_icc:
-                    raise exceptions.ValidationError(
-                        'Converted file {0} has different colour profile from {1}'
-                        .format(converted_filepath, source_filepath)
-                    )
+            source_icc = source_image.info.get('icc_profile')
+            converted_icc = converted_image.info.get('icc_profile')
+            if source_icc != converted_icc:
+                raise exceptions.ValidationError(
+                    'Converted file {0} has different colour profile from {1}'
+                    .format(converted_filepath, source_filepath)
+                )
 
             if source_pixel_checksum:
                 pixels_identical = generate_pixel_checksum(converted_filepath) == source_pixel_checksum
@@ -80,10 +74,6 @@ def check_visually_identical(source_filepath, converted_filepath,
                              'If this crashes, the machine probably needs more memory')
                 source_pixels = list(source_image.getdata())
                 converted_pixels = list(converted_image.getdata())
-
-                if monochrome_to_rgb:
-                    logger.debug('Adjusting pixels of monochrome image to RGB before comparison')
-                    source_pixels = _adjust_pixels_for_monochrome(source_pixels)
 
                 pixels_identical = source_pixels == converted_pixels
 
@@ -111,7 +101,7 @@ def check_image_suitable_for_jp2_conversion(image_filepath, allow_no_icc_profile
 
     logger = logging.getLogger(__name__)
 
-    ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE]  # TODO: add BITONAL once it's supported
+    ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
 
     must_check_lossless = False
 
@@ -144,10 +134,3 @@ def check_image_suitable_for_jp2_conversion(image_filepath, allow_no_icc_profile
             logger.warn('File has multiple layers: only the first one will be converted')
 
     return must_check_lossless
-
-
-def _adjust_pixels_for_monochrome(pixels_list):
-    if isinstance(pixels_list[0], Number):
-        return [(a, a, a) for a in pixels_list]
-    else:
-        return pixels_list

@@ -29,22 +29,11 @@ class ImageConverter(object):
         self.convert_to_jpeg2000(tiff_filepath, output_filepath)
         os.remove(tiff_filepath)
 
-    def convert_to_jpeg2000(self, input_filepath, output_filepath, lossless=True):
+    def convert_to_jpeg2000(self, input_filepath, output_filepath, lossless=True,
+                            kakadu_options=DEFAULT_BDLSS_OPTIONS):
         """
-        Converts an image file supported by kakadu to jpeg2000.
-        Handles colour conversion of greyscale and bitonal files to 3 colour channels of information.
-        """
-        image_is_monochrome = self.is_monochrome(input_filepath)
-
-        if image_is_monochrome:
-            self.convert_monochrome_to_jpeg2000(input_filepath, output_filepath, lossless=lossless)
-        else:
-            self.convert_colour_to_jpeg2000(input_filepath, output_filepath, lossless=lossless)
-
-    def convert_colour_to_jpeg2000(self, input_filepath, output_filepath, lossless=True,
-                                   kakadu_options=DEFAULT_BDLSS_OPTIONS):
-        """
-        Converts an non-monochrome image file supported by kakadu to jpeg2000
+        Converts an image file supported by kakadu to jpeg2000
+        Bitonal or greyscale image files are converted to a single channel jpeg2000 file
         """
         if lossless:
             extra_options = LOSSLESS_OPTIONS
@@ -53,28 +42,6 @@ class ImageConverter(object):
 
         kakadu_options = kakadu_options + extra_options
         self.kakadu.kdu_compress(input_filepath, output_filepath, kakadu_options)
-
-    @staticmethod
-    def is_monochrome(input_filepath):
-        with Image.open(input_filepath) as input_pil:
-            image_mode = input_pil.mode  # colour mode of image
-            return image_mode in ['L', '1']  # greyscale, Bitonal
-
-    def convert_monochrome_to_jpeg2000(self, input_filepath, output_filepath, lossless=True,
-                                       kakadu_options=DEFAULT_BDLSS_OPTIONS):
-        """
-        Converts an bitonal or greyscale image file supported by kakadu to jpeg2000
-        The same input is copied to each of the
-        three colour channels, with no colour palette applied, to create a 24-bit
-        [3 x 8] image
-        """
-        if lossless:
-            extra_options = LOSSLESS_OPTIONS
-        else:
-            extra_options = ["-rate", "3"]
-        # todo: should this be left without jp2_space?
-        kakadu_options = kakadu_options + extra_options + ["-no_palette", '-jp2_space', 'sRGB']
-        self.kakadu.kdu_compress([input_filepath for _ in range(0, 3)], output_filepath, kakadu_options)
 
     def convert_to_tiff(self, input_filepath, output_filepath_with_tif_extension):
         post_options = ['-compress', 'None']
