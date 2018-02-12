@@ -1,9 +1,12 @@
 import filecmp
-import os, sys, logging
+import logging
+import os
 import shutil
+import sys
+
 import pytest
 
-from image_processing import image_converter, derivative_files_generator, validation, exceptions, image_magick
+from image_processing import image_converter, derivative_files_generator, validation, exceptions
 from .test_utils import temporary_folder, filepaths, assert_lines_match
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -22,21 +25,15 @@ def get_derivatives_generator():
 class TestImageFormatConverter(object):
     def test_converts_jpg_to_tiff(self):
         with temporary_folder() as output_folder:
-            jpg_file = os.path.join(output_folder, 'test.jpg')
             tiff_file = os.path.join(output_folder, 'test.tif')
-            shutil.copy(filepaths.STANDARD_JPG, jpg_file)
-
-            get_image_converter().convert_to_tiff(jpg_file, tiff_file)
+            get_image_converter().convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
             assert os.path.isfile(tiff_file)
             assert filecmp.cmp(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
 
     def test_converts_jpg_to_jpeg2000(self):
         with temporary_folder() as output_folder:
-            jpg_file = os.path.join(output_folder,'test.jpg')
-            output_file = os.path.join(output_folder,'output.jp2')
-            shutil.copy(filepaths.STANDARD_JPG, jpg_file)
-
-            get_image_converter().convert_unsupported_file_to_jpeg2000(jpg_file, output_file)
+            output_file = os.path.join(output_folder, 'output.jp2')
+            get_image_converter().convert_unsupported_file_to_jpeg2000(filepaths.STANDARD_JPG, output_file)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG)
 
@@ -52,34 +49,25 @@ class TestImageFormatConverter(object):
 
     def test_converts_tif_to_jpeg2000(self):
         with temporary_folder() as output_folder:
-            tif_file = os.path.join(output_folder,'test.tif')
-            output_file = os.path.join(output_folder,'output.jp2')
-            shutil.copy(filepaths.STANDARD_TIF, tif_file)
-
-            get_image_converter().convert_to_jpeg2000(tif_file, output_file)
+            output_file = os.path.join(output_folder, 'output.jp2')
+            get_image_converter().convert_to_jpeg2000(filepaths.STANDARD_TIF, output_file)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
 
     def test_converts_tif_to_lossy_jpeg2000(self):
         with temporary_folder() as output_folder:
-            tif_file = os.path.join(output_folder,'test.tif')
-            output_file = os.path.join(output_folder,'output.jp2')
-            shutil.copy(filepaths.STANDARD_TIF, tif_file)
-
-            get_image_converter().convert_to_jpeg2000(tif_file, output_file, lossless=False)
+            output_file = os.path.join(output_folder, 'output.jp2')
+            get_image_converter().convert_to_jpeg2000(filepaths.STANDARD_TIF, output_file, lossless=False)
             assert os.path.isfile(output_file)
             validation.validate_jp2(output_file)
-            #lossy conversions to jp2 don't seem to produce deterministic results, even if we only look at the pixels
-            #validation.check_visually_identical(output_file, filepaths.LOSSY_JP2_FROM_STANDARD_TIF)
+            # lossy conversions to jp2 don't seem to produce deterministic results, even if we only look at the pixels
+            # validation.check_visually_identical(output_file, filepaths.LOSSY_JP2_FROM_STANDARD_TIF)
 
     def test_kakadu_errors_are_raised(self):
         with temporary_folder() as output_folder:
-            tif_file = os.path.join(output_folder,'test.tif')
-            output_file = os.path.join(output_folder,'output.jp2')
-            shutil.copy(filepaths.INVALID_TIF, tif_file)
-
+            output_file = os.path.join(output_folder, 'output.jp2')
             with pytest.raises(exceptions.KakaduError):
-                get_image_converter().convert_to_jpeg2000(tif_file, output_file)
+                get_image_converter().convert_to_jpeg2000(filepaths.INVALID_TIF, output_file)
 
 
 class TestImageValidation(object):
@@ -100,14 +88,15 @@ class TestImageValidation(object):
         assert tif_checksum == validation.generate_pixel_checksum(filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
 
         assert validation.generate_pixel_checksum(filepaths.SMALL_TIF) == \
-               validation.generate_pixel_checksum(filepaths.SMALL_TIF_WITH_CHANGED_METADATA)
+            validation.generate_pixel_checksum(filepaths.SMALL_TIF_WITH_CHANGED_METADATA)
 
     def test_pixel_checksum_doesnt_match_different_files(self):
         tif_checksum = validation.generate_pixel_checksum(filepaths.STANDARD_TIF)
         assert not tif_checksum == validation.generate_pixel_checksum(filepaths.TIF_FROM_STANDARD_JPG)
 
         assert not validation.generate_pixel_checksum(filepaths.SMALL_TIF) == \
-                   validation.generate_pixel_checksum(filepaths.SMALL_TIF_WITH_CHANGED_PIXELS)
+            validation.generate_pixel_checksum(filepaths.SMALL_TIF_WITH_CHANGED_PIXELS)
+
 
 class TestJpegInput(object):
 
@@ -135,8 +124,8 @@ class TestDerivativeGeneratorTiff(object):
                                                                        create_jpg_as_thumbnail=False,
                                                                        check_lossless=True)
 
-            jpg_file = os.path.join(output_folder,'full.jpg')
-            jp2_file = os.path.join(output_folder,'full_lossless.jp2')
+            jpg_file = os.path.join(output_folder, 'full.jpg')
+            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
             xmp_file = os.path.join(output_folder, 'xmp.xml')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
@@ -150,8 +139,8 @@ class TestDerivativeGeneratorTiff(object):
             get_derivatives_generator().generate_derivatives_from_tiff(filepaths.STANDARD_TIF, output_folder,
                                                                        check_lossless=True)
 
-            jpg_file = os.path.join(output_folder,'full.jpg')
-            jp2_file = os.path.join(output_folder,'full_lossless.jp2')
+            jpg_file = os.path.join(output_folder, 'full.jpg')
+            jp2_file = os.path.join(output_folder, 'full_lossless.jp2')
             xmp_file = os.path.join(output_folder, 'xmp.xml')
             assert os.path.isfile(jpg_file)
             assert os.path.isfile(jp2_file)
@@ -282,9 +271,9 @@ class TestDerivativeGeneratorTiff(object):
 
     def test_allows_tif_without_icc_profile(self):
         with temporary_folder() as output_folder:
-            d = derivative_files_generator.DerivativeFilesGenerator(kakadu_base_path=filepaths.KAKADU_BASE_PATH,
-                                                                image_magick_path=filepaths.DEFAULT_IMAGE_MAGICK_PATH,
-                                                                    allow_no_icc_profile=True)
+            d = derivative_files_generator.DerivativeFilesGenerator(
+                kakadu_base_path=filepaths.KAKADU_BASE_PATH, image_magick_path=filepaths.DEFAULT_IMAGE_MAGICK_PATH,
+                allow_no_icc_profile=True)
             d.generate_derivatives_from_tiff(filepaths.NO_PROFILE_TIF, output_folder, check_lossless=True)
 
             jpg_file = os.path.join(output_folder, 'full.jpg')

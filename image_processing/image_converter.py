@@ -4,7 +4,6 @@ from __future__ import division
 
 import os
 import logging
-from PIL import Image
 from image_processing.kakadu import DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS, Kakadu
 from image_processing.image_magick import ImageMagick
 
@@ -22,7 +21,8 @@ class ImageConverter(object):
 
     def convert_unsupported_file_to_jpeg2000(self, input_filepath, output_filepath):
         """
-        Converts an image file unsupported by kakadu (e.g. jpg) mostly losslessly to jpeg2000 by converting it to tiff first
+        Converts an image file unsupported by kakadu (e.g. jpg) as losslessly as is possible to jpeg2000
+         by converting it to tiff first
         """
         tiff_filepath = os.path.splitext(output_filepath)[0] + '.tif'
         self.convert_to_tiff(input_filepath, tiff_filepath)

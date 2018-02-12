@@ -100,8 +100,6 @@ def check_image_suitable_for_jp2_conversion(image_filepath, allow_no_icc_profile
 
     logger = logging.getLogger(__name__)
 
-    ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
-
     must_check_lossless = False
 
     with Image.open(image_filepath) as image_pil:
@@ -125,8 +123,7 @@ def check_image_suitable_for_jp2_conversion(image_filepath, allow_no_icc_profile
         if icc is None:
             logger.warn('No icc profile embedded in {0}'.format(image_filepath))
             if not icc_not_needed:
-                raise exceptions.ValidationError('No icc profile embedded in {0}.'
-                                                 .format(image_filepath))
+                raise exceptions.ValidationError('No icc profile embedded in {0}.'.format(image_filepath))
 
         frames = len(list(ImageSequence.Iterator(image_pil)))
         if frames > 1:

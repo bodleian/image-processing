@@ -55,7 +55,8 @@ class DerivativeFilesGenerator(object):
         :param jpg_filepath:
         :param output_folder: the folder where the related dc.xml will be stored
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
-        :param check_lossless: If true, check the created jpg2000 file is visually identical to the tiff created from the source file
+        :param check_lossless: If true, check the created jpg2000 file is visually identical to the tiff
+        created from the source file
         :return: filepaths of created images
         """
         self.log.debug("Processing {0}".format(jpg_filepath))
@@ -181,10 +182,12 @@ class DerivativeFilesGenerator(object):
         :param lossless_jpg_2000_file:
         :return:
         """
-        self.log.debug('Checking conversion from source file {0} to jp2 file {1} was lossless'.format(source_file, lossless_jpg_2000_file))
+        self.log.debug('Checking conversion from source file {0} to jp2 file {1} was lossless'
+                       .format(source_file, lossless_jpg_2000_file))
         with tempfile.NamedTemporaryFile(prefix='jp2_reconvert_', suffix='.tif') as reconverted_tiff_file_obj:
             reconverted_tiff_filepath = reconverted_tiff_file_obj.name
             self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath,
                                                    kakadu_options=['-fussy'])
             validation.check_visually_identical(source_file, reconverted_tiff_filepath)
-        self.log.info('Conversion from source file {0} to jp2 file {1} was lossless'.format(source_file, lossless_jpg_2000_file))
+        self.log.info('Conversion from source file {0} to jp2 file {1} was lossless'
+                      .format(source_file, lossless_jpg_2000_file))

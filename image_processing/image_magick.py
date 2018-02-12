@@ -40,19 +40,6 @@ class ImageMagick(object):
 
         self.run_command('convert', input_file, output_file, initial_options=initial_options, post_options=post_options)
 
-    def mogrify(self, input_file, initial_options=None, post_options=None):
-        """
-        IMPORTANT: if changing formats, and the input_file extension differs from the format extension,
-        the created file will have the format extension
-        :param input_file:
-        :param initial_options: command line arguments which need to go before the input file
-        :param post_options: command line arguments which need to go after the input file
-        :return:
-        """
-        self._check_input_file_readable(input_file)
-
-        self.run_command('mogrify', input_file, initial_options=initial_options, post_options=post_options)
-
     def run_command(self, command, input_file, output_file=None, initial_options=None, post_options=None):
         """
         :param command:
