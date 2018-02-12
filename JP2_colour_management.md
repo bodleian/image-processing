@@ -20,26 +20,28 @@ Kakadu (and JP2 itself) will not support CYMK images:
 
 JPX does support it, but isn't recommended for digital preservation.
 
-Kakadu only supports a restricted set of ICC profile features. For example the [sRGB v4 ICC preference profile](http://www.color.org/srgbprofiles.xalter#v4pref) is not supported, and cannot be embedded into a jp2 file using Kakadu. Setting `-jp2_space sRGB` on `kdu_compress` will erase the embedded profile and so allow it to be converted. But the sRGB IEC61966-2.1 profile thus assigned is sufficiently different that in some cases there's a noticable tint to the created jp2.
+JP2 only supports a restricted set of ICC profile features. For example the [sRGB v4 ICC preference profile](http://www.color.org/srgbprofiles.xalter#v4pref) is not supported, and cannot be embedded into a jp2 file using Kakadu. Setting `-jp2_space sRGB` on `kdu_compress` will erase the embedded profile and so allow it to be converted. But the sRGB IEC61966-2.1 profile thus assigned is sufficiently different that in some cases there's a noticable tint to the created jp2.
 
 ## Recommendations
 
 When using JP2 for preservation, preserve the original colour space where possible, and keep it embedded in the JP2.
 
 ### Supported RGB colour profiles
-If the original tiff has an RGB colour profile supported by kakadu, this is simple. Convert directly from the original tiff, without any colour conversion beforehand, and don't use the `-jp2_space` parameter in `kdu_compress`.
+If the original tiff has an RGB colour profile supported by JP2, this is simple. Convert directly from the original tiff, without any colour conversion beforehand, and don't use the `-jp2_space` parameter in `kdu_compress`.
 
 ### Monochrome colour spaces
 To be decided
 
 ## RGBA colour spaces
-The `kdu_compress` command options we use don't always preserve alpha channel information with RGBA tiffs. As very few of our images are RGBA, and so far we haven't encountered failing cases in live data (as opposed to constructed test data), we just make sure to check RGBA JP2 conversions are lossless, and otherwise treat them the same as RGB.
+The `kdu_compress` command options we use don't always preserve alpha channel information with RGBA tiffs. As very few of our images are RGBA, and so far we haven't encountered failing cases in live data (as opposed to constructed test data), we just make sure to check RGBA JP2 conversions are lossless, and otherwise treat them the same as RGB. If we had more RGBA images, we'd investigate the `-jp2_alpha` option. 
 
-### Colour profiles / spaces not supported by kakadu
-To be decided
+### Colour profiles not supported by JP2
+Convert to a wide gamut colour profile supported by JP2 - we use Adobe RGB 1998. This may be lossy, so consider keeping a copy of the original tiff for preservation.
 
 ### Images without colour profiles
-To be decided
+Ideally, we would work out the closest colour profile for the image and assign that. If it's been recently shot, go back to the studio. If not, either read the technical metadata and find out the profile most commonly used in the scanner/camera or run a bunch of tests on some of the files to see if there’s a standard one that makes the least change to the colour. Without a colour profile, images will be assumed to be sRGB by browsers.
+
+If we really aren't able to calculate a profile, we should leave it without one rather than assigning one arbitrarily.
 
 ### Delivery
 

@@ -4,7 +4,6 @@ from __future__ import division
 
 from jpylyzer.jpylyzer import checkOneFile
 from PIL import Image, ImageSequence
-from numbers import Number
 from image_processing import exceptions
 import logging
 from hashlib import sha256
