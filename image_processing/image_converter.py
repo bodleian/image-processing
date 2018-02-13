@@ -71,7 +71,7 @@ class ImageConverter(object):
                 icc_profile = input_pil.info.get('icc_profile')
                 if input_pil.mode == 'RGBA':
                     self.log.warning('Image is RGBA - the alpha channel will be removed from the JPEG derivative image')
-                    input_pil.convert(mode="RGB")
+                    input_pil = input_pil.convert(mode="RGB")
                 if resize:
                     # todo: should be int to start with
                     resize = int(resize.rstrip('%'))/100
