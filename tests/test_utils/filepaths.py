@@ -31,7 +31,7 @@ TIF_FROM_STANDARD_JPG = 'tests/data/standard_adobe_jpg.tif'
 LOSSLESS_JP2_FROM_STANDARD_JPG = 'tests/data/standard_adobe_jpg.jp2'
 STANDARD_JPG_XMP = 'tests/data/standard_adobe_jpg_xmp.xml'
 
-#misc tiffs
+# misc tiffs
 # for testing the pixel checksum
 SMALL_TIF = 'tests/data/small.tif'
 SMALL_TIF_WITH_CHANGED_PIXELS = 'tests/data/small_different_pixel.tif'
@@ -45,5 +45,3 @@ INVALID_TIF = 'tests/data/invalid.tif'
 
 KAKADU_BASE_PATH = '/opt/kakadu'
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
-
-

@@ -36,7 +36,8 @@ class DerivativeFilesGenerator(object):
                  xmp_filename=DEFAULT_XMP_FILENAME,
                  jpg_filename=DEFAULT_JPG_FILENAME,
                  lossless_jp2_filename=DEFAULT_LOSSLESS_JP2_FILENAME,
-                 allow_no_icc_profile=False):
+                 allow_no_icc_profile=False,
+                 use_image_magick=True):
         self.tiff_filename = tiff_filename
         self.xmp_filename = xmp_filename
         self.jpg_filename = jpg_filename
@@ -44,7 +45,8 @@ class DerivativeFilesGenerator(object):
         self.jpg_high_quality_value = jpg_high_quality_value
         self.jpg_thumbnail_resize_value = jpg_thumbnail_resize_value
         self.image_converter = image_converter.ImageConverter(kakadu_base_path=kakadu_base_path,
-                                                              image_magick_path=image_magick_path)
+                                                              image_magick_path=image_magick_path,
+                                                              use_image_magick = use_image_magick)
         self.allow_no_icc_profile = allow_no_icc_profile
         self.log = logging.getLogger(__name__)
 
@@ -80,6 +82,8 @@ class DerivativeFilesGenerator(object):
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as scratch_tiff_file_obj:
             scratch_tiff_filepath = scratch_tiff_file_obj.name
             self.image_converter.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
+
+            validation.check_colour_profiles_match(jpg_filepath, scratch_tiff_filepath)
 
             generated_files.append(self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder))
 

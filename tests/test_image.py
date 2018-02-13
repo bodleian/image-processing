@@ -12,9 +12,10 @@ from .test_utils import temporary_folder, filepaths, assert_lines_match
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
-def get_image_converter():
+def get_image_converter(use_image_magick=True):
     return image_converter.ImageConverter(kakadu_base_path=filepaths.KAKADU_BASE_PATH,
-                                          image_magick_path=filepaths.DEFAULT_IMAGE_MAGICK_PATH)
+                                          image_magick_path=filepaths.DEFAULT_IMAGE_MAGICK_PATH,
+                                          use_image_magick=use_image_magick)
 
 
 def get_derivatives_generator():
@@ -23,10 +24,17 @@ def get_derivatives_generator():
 
 
 class TestImageFormatConverter(object):
-    def test_converts_jpg_to_tiff(self):
+    def test_converts_jpg_to_tiff_im(self):
         with temporary_folder() as output_folder:
-            tiff_file = os.path.join(output_folder, 'test.tif')
-            get_image_converter().convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
+            tiff_file = os.path.join(output_folder, 'test_im.tif')
+            get_image_converter(True).convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
+            assert os.path.isfile(tiff_file)
+            assert filecmp.cmp(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
+
+    def test_converts_jpg_to_tiff_pil(self):
+        with temporary_folder() as output_folder:
+            tiff_file = os.path.join(output_folder, 'test_pil.tif')
+            get_image_converter(False).convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
             assert os.path.isfile(tiff_file)
             assert filecmp.cmp(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
 
