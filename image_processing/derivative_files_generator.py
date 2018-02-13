@@ -19,8 +19,8 @@ DEFAULT_LOSSLESS_JP2_FILENAME = 'full_lossless.jp2'
 
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
 
-DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE = "60%"
-DEFAULT_JPG_HIGH_QUALITY_VALUE = "92"
+DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE = 0.6
+DEFAULT_JPG_HIGH_QUALITY_VALUE = 92
 
 
 class DerivativeFilesGenerator(object):
@@ -29,24 +29,21 @@ class DerivativeFilesGenerator(object):
     technical metadata etc.) we store in our repository
     """
 
-    def __init__(self, kakadu_base_path, image_magick_path=DEFAULT_IMAGE_MAGICK_PATH,
+    def __init__(self, kakadu_base_path,
                  jpg_high_quality_value=DEFAULT_JPG_HIGH_QUALITY_VALUE,
                  jpg_thumbnail_resize_value=DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE,
                  tiff_filename=DEFAULT_TIFF_FILENAME,
                  xmp_filename=DEFAULT_XMP_FILENAME,
                  jpg_filename=DEFAULT_JPG_FILENAME,
                  lossless_jp2_filename=DEFAULT_LOSSLESS_JP2_FILENAME,
-                 allow_no_icc_profile=False,
-                 use_image_magick=True):
+                 allow_no_icc_profile=False):
         self.tiff_filename = tiff_filename
         self.xmp_filename = xmp_filename
         self.jpg_filename = jpg_filename
         self.lossless_jp2_filename = lossless_jp2_filename
         self.jpg_high_quality_value = jpg_high_quality_value
         self.jpg_thumbnail_resize_value = jpg_thumbnail_resize_value
-        self.image_converter = image_converter.ImageConverter(kakadu_base_path=kakadu_base_path,
-                                                              image_magick_path=image_magick_path,
-                                                              use_image_magick = use_image_magick)
+        self.image_converter = image_converter.ImageConverter(kakadu_base_path=kakadu_base_path)
         self.allow_no_icc_profile = allow_no_icc_profile
         self.log = logging.getLogger(__name__)
 
@@ -166,17 +163,11 @@ class DerivativeFilesGenerator(object):
         return lossless_filepath
 
     def extract_xmp(self, image_file, xmp_file_path):
-
-        image_xmp_file = libxmp.XMPFiles(file_path=image_file)
-        try:
-            xmp = image_xmp_file.get_xmp()
-
-            # using io.open for unicode compatibility
-            with io.open(xmp_file_path, 'w') as output_xmp_file:
-                output_xmp_file.write(xmp.serialize_to_unicode())
-            self.log.debug('XMP file {0} generated'.format(xmp_file_path))
-        finally:
-            image_xmp_file.close_file()
+        xmp = self.image_converter.get_xmp(image_file)
+        # using io.open for unicode compatibility
+        with io.open(xmp_file_path, 'w') as output_xmp_file:
+            output_xmp_file.write(xmp.serialize_to_unicode())
+        self.log.debug('XMP file {0} generated'.format(xmp_file_path))
 
     def check_conversion_was_lossless(self, source_file, lossless_jpg_2000_file):
         """

@@ -12,29 +12,19 @@ from .test_utils import temporary_folder, filepaths, assert_lines_match
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
-def get_image_converter(use_image_magick=True):
-    return image_converter.ImageConverter(kakadu_base_path=filepaths.KAKADU_BASE_PATH,
-                                          image_magick_path=filepaths.DEFAULT_IMAGE_MAGICK_PATH,
-                                          use_image_magick=use_image_magick)
+def get_image_converter():
+    return image_converter.ImageConverter(kakadu_base_path=filepaths.KAKADU_BASE_PATH)
 
 
 def get_derivatives_generator():
-    return derivative_files_generator.DerivativeFilesGenerator(kakadu_base_path=filepaths.KAKADU_BASE_PATH,
-                                                               image_magick_path=filepaths.DEFAULT_IMAGE_MAGICK_PATH)
+    return derivative_files_generator.DerivativeFilesGenerator(kakadu_base_path=filepaths.KAKADU_BASE_PATH)
 
 
 class TestImageFormatConverter(object):
-    def test_converts_jpg_to_tiff_im(self):
-        with temporary_folder() as output_folder:
-            tiff_file = os.path.join(output_folder, 'test_im.tif')
-            get_image_converter(True).convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
-            assert os.path.isfile(tiff_file)
-            assert filecmp.cmp(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
-
     def test_converts_jpg_to_tiff_pil(self):
         with temporary_folder() as output_folder:
-            tiff_file = os.path.join(output_folder, 'test_pil.tif')
-            get_image_converter(False).convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
+            tiff_file = os.path.join(output_folder, 'test.tif')
+            get_image_converter().convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
             assert os.path.isfile(tiff_file)
             assert filecmp.cmp(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
 
@@ -61,6 +51,14 @@ class TestImageFormatConverter(object):
             get_image_converter().convert_to_jpeg2000(filepaths.STANDARD_TIF, output_file)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+
+    def test_converts_tif_to_jpeg(self):
+        with temporary_folder() as output_folder:
+            output_file = os.path.join(output_folder, 'output.jpg')
+            get_image_converter().convert_to_jpg(filepaths.STANDARD_TIF, output_file, resize=None,
+                                                 quality=derivative_files_generator.DEFAULT_JPG_HIGH_QUALITY_VALUE)
+            assert os.path.isfile(output_file)
+            assert filecmp.cmp(output_file, filepaths.HIGH_QUALITY_JPG_FROM_STANDARD_TIF)
 
     def test_converts_tif_to_lossy_jpeg2000(self):
         with temporary_folder() as output_folder:
@@ -280,8 +278,7 @@ class TestDerivativeGeneratorTiff(object):
     def test_allows_tif_without_icc_profile(self):
         with temporary_folder() as output_folder:
             d = derivative_files_generator.DerivativeFilesGenerator(
-                kakadu_base_path=filepaths.KAKADU_BASE_PATH, image_magick_path=filepaths.DEFAULT_IMAGE_MAGICK_PATH,
-                allow_no_icc_profile=True)
+                kakadu_base_path=filepaths.KAKADU_BASE_PATH, allow_no_icc_profile=True)
             d.generate_derivatives_from_tiff(filepaths.NO_PROFILE_TIF, output_folder, check_lossless=True)
 
             jpg_file = os.path.join(output_folder, 'full.jpg')
