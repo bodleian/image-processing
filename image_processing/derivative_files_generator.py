@@ -10,14 +10,12 @@ import tempfile
 import io
 
 from image_processing import image_converter, validation
-import libxmp
+from image_processing.kakadu import Kakadu, DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
 DEFAULT_XMP_FILENAME = 'xmp.xml'
 DEFAULT_JPG_FILENAME = 'full.jpg'
 DEFAULT_LOSSLESS_JP2_FILENAME = 'full_lossless.jp2'
-
-DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
 
 DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE = 0.6
 DEFAULT_JPG_HIGH_QUALITY_VALUE = 92
@@ -41,10 +39,13 @@ class DerivativeFilesGenerator(object):
         self.xmp_filename = xmp_filename
         self.jpg_filename = jpg_filename
         self.lossless_jp2_filename = lossless_jp2_filename
+
         self.jpg_high_quality_value = jpg_high_quality_value
         self.jpg_thumbnail_resize_value = jpg_thumbnail_resize_value
-        self.image_converter = image_converter.ImageConverter(kakadu_base_path=kakadu_base_path)
         self.allow_no_icc_profile = allow_no_icc_profile
+
+        self.kakadu = Kakadu(kakadu_base_path=kakadu_base_path)
+
         self.log = logging.getLogger(__name__)
 
     def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=True,
@@ -78,7 +79,7 @@ class DerivativeFilesGenerator(object):
 
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as scratch_tiff_file_obj:
             scratch_tiff_filepath = scratch_tiff_file_obj.name
-            self.image_converter.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
+            image_converter.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
 
             validation.check_colour_profiles_match(jpg_filepath, scratch_tiff_filepath)
 
@@ -129,8 +130,8 @@ class DerivativeFilesGenerator(object):
             jpg_quality = None if create_jpg_as_thumbnail else self.jpg_high_quality_value
             jpg_resize = self.jpg_thumbnail_resize_value if create_jpg_as_thumbnail else None
 
-            self.image_converter.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath,
-                                                quality=jpg_quality, resize=jpg_resize)
+            image_converter.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath,
+                                           quality=jpg_quality, resize=jpg_resize)
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
 
@@ -156,14 +157,14 @@ class DerivativeFilesGenerator(object):
 
     def generate_jp2_from_tiff(self, tiff_file, output_folder):
         lossless_filepath = os.path.join(output_folder, self.lossless_jp2_filename)
-        self.image_converter.convert_to_jpeg2000(tiff_file, lossless_filepath, lossless=True)
+        self.kakadu.kdu_compress(tiff_file, lossless_filepath, kakadu_options=DEFAULT_BDLSS_OPTIONS + LOSSLESS_OPTIONS)
         validation.validate_jp2(lossless_filepath)
         self.log.debug('Lossless jp2 file {0} generated'.format(lossless_filepath))
 
         return lossless_filepath
 
     def extract_xmp(self, image_file, xmp_file_path):
-        xmp = self.image_converter.get_xmp(image_file)
+        xmp = image_converter.get_xmp(image_file)
         # using io.open for unicode compatibility
         with io.open(xmp_file_path, 'w') as output_xmp_file:
             output_xmp_file.write(xmp.serialize_to_unicode())
@@ -181,8 +182,7 @@ class DerivativeFilesGenerator(object):
                        .format(source_file, lossless_jpg_2000_file))
         with tempfile.NamedTemporaryFile(prefix='jp2_reconvert_', suffix='.tif') as reconverted_tiff_file_obj:
             reconverted_tiff_filepath = reconverted_tiff_file_obj.name
-            self.image_converter.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath,
-                                                   kakadu_options=['-fussy'])
+            self.kakadu.kdu_expand(lossless_jpg_2000_file, reconverted_tiff_filepath, kakadu_options=['-fussy'])
             validation.check_visually_identical(source_file, reconverted_tiff_filepath)
         self.log.info('Conversion from source file {0} to jp2 file {1} was lossless'
                       .format(source_file, lossless_jpg_2000_file))

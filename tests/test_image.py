@@ -6,14 +6,14 @@ import sys
 
 import pytest
 
-from image_processing import image_converter, derivative_files_generator, validation, exceptions
+from image_processing import image_converter, derivative_files_generator, validation, exceptions, kakadu
 from .test_utils import temporary_folder, filepaths, assert_lines_match
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
-def get_image_converter():
-    return image_converter.ImageConverter(kakadu_base_path=filepaths.KAKADU_BASE_PATH)
+def get_kakadu():
+    return kakadu.Kakadu(kakadu_base_path=filepaths.KAKADU_BASE_PATH)
 
 
 def get_derivatives_generator():
@@ -24,46 +24,31 @@ class TestImageFormatConverter(object):
     def test_converts_jpg_to_tiff_pil(self):
         with temporary_folder() as output_folder:
             tiff_file = os.path.join(output_folder, 'test.tif')
-            get_image_converter().convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
+            image_converter.convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
             assert os.path.isfile(tiff_file)
             assert filecmp.cmp(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
-
-    def test_converts_jpg_to_jpeg2000(self):
-        with temporary_folder() as output_folder:
-            output_file = os.path.join(output_folder, 'output.jp2')
-            get_image_converter().convert_unsupported_file_to_jpeg2000(filepaths.STANDARD_JPG, output_file)
-            assert os.path.isfile(output_file)
-            assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG)
-
-    def test_converts_jpg_to_jpeg2000_with_awful_filename(self):
-        with temporary_folder() as output_folder:
-            jpg_file = os.path.join(output_folder, 'te.s-t(1)_[2]s')
-            output_file = os.path.join(output_folder, 'output.jp2')
-            shutil.copy(filepaths.STANDARD_JPG, jpg_file)
-
-            get_image_converter().convert_unsupported_file_to_jpeg2000(jpg_file, output_file)
-            assert os.path.isfile(output_file)
-            assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG)
 
     def test_converts_tif_to_jpeg2000(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jp2')
-            get_image_converter().convert_to_jpeg2000(filepaths.STANDARD_TIF, output_file)
+            get_kakadu().kdu_compress(filepaths.STANDARD_TIF, output_file,
+                                      kakadu_options=kakadu.DEFAULT_BDLSS_OPTIONS + kakadu.LOSSLESS_OPTIONS)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
 
     def test_converts_tif_to_jpeg(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jpg')
-            get_image_converter().convert_to_jpg(filepaths.STANDARD_TIF, output_file, resize=None,
-                                                 quality=derivative_files_generator.DEFAULT_JPG_HIGH_QUALITY_VALUE)
+            image_converter.convert_to_jpg(filepaths.STANDARD_TIF, output_file, resize=None,
+                                           quality=derivative_files_generator.DEFAULT_JPG_HIGH_QUALITY_VALUE)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.HIGH_QUALITY_JPG_FROM_STANDARD_TIF)
 
     def test_converts_tif_to_lossy_jpeg2000(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jp2')
-            get_image_converter().convert_to_jpeg2000(filepaths.STANDARD_TIF, output_file, lossless=False)
+            get_kakadu().kdu_compress(filepaths.STANDARD_TIF, output_file,
+                                      kakadu_options=kakadu.DEFAULT_BDLSS_OPTIONS + kakadu.LOSSY_OPTIONS)
             assert os.path.isfile(output_file)
             validation.validate_jp2(output_file)
             # lossy conversions to jp2 don't seem to produce deterministic results, even if we only look at the pixels
@@ -73,7 +58,8 @@ class TestImageFormatConverter(object):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jp2')
             with pytest.raises(exceptions.KakaduError):
-                get_image_converter().convert_to_jpeg2000(filepaths.INVALID_TIF, output_file)
+                get_kakadu().kdu_compress(filepaths.INVALID_TIF, output_file,
+                                          kakadu_options=kakadu.DEFAULT_BDLSS_OPTIONS + kakadu.LOSSLESS_OPTIONS)
 
 
 class TestImageValidation(object):
