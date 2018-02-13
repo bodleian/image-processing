@@ -69,13 +69,16 @@ class ImageConverter(object):
         else:
             with Image.open(input_filepath) as input_pil:
                 icc_profile = input_pil.info.get('icc_profile')
+                if input_pil.mode == 'RGBA':
+                    self.log.warning('Image is RGBA - the alpha channel will be removed from the JPEG derivative image')
+                    input_pil.convert(mode="RGB")
                 if resize:
                     # todo: should be int to start with
                     resize = int(resize.rstrip('%'))/100
                     thumbnail_size = tuple(int(i * resize) for i in input_pil.size)
                     input_pil.thumbnail(thumbnail_size, Image.LANCZOS)
                 if quality:
-                    input_pil.save(output_filepath_with_jpg_extension, "JPEG", quality=quality, icc_profile=icc_profile)
+                    input_pil.save(output_filepath_with_jpg_extension, "JPEG", quality=int(quality), icc_profile=icc_profile)
                 else:
                     input_pil.save(output_filepath_with_jpg_extension, "JPEG", icc_profile=icc_profile)
             self.copy_over_xmp(input_filepath, output_filepath_with_jpg_extension)
