@@ -4,7 +4,6 @@ from __future__ import division
 
 import os
 import shutil
-
 import logging
 import tempfile
 import io
