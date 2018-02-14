@@ -53,7 +53,7 @@ class DerivativeFilesGenerator(object):
         self.log = logging.getLogger(__name__)
 
     def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=True,
-                                      check_lossless=False):
+                                      check_lossless=True):
         """
         Extracts the xmp, creates a copy of the jpg file and a validated jpeg2000 file
         Stores all in the given folder
@@ -103,7 +103,7 @@ class DerivativeFilesGenerator(object):
         return generated_files
 
     def generate_derivatives_from_tiff(self, tiff_filepath, output_folder, include_tiff=False, save_xmp=True,
-                                       create_jpg_as_thumbnail=True, check_lossless=False):
+                                       create_jpg_as_thumbnail=True, check_lossless=True):
         """
         Extracts the xmp, creates a jpg file and a validated jpeg2000 file
         Stores all in the given folder
