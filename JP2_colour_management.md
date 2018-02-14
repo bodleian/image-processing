@@ -34,9 +34,9 @@ The conversion process is the same for greyscale and bitonal images as it is for
 
 Bitonal images don't need colour profiles. Ideally greyscale images should have one - the digital preservation recommendation is Grayscale Gamma 2.2. This will be embedded in the created JP2.
 
-It's possible to convert monochrome images to RGB when compressing to JP2. These three channel JP2s expand to single channel TIFFs. We've historically done this with our monochrome images, originally for support with a legacy image server. This is no longer an issue for us (we've tested single channel JP2s with IIPServer and Jpylyzer), so we stick to the original colour mode and profile, as recommended.
+It's possible to convert monochrome images to RGB when compressing to JP2. These three channel JP2s expand to single channel TIFFs. We've historically done this with our monochrome images, originally because a legacy image server didn't support single channel JP2s. This is no longer an issue for us (we've tested single channel JP2s with IIPServer and Jpylyzer), so we stick to the original colour mode and profile, as recommended.
 
-## RGBA colour spaces
+### RGBA colour spaces
 The `kdu_compress` command options we use don't always preserve alpha channel information with RGBA tiffs. As very few of our images are RGBA, and so far we haven't encountered failing cases in live data (as opposed to constructed test data), we just make sure to check RGBA JP2 conversions are lossless, and otherwise treat them the same as RGB. If we had more RGBA images, we'd investigate the `-jp2_alpha` option. 
 
 ### Colour profiles / modes not supported by JP2
