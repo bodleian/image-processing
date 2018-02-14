@@ -24,6 +24,9 @@ LOSSLESS_OPTIONS = [
     "Creversible=yes",
     "-rate", "-"]
 
+LOSSY_OPTIONS = [
+    "-rate", '3']
+
 
 class Kakadu(object):
 
@@ -35,9 +38,16 @@ class Kakadu(object):
         return os.path.join(self.kakadu_base_path, command)
 
     def kdu_compress(self, input_files, output_file, kakadu_options):
+        """
+        Converts an image file supported by kakadu to jpeg2000
+        Bitonal or greyscale image files are converted to a single channel jpeg2000 file
+        """
         self.run_command('kdu_compress', input_files, output_file, kakadu_options)
 
     def kdu_expand(self, input_files, output_file, kakadu_options):
+        """
+        Converts a jpeg2000 file to tif
+        """
         self.run_command('kdu_expand', input_files, output_file, kakadu_options)
 
     def run_command(self, command, input_files, output_file, kakadu_options):

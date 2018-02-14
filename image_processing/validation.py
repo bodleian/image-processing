@@ -46,25 +46,10 @@ def check_visually_identical(source_filepath, converted_filepath,
     logger = logging.getLogger(__name__)
     logger.debug("Comparing pixel values and colour profile of {0} and {1}".format(source_filepath, converted_filepath))
 
+    check_colour_profiles_match(source_filepath, converted_filepath)
+
     with Image.open(source_filepath) as source_image:
         with Image.open(converted_filepath) as converted_image:
-
-            if source_image.mode != converted_image.mode:
-                if source_image.mode == BITONAL and converted_image.mode == GREYSCALE:
-                    logger.debug('Converted image is greyscale, not bitonal. This is expected')
-                else:
-                    raise exceptions.ValidationError(
-                        'Converted file {0} has different colour mode from {1}'
-                        .format(converted_filepath, source_filepath)
-                    )
-
-            source_icc = source_image.info.get('icc_profile')
-            converted_icc = converted_image.info.get('icc_profile')
-            if source_icc != converted_icc:
-                raise exceptions.ValidationError(
-                    'Converted file {0} has different colour profile from {1}'
-                    .format(converted_filepath, source_filepath)
-                )
 
             if source_pixel_checksum:
                 pixels_identical = generate_pixel_checksum(converted_filepath) == source_pixel_checksum
@@ -83,6 +68,28 @@ def check_visually_identical(source_filepath, converted_filepath,
                 )
 
             logger.debug('{0} and {1} are equivalent'.format(source_filepath, converted_filepath))
+
+
+def check_colour_profiles_match(source_filepath, converted_filepath):
+    logger = logging.getLogger(__name__)
+
+    with Image.open(source_filepath) as source_image:
+        with Image.open(converted_filepath) as converted_image:
+            if source_image.mode != converted_image.mode:
+                if source_image.mode == BITONAL and converted_image.mode == GREYSCALE:
+                    logger.debug('Converted image is greyscale, not bitonal. This is expected')
+                else:
+                    raise exceptions.ValidationError(
+                        'Converted file {0} has different colour mode from {1}'
+                        .format(converted_filepath, source_filepath)
+                    )
+
+            source_icc = source_image.info.get('icc_profile')
+            converted_icc = converted_image.info.get('icc_profile')
+            if source_icc != converted_icc:
+                raise exceptions.ValidationError(
+                    'Converted file {0} has different colour profile from {1}'
+                    .format(converted_filepath, source_filepath))
 
 
 def check_image_suitable_for_jp2_conversion(image_filepath, allow_no_icc_profile_for_greyscale=True,
@@ -117,7 +124,7 @@ def check_image_suitable_for_jp2_conversion(image_filepath, allow_no_icc_profile
             must_check_lossless = True
 
         icc_not_needed = allow_no_icc_profile or colour_mode == BITONAL or \
-                         (allow_no_icc_profile_for_greyscale and colour_mode == GREYSCALE)
+            (allow_no_icc_profile_for_greyscale and colour_mode == GREYSCALE)
 
         icc = image_pil.info.get('icc_profile')
         if icc is None:
