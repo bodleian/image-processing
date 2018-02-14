@@ -15,6 +15,11 @@ ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
 
 
 def validate_jp2(image_file):
+    """
+    Uses jpylzer to validate the jp2 file. Raises a ValidationError if it fails
+    :param image_file:
+    :return:
+    """
     logger = logging.getLogger(__name__)
     jp2_element = checkOneFile(image_file)
     success = jp2_element.findtext('isValidJP2') == 'True'
@@ -26,6 +31,11 @@ def validate_jp2(image_file):
 
 
 def generate_pixel_checksum(image_filepath):
+    """
+    Generate a checksum unique to this image's pixel values
+    :param image_filepath:
+    :return:
+    """
     logger = logging.getLogger(__name__)
     with Image.open(image_filepath) as pil_image:
         logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
@@ -36,10 +46,13 @@ def generate_pixel_checksum(image_filepath):
 def check_visually_identical(source_filepath, converted_filepath,
                              source_pixel_checksum=None):
     """
-    Visually compare the files, and throw an exception if they don't match.
+    Visually compare the files (i.e. that the pixel values are identical)
+    Raises ValidationError if they don't match
+    Doesn't check technical metadata beyond colour profile and mode
     :param source_filepath:
     :param converted_filepath:
-    :param source_pixel_checksum: if not None, uses this instead of reading out the source pixels again
+    :param source_pixel_checksum: if not None, uses this to compare against instead of reading out the
+    source pixels again. Should be one generated using generate_pixel_checksum
     :return:
     """
 
@@ -71,13 +84,21 @@ def check_visually_identical(source_filepath, converted_filepath,
 
 
 def check_colour_profiles_match(source_filepath, converted_filepath):
+    """
+    Check the icc profile and colour mode match.
+    Allows greyscale and bitonal images to match, as that's how kakadu expands JP2s which were originally bitonal
+    Raises ValidationError if they don't match
+    :param source_filepath:
+    :param converted_filepath:
+    :return:
+    """
     logger = logging.getLogger(__name__)
 
     with Image.open(source_filepath) as source_image:
         with Image.open(converted_filepath) as converted_image:
             if source_image.mode != converted_image.mode:
                 if source_image.mode == BITONAL and converted_image.mode == GREYSCALE:
-                    logger.debug('Converted image is greyscale, not bitonal. This is expected')
+                    logger.info('Converted image is greyscale, not bitonal. This is expected')
                 else:
                     raise exceptions.ValidationError(
                         'Converted file {0} has different colour mode from {1}'
@@ -96,10 +117,10 @@ def check_image_suitable_for_jp2_conversion(image_filepath, allow_no_icc_profile
                                             allow_no_icc_profile=False):
     """
     Check over the image and make sure it's in a supported and tested format for conversion to jp2
-    Raises exception if there are problems
+    Raises ValidationError if there are problems
     :param image_filepath:
     :param allow_no_icc_profile_for_greyscale: don't throw an error if a greyscale image doesn't have an icc profile
-    note: bitonal images don't need icc profiles
+    note: bitonal images don't need icc profiles even if this is false
     :param allow_no_icc_profile: don't throw an error if an image doesn't have an icc profile
     :return: must_check_lossless: if true, there are unsupported edge cases where this format doesn't convert
     losslessly, so the jp2 must be checked against the source image after conversion

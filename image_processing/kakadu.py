@@ -7,7 +7,7 @@ import subprocess
 import logging
 from image_processing.exceptions import KakaduError
 
-DEFAULT_BDLSS_OPTIONS = [
+DEFAULT_OPTIONS = [
     'Clevels=6',
     'Clayers=6',
     'Cprecincts={256,256},{256,256},{128,128}',
@@ -28,26 +28,42 @@ LOSSY_OPTIONS = ["-rate", '3']
 
 
 class Kakadu(object):
+    """
+    Python wrapper for jp2 compression and expansion functions in kakadu (http://kakadusoftware.com/)
+    """
 
     def __init__(self, kakadu_base_path):
+        """
+        :param kakadu_base_path: a filepath you can find kdu_compress and kdu_expand at
+        """
         self.kakadu_base_path = kakadu_base_path
         self.log = logging.getLogger(__name__)
 
     def _command_path(self, command):
         return os.path.join(self.kakadu_base_path, command)
 
-    def kdu_compress(self, input_files, output_file, kakadu_options):
+    def kdu_compress(self, input_filepaths, output_filepath, kakadu_options):
         """
         Converts an image file supported by kakadu to jpeg2000
         Bitonal or greyscale image files are converted to a single channel jpeg2000 file
+        :param input_filepaths: either a single filepath or a list of filepaths
+         If given three single channel files, kakadu will combine them into a single 3 channel image
+        :param output_filepath:
+        :param kakadu_options: command line arguments
+        :return:
         """
-        self.run_command('kdu_compress', input_files, output_file, kakadu_options)
 
-    def kdu_expand(self, input_files, output_file, kakadu_options):
+        self.run_command('kdu_compress', input_filepaths, output_filepath, kakadu_options)
+
+    def kdu_expand(self, input_filepath, output_filepath, kakadu_options):
         """
         Converts a jpeg2000 file to tif
+        :param input_filepath:
+        :param output_filepath:
+        :param kakadu_options: command line arguments
+        :return:
         """
-        self.run_command('kdu_expand', input_files, output_file, kakadu_options)
+        self.run_command('kdu_expand', input_filepath, output_filepath, kakadu_options)
 
     def run_command(self, command, input_files, output_file, kakadu_options):
         if not isinstance(input_files, list):

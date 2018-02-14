@@ -8,8 +8,8 @@ import logging
 import tempfile
 import io
 
-from image_processing import image_converter, validation
-from image_processing.kakadu import Kakadu, DEFAULT_BDLSS_OPTIONS, LOSSLESS_OPTIONS
+from image_processing import conversion, validation
+from image_processing.kakadu import Kakadu, DEFAULT_OPTIONS, LOSSLESS_OPTIONS
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
 DEFAULT_XMP_FILENAME = 'xmp.xml'
@@ -34,6 +34,16 @@ class DerivativeFilesGenerator(object):
                  jpg_filename=DEFAULT_JPG_FILENAME,
                  lossless_jp2_filename=DEFAULT_LOSSLESS_JP2_FILENAME,
                  allow_no_icc_profile=False):
+        """
+        :param kakadu_base_path: a filepath you can find kdu_compress and kdu_expand at
+        :param jpg_high_quality_value:
+        :param jpg_thumbnail_resize_value:
+        :param tiff_filename:
+        :param xmp_filename:
+        :param jpg_filename:
+        :param lossless_jp2_filename:
+        :param allow_no_icc_profile: if false, any non greyscale image without icc profile will throw an exception
+        """
         self.tiff_filename = tiff_filename
         self.xmp_filename = xmp_filename
         self.jpg_filename = jpg_filename
@@ -50,9 +60,10 @@ class DerivativeFilesGenerator(object):
     def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=True,
                                       check_lossless=False):
         """
-        Creates a copy of the jpg file and a validated jpeg2000 file and stores both in the given folder
+        Extracts the xmp, creates a copy of the jpg file and a validated jpeg2000 file
+        Stores all in the given folder
         :param jpg_filepath:
-        :param output_folder: the folder where the related dc.xml will be stored
+        :param output_folder: the folder where the derivatives will be stored
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the tiff
         created from the source file
@@ -78,7 +89,7 @@ class DerivativeFilesGenerator(object):
 
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as scratch_tiff_file_obj:
             scratch_tiff_filepath = scratch_tiff_file_obj.name
-            image_converter.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
+            conversion.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
 
             validation.check_colour_profiles_match(jpg_filepath, scratch_tiff_filepath)
 
@@ -97,13 +108,13 @@ class DerivativeFilesGenerator(object):
     def generate_derivatives_from_tiff(self, tiff_filepath, output_folder, include_tiff=False, save_xmp=True,
                                        create_jpg_as_thumbnail=True, check_lossless=False):
         """
-        Creates a copy of the jpg fil and a validated jpeg2000 file and stores both in the given folder
+        Extracts the xmp, creates a jpg file and a validated jpeg2000 file
+        Stores all in the given folder
         :param create_jpg_as_thumbnail: create the jpg as a resized thumbnail, not a high quality image
         Parameters for resize and quality are set on a class level
         :param tiff_filepath:
         :param output_folder: the folder where the related dc.xml will be stored
         :param include_tiff: Include copy of source tiff file in derivatives
-        (It's a common error during conversion)
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created images
@@ -129,8 +140,8 @@ class DerivativeFilesGenerator(object):
             jpg_quality = None if create_jpg_as_thumbnail else self.jpg_high_quality_value
             jpg_resize = self.jpg_thumbnail_resize_value if create_jpg_as_thumbnail else None
 
-            image_converter.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath,
-                                           quality=jpg_quality, resize=jpg_resize)
+            conversion.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath,
+                                      quality=jpg_quality, resize=jpg_resize)
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
 
@@ -155,15 +166,27 @@ class DerivativeFilesGenerator(object):
             return generated_files
 
     def generate_jp2_from_tiff(self, tiff_file, output_folder):
+        """
+        Create lossless jp2 in output_folder, and validates it
+        :param tiff_file:
+        :param output_folder:
+        :return:
+        """
         lossless_filepath = os.path.join(output_folder, self.lossless_jp2_filename)
-        self.kakadu.kdu_compress(tiff_file, lossless_filepath, kakadu_options=DEFAULT_BDLSS_OPTIONS + LOSSLESS_OPTIONS)
+        self.kakadu.kdu_compress(tiff_file, lossless_filepath, kakadu_options=DEFAULT_OPTIONS + LOSSLESS_OPTIONS)
         validation.validate_jp2(lossless_filepath)
         self.log.debug('Lossless jp2 file {0} generated'.format(lossless_filepath))
 
         return lossless_filepath
 
     def extract_xmp(self, image_file, xmp_file_path):
-        xmp = image_converter.get_xmp(image_file)
+        """
+        Extract the xmp (technical metadata) from the image file and save it to the xmp_file_path
+        :param image_file:
+        :param xmp_file_path:
+        :return:
+        """
+        xmp = conversion.get_xmp(image_file)
         # using io.open for unicode compatibility
         with io.open(xmp_file_path, 'w') as output_xmp_file:
             output_xmp_file.write(xmp.serialize_to_unicode())
@@ -172,8 +195,8 @@ class DerivativeFilesGenerator(object):
     def check_conversion_was_lossless(self, source_file, lossless_jpg_2000_file):
         """
         Visually compare the source file to the tiff generated by expanding the lossless jp2,
-        and throw an exception if they don't match.
-        :param source_file: Must be tiff - can't seem to convert completely losslessly from jpg to tiff
+        and throw an exception if they don't match. Doesn't check technical metadata beyond colour profile and mode
+        :param source_file: Must be tiff - can't convert completely losslessly from jpg to tiff
         :param lossless_jpg_2000_file:
         :return:
         """
