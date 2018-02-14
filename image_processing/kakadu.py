@@ -24,8 +24,7 @@ LOSSLESS_OPTIONS = [
     "Creversible=yes",
     "-rate", "-"]
 
-LOSSY_OPTIONS = [
-    "-rate", '3']
+LOSSY_OPTIONS = ["-rate", '3']
 
 
 class Kakadu(object):
