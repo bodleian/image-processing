@@ -29,33 +29,24 @@ class DerivativeFilesGenerator(object):
     def __init__(self, kakadu_base_path,
                  jpg_high_quality_value=DEFAULT_JPG_HIGH_QUALITY_VALUE,
                  jpg_thumbnail_resize_value=DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE,
-                 tiff_filename=DEFAULT_TIFF_FILENAME,
-                 xmp_filename=DEFAULT_XMP_FILENAME,
-                 jpg_filename=DEFAULT_JPG_FILENAME,
-                 lossless_jp2_filename=DEFAULT_LOSSLESS_JP2_FILENAME,
+                 use_default_filenames=True,
                  require_icc_profile_for_greyscale=False,
                  require_icc_profile_for_colour=True):
         """
         :param kakadu_base_path: a filepath you can find kdu_compress and kdu_expand at
         :param jpg_high_quality_value:
         :param jpg_thumbnail_resize_value:
-        :param tiff_filename:
-        :param xmp_filename:
-        :param jpg_filename:
-        :param lossless_jp2_filename:
+        :param use_default_filenames: use the filenames specified in this module instead of using the original filename
         :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile
         note: bitonal images don't need icc profiles even if this is true
         :param require_icc_profile_for_colour: raise an error if a colour image doesn't have an icc profile
         """
-        self.tiff_filename = tiff_filename
-        self.xmp_filename = xmp_filename
-        self.jpg_filename = jpg_filename
-        self.lossless_jp2_filename = lossless_jp2_filename
 
         self.jpg_high_quality_value = jpg_high_quality_value
         self.jpg_thumbnail_resize_value = jpg_thumbnail_resize_value
         self.require_icc_profile_for_greyscale = require_icc_profile_for_greyscale
         self.require_icc_profile_for_colour = require_icc_profile_for_colour
+        self.use_default_filenames = use_default_filenames
 
         self.kakadu = Kakadu(kakadu_base_path=kakadu_base_path)
 
@@ -76,6 +67,7 @@ class DerivativeFilesGenerator(object):
         self.log.debug("Processing {0}".format(jpg_filepath))
         self.log.info("There may be some loss in converting from jpg to jpg2000, as jpg compression is lossy. "
                       "The lossless check is against the tiff created from the jpg")
+        source_file_name = os.path.basename(jpg_filepath)
 
         must_check_lossless = validation.check_image_suitable_for_jp2_conversion(
             jpg_filepath, require_icc_profile_for_colour=self.require_icc_profile_for_colour,
@@ -83,12 +75,12 @@ class DerivativeFilesGenerator(object):
 
         check_lossless = must_check_lossless or check_lossless
 
-        output_jpg_filepath = os.path.join(output_folder, self.jpg_filename)
+        output_jpg_filepath = os.path.join(output_folder, self._get_filename(DEFAULT_JPG_FILENAME, source_file_name))
         shutil.copy(jpg_filepath, output_jpg_filepath)
         generated_files = [output_jpg_filepath]
 
         if save_xmp:
-            xmp_file_path = os.path.join(output_folder, self.xmp_filename)
+            xmp_file_path = os.path.join(output_folder, self._get_filename(DEFAULT_XMP_FILENAME, source_file_name))
             self.extract_xmp(jpg_filepath, xmp_file_path)
             generated_files += [xmp_file_path]
 
@@ -98,9 +90,9 @@ class DerivativeFilesGenerator(object):
 
             validation.check_colour_profiles_match(jpg_filepath, scratch_tiff_filepath)
 
-            generated_files.append(self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder))
-
-            lossless_filepath = self.generate_jp2_from_tiff(scratch_tiff_filepath, output_folder)
+            lossless_filepath = os.path.join(output_folder,
+                                             self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
+            self.generate_jp2_from_tiff(scratch_tiff_filepath, lossless_filepath)
             generated_files.append(lossless_filepath)
 
             if check_lossless:
@@ -125,6 +117,7 @@ class DerivativeFilesGenerator(object):
         :return: filepaths of created images
         """
         self.log.debug("Processing {0}".format(tiff_filepath))
+        source_file_name = os.path.basename(tiff_filepath)
 
         must_check_lossless = validation.check_image_suitable_for_jp2_conversion(
             tiff_filepath, require_icc_profile_for_colour=self.require_icc_profile_for_colour,
@@ -141,7 +134,7 @@ class DerivativeFilesGenerator(object):
             else:
                 normalised_tiff_filepath = tiff_filepath
 
-            jpeg_filepath = os.path.join(output_folder, self.jpg_filename)
+            jpeg_filepath = os.path.join(output_folder, self._get_filename(DEFAULT_JPG_FILENAME, source_file_name))
 
             jpg_quality = None if create_jpg_as_thumbnail else self.jpg_high_quality_value
             jpg_resize = self.jpg_thumbnail_resize_value if create_jpg_as_thumbnail else None
@@ -152,16 +145,17 @@ class DerivativeFilesGenerator(object):
             generated_files = [jpeg_filepath]
 
             if save_xmp:
-                xmp_file_path = os.path.join(output_folder, self.xmp_filename)
+                xmp_file_path = os.path.join(output_folder, self._get_filename(DEFAULT_XMP_FILENAME, source_file_name))
                 self.extract_xmp(tiff_filepath, xmp_file_path)
                 generated_files += [xmp_file_path]
 
             if include_tiff:
-                output_tiff_filepath = os.path.join(output_folder, self.tiff_filename)
+                output_tiff_filepath = os.path.join(output_folder, self._get_filename(DEFAULT_TIFF_FILENAME, source_file_name))
                 shutil.copy(tiff_filepath, output_tiff_filepath)
                 generated_files += [output_tiff_filepath]
 
-            lossless_filepath = self.generate_jp2_from_tiff(normalised_tiff_filepath, output_folder)
+            lossless_filepath = os.path.join(output_folder, self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
+            self.generate_jp2_from_tiff(normalised_tiff_filepath, lossless_filepath)
             generated_files.append(lossless_filepath)
 
             if check_lossless:
@@ -171,19 +165,16 @@ class DerivativeFilesGenerator(object):
 
             return generated_files
 
-    def generate_jp2_from_tiff(self, tiff_file, output_folder):
+    def generate_jp2_from_tiff(self, tiff_file, jp2_filepath):
         """
         Create lossless jp2 in output_folder, and validates it
         :param tiff_file:
         :param output_folder:
         :return:
         """
-        lossless_filepath = os.path.join(output_folder, self.lossless_jp2_filename)
-        self.kakadu.kdu_compress(tiff_file, lossless_filepath, kakadu_options=DEFAULT_OPTIONS + LOSSLESS_OPTIONS)
-        validation.validate_jp2(lossless_filepath)
-        self.log.debug('Lossless jp2 file {0} generated'.format(lossless_filepath))
-
-        return lossless_filepath
+        self.kakadu.kdu_compress(tiff_file, jp2_filepath, kakadu_options=DEFAULT_OPTIONS + LOSSLESS_OPTIONS)
+        validation.validate_jp2(jp2_filepath)
+        self.log.debug('Lossless jp2 file {0} generated'.format(jp2_filepath))
 
     def extract_xmp(self, image_file, xmp_file_path):
         """
@@ -214,3 +205,25 @@ class DerivativeFilesGenerator(object):
             validation.check_visually_identical(source_file, reconverted_tiff_filepath)
         self.log.info('Conversion from source file {0} to jp2 file {1} was lossless'
                       .format(source_file, lossless_jpg_2000_file))
+
+    def _get_filename(self, default_filename, source_file_name):
+        """
+        Get a filename for the derivative file specified by default_filename
+        If use_default_filenames is set, just use the default value provided
+        Otherwise, create one from the original filename
+        :param orig_filename:
+        :param default_filename:
+        :return:
+        """
+        if self.use_default_filenames:
+            return default_filename
+
+        orig_filename_base = os.path.splitext(source_file_name)[0]
+        if default_filename == DEFAULT_TIFF_FILENAME:
+            return "{0}.tiff".format(orig_filename_base)
+        elif default_filename == DEFAULT_JPG_FILENAME:
+            return "{0}.jpg".format(orig_filename_base)
+        elif default_filename == DEFAULT_XMP_FILENAME:
+            return "{0}_xmp.xml".format(orig_filename_base)
+        elif default_filename == DEFAULT_LOSSLESS_JP2_FILENAME:
+            return "{0}.jp2".format(orig_filename_base)

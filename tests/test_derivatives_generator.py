@@ -47,6 +47,30 @@ class TestDerivativeGenerator(object):
             assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_STANDARD_TIF)
             assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
 
+    def test_creates_correct_files_without_default_names(self):
+        with temporary_folder() as output_folder:
+            orig_filepath = os.path.join(output_folder, 'test_tiff_filepath.tif')
+            shutil.copy(filepaths.STANDARD_TIF, orig_filepath)
+            d = derivative_files_generator.DerivativeFilesGenerator(kakadu_base_path=filepaths.KAKADU_BASE_PATH,
+                                                                    use_default_filenames=False)
+            d.generate_derivatives_from_tiff(orig_filepath, output_folder, check_lossless=True, include_tiff=True)
+
+            os.remove(orig_filepath)
+
+            jpg_file = os.path.join(output_folder, 'test_tiff_filepath.jpg')
+            jp2_file = os.path.join(output_folder, 'test_tiff_filepath.jp2')
+            xmp_file = os.path.join(output_folder, 'test_tiff_filepath_xmp.xml')
+            tif_file = os.path.join(output_folder, 'test_tiff_filepath.tiff')
+            assert os.path.isfile(jpg_file)
+            assert os.path.isfile(jp2_file)
+            assert os.path.isfile(xmp_file)
+            assert os.path.isfile(tif_file)
+            assert len(os.listdir(output_folder)) == 4
+            assert filecmp.cmp(jpg_file, filepaths.RESIZED_JPG_FROM_STANDARD_TIF)
+            assert filecmp.cmp(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+            assert filecmp.cmp(tif_file, filepaths.STANDARD_TIF)
+            assert filecmp.cmp(xmp_file, filepaths.STANDARD_TIF_XMP)
+
     def test_creates_correct_files_with_awful_filename(self):
         with temporary_folder() as output_folder:
             awful_filepath = os.path.join(output_folder, 'te.s-t(1)_[2]a')
@@ -170,7 +194,7 @@ class TestDerivativeGenerator(object):
     def test_allows_tif_without_icc_profile(self):
         with temporary_folder() as output_folder:
             d = derivative_files_generator.DerivativeFilesGenerator(
-                kakadu_base_path=filepaths.KAKADU_BASE_PATH, allow_no_icc_profile=True)
+                kakadu_base_path=filepaths.KAKADU_BASE_PATH, require_icc_profile_for_colour=False)
             d.generate_derivatives_from_tiff(filepaths.NO_PROFILE_TIF, output_folder, check_lossless=True)
 
             jpg_file = os.path.join(output_folder, 'full.jpg')
