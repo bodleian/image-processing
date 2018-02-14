@@ -12,7 +12,7 @@ from hashlib import sha256
 GREYSCALE = 'L'
 BITONAL = '1'
 MONOTONE_COLOUR_MODES = [GREYSCALE, BITONAL]
-ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
+ACCEPTED_COLOUR_MODES = ['RGB', GREYSCALE, BITONAL]
 
 
 def validate_jp2(image_file):
@@ -122,27 +122,16 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
     :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile
     note: bitonal images don't need icc profiles even if this is true
     :param require_icc_profile_for_colour: raise an error if a colour image doesn't have an icc profile
-    :return: must_check_lossless: if true, there are unsupported edge cases where this format doesn't convert
-    losslessly, so the jp2 must be checked against the source image after conversion
+    :return:
     """
 
     logger = logging.getLogger(__name__)
-
-    must_check_lossless = False
-
     with Image.open(image_filepath) as image_pil:
 
         colour_mode = image_pil.mode
 
         if colour_mode not in ACCEPTED_COLOUR_MODES:
             raise exceptions.ValidationError("Unsupported colour mode {0} for {1}".format(colour_mode, image_filepath))
-
-        if colour_mode == 'RGBA':
-            # In some cases alpha channel data is lost during jp2 conversion
-            # As we rarely encounter these, we just put in a check to see if it was lossless and error otherwise
-            logger.warn("{0} is an RGBA image, and may not be converted correctly into jp2. "
-                        "The result should be checked to make sure it's lossless".format(image_filepath))
-            must_check_lossless = True
 
         icc_needed = (require_icc_profile_for_greyscale and colour_mode == GREYSCALE) \
             or (require_icc_profile_for_colour and colour_mode not in MONOTONE_COLOUR_MODES)
@@ -156,5 +145,3 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
         frames = len(list(ImageSequence.Iterator(image_pil)))
         if frames > 1:
             logger.warn('File has multiple layers: only the first one will be converted')
-
-    return must_check_lossless

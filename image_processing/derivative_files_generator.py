@@ -69,11 +69,9 @@ class DerivativeFilesGenerator(object):
                       "The lossless check is against the tiff created from the jpg")
         source_file_name = os.path.basename(jpg_filepath)
 
-        must_check_lossless = validation.check_image_suitable_for_jp2_conversion(
+        validation.check_image_suitable_for_jp2_conversion(
             jpg_filepath, require_icc_profile_for_colour=self.require_icc_profile_for_colour,
             require_icc_profile_for_greyscale=self.require_icc_profile_for_greyscale)
-
-        check_lossless = must_check_lossless or check_lossless
 
         output_jpg_filepath = os.path.join(output_folder, self._get_filename(DEFAULT_JPG_FILENAME, source_file_name))
         shutil.copy(jpg_filepath, output_jpg_filepath)
@@ -119,10 +117,9 @@ class DerivativeFilesGenerator(object):
         self.log.debug("Processing {0}".format(tiff_filepath))
         source_file_name = os.path.basename(tiff_filepath)
 
-        must_check_lossless = validation.check_image_suitable_for_jp2_conversion(
+        validation.check_image_suitable_for_jp2_conversion(
             tiff_filepath, require_icc_profile_for_colour=self.require_icc_profile_for_colour,
             require_icc_profile_for_greyscale=self.require_icc_profile_for_greyscale)
-        check_lossless = must_check_lossless or check_lossless
 
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as temp_tiff_file_obj:
             # only work from a temporary file if we need to - e.g. if the tiff filepath is invalid,
