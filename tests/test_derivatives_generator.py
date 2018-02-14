@@ -84,7 +84,7 @@ class TestDerivativeGenerator(object):
     def test_creates_correct_files_greyscale_without_profile(self):
         with pytest.raises(exceptions.ValidationError):
             validation.check_image_suitable_for_jp2_conversion(filepaths.GREYSCALE_NO_PROFILE_TIF,
-                                                               allow_no_icc_profile_for_greyscale=False)
+                                                               require_icc_profile_for_greyscale=True)
         with temporary_folder() as output_folder:
 
             get_derivatives_generator().generate_derivatives_from_tiff(filepaths.GREYSCALE_NO_PROFILE_TIF,
@@ -101,7 +101,7 @@ class TestDerivativeGenerator(object):
 
     def test_creates_correct_files_greyscale(self):
         validation.check_image_suitable_for_jp2_conversion(filepaths.GREYSCALE_TIF,
-                                                           allow_no_icc_profile_for_greyscale=False)
+                                                           require_icc_profile_for_greyscale=True)
         with temporary_folder() as output_folder:
 
             get_derivatives_generator().generate_derivatives_from_tiff(filepaths.GREYSCALE_TIF,

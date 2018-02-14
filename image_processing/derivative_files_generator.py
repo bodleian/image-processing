@@ -33,7 +33,8 @@ class DerivativeFilesGenerator(object):
                  xmp_filename=DEFAULT_XMP_FILENAME,
                  jpg_filename=DEFAULT_JPG_FILENAME,
                  lossless_jp2_filename=DEFAULT_LOSSLESS_JP2_FILENAME,
-                 allow_no_icc_profile=False):
+                 require_icc_profile_for_greyscale=False,
+                 require_icc_profile_for_colour=True):
         """
         :param kakadu_base_path: a filepath you can find kdu_compress and kdu_expand at
         :param jpg_high_quality_value:
@@ -42,7 +43,9 @@ class DerivativeFilesGenerator(object):
         :param xmp_filename:
         :param jpg_filename:
         :param lossless_jp2_filename:
-        :param allow_no_icc_profile: if false, any non greyscale image without icc profile will throw an exception
+        :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile
+        note: bitonal images don't need icc profiles even if this is true
+        :param require_icc_profile_for_colour: raise an error if a colour image doesn't have an icc profile
         """
         self.tiff_filename = tiff_filename
         self.xmp_filename = xmp_filename
@@ -51,7 +54,8 @@ class DerivativeFilesGenerator(object):
 
         self.jpg_high_quality_value = jpg_high_quality_value
         self.jpg_thumbnail_resize_value = jpg_thumbnail_resize_value
-        self.allow_no_icc_profile = allow_no_icc_profile
+        self.require_icc_profile_for_greyscale = require_icc_profile_for_greyscale
+        self.require_icc_profile_for_colour = require_icc_profile_for_colour
 
         self.kakadu = Kakadu(kakadu_base_path=kakadu_base_path)
 
@@ -74,7 +78,8 @@ class DerivativeFilesGenerator(object):
                       "The lossless check is against the tiff created from the jpg")
 
         must_check_lossless = validation.check_image_suitable_for_jp2_conversion(
-            jpg_filepath, allow_no_icc_profile=self.allow_no_icc_profile)
+            jpg_filepath, require_icc_profile_for_colour=self.require_icc_profile_for_colour,
+            require_icc_profile_for_greyscale=self.require_icc_profile_for_greyscale)
 
         check_lossless = must_check_lossless or check_lossless
 
@@ -122,7 +127,8 @@ class DerivativeFilesGenerator(object):
         self.log.debug("Processing {0}".format(tiff_filepath))
 
         must_check_lossless = validation.check_image_suitable_for_jp2_conversion(
-            tiff_filepath, allow_no_icc_profile=self.allow_no_icc_profile)
+            tiff_filepath, require_icc_profile_for_colour=self.require_icc_profile_for_colour,
+            require_icc_profile_for_greyscale=self.require_icc_profile_for_greyscale)
         check_lossless = must_check_lossless or check_lossless
 
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as temp_tiff_file_obj:

@@ -11,6 +11,7 @@ from hashlib import sha256
 
 GREYSCALE = 'L'
 BITONAL = '1'
+MONOTONE_COLOUR_MODES = [GREYSCALE, BITONAL]
 ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
 
 
@@ -43,8 +44,7 @@ def generate_pixel_checksum(image_filepath):
         return sha256(pixels).hexdigest()
 
 
-def check_visually_identical(source_filepath, converted_filepath,
-                             source_pixel_checksum=None):
+def check_visually_identical(source_filepath, converted_filepath, source_pixel_checksum=None):
     """
     Visually compare the files (i.e. that the pixel values are identical)
     Raises ValidationError if they don't match
@@ -113,15 +113,15 @@ def check_colour_profiles_match(source_filepath, converted_filepath):
                     .format(converted_filepath, source_filepath))
 
 
-def check_image_suitable_for_jp2_conversion(image_filepath, allow_no_icc_profile_for_greyscale=True,
-                                            allow_no_icc_profile=False):
+def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_for_greyscale=False,
+                                            require_icc_profile_for_colour=True):
     """
     Check over the image and make sure it's in a supported and tested format for conversion to jp2
     Raises ValidationError if there are problems
     :param image_filepath:
-    :param allow_no_icc_profile_for_greyscale: don't throw an error if a greyscale image doesn't have an icc profile
-    note: bitonal images don't need icc profiles even if this is false
-    :param allow_no_icc_profile: don't throw an error if an image doesn't have an icc profile
+    :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile
+    note: bitonal images don't need icc profiles even if this is true
+    :param require_icc_profile_for_colour: raise an error if a colour image doesn't have an icc profile
     :return: must_check_lossless: if true, there are unsupported edge cases where this format doesn't convert
     losslessly, so the jp2 must be checked against the source image after conversion
     """
@@ -144,13 +144,13 @@ def check_image_suitable_for_jp2_conversion(image_filepath, allow_no_icc_profile
                         "The result should be checked to make sure it's lossless".format(image_filepath))
             must_check_lossless = True
 
-        icc_not_needed = allow_no_icc_profile or colour_mode == BITONAL or \
-            (allow_no_icc_profile_for_greyscale and colour_mode == GREYSCALE)
+        icc_needed = (require_icc_profile_for_greyscale and colour_mode == GREYSCALE) \
+            or (require_icc_profile_for_colour and colour_mode not in MONOTONE_COLOUR_MODES)
 
         icc = image_pil.info.get('icc_profile')
         if icc is None:
             logger.warn('No icc profile embedded in {0}'.format(image_filepath))
-            if not icc_not_needed:
+            if icc_needed:
                 raise exceptions.ValidationError('No icc profile embedded in {0}.'.format(image_filepath))
 
         frames = len(list(ImageSequence.Iterator(image_pil)))
