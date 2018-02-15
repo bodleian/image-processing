@@ -134,7 +134,7 @@ class DerivativeFilesGenerator(object):
             # only work from a temporary file if we need to - e.g. if the tiff filepath is invalid,
             # or if we need to normalise the tiff. Otherwise just use the original tiff
             temp_tiff_filepath = temp_tiff_file_obj.name
-            if os.path.splitext(tiff_filepath)[1].lower() not in ['tif', 'tiff']:
+            if os.path.splitext(tiff_filepath)[1].lower() not in ['.tif', '.tiff']:
                 shutil.copy(tiff_filepath, temp_tiff_filepath)
                 normalised_tiff_filepath = temp_tiff_filepath
             else:
