@@ -7,7 +7,7 @@ import subprocess
 import logging
 from image_processing.exceptions import KakaduError
 
-DEFAULT_OPTIONS = [
+DEFAULT_COMPRESS_OPTIONS = [
     'Clevels=6',
     'Clayers=6',
     'Cprecincts={256,256},{256,256},{128,128}',
@@ -24,7 +24,11 @@ LOSSLESS_OPTIONS = [
     "Creversible=yes",
     "-rate", "-"]
 
+DEFAULT_LOSSLESS_COMPRESS_OPTIONS = DEFAULT_COMPRESS_OPTIONS + LOSSLESS_OPTIONS
+
 LOSSY_OPTIONS = ["-rate", '3']
+
+ALPHA_OPTION = '-jp2_alpha'
 
 
 class Kakadu(object):
@@ -52,7 +56,6 @@ class Kakadu(object):
         :param kakadu_options: command line arguments
         :return:
         """
-
         self.run_command('kdu_compress', input_filepaths, output_filepath, kakadu_options)
 
     def kdu_expand(self, input_filepath, output_filepath, kakadu_options):
