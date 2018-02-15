@@ -5,7 +5,7 @@ with open("README.md", 'r') as f:
 
 setup(name='image_processing',
       version='1.5.0',
-      description='Image processing library',
+      description='Digital Bodleian image processing library',
       url='http://gitlab.bodleian.ox.ac.uk/digital.bodleian/image-processing',
       #license="",
       long_description=long_description,
