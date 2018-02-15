@@ -173,11 +173,11 @@ class DerivativeFilesGenerator(object):
         :param output_folder:
         :return:
         """
-        kakadu_options = self.kakadu_compress_options
+        kakadu_options = list(self.kakadu_compress_options)
         with Image.open(tiff_file) as tiff_pil:
             if tiff_pil.mode == 'RGBA':
                 if kakadu.ALPHA_OPTION not in kakadu_options:
-                    kakadu_options += kakadu.ALPHA_OPTION
+                    kakadu_options += [kakadu.ALPHA_OPTION]
         self.kakadu.kdu_compress(tiff_file, jp2_filepath, kakadu_options=kakadu_options)
         validation.validate_jp2(jp2_filepath)
         self.log.debug('Lossless jp2 file {0} generated'.format(jp2_filepath))
