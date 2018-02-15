@@ -133,6 +133,21 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
         if colour_mode not in ACCEPTED_COLOUR_MODES:
             raise exceptions.ValidationError("Unsupported colour mode {0} for {1}".format(colour_mode, image_filepath))
 
+        if colour_mode == 'RGBA':
+            # In some cases alpha channel data is stored in a way that means it would be lost in the conversion back to
+            # tiff from jp2.
+            # "Kakadu Warning:
+            # Alpha channel cannot be identified in a TIFF file since it is of the unassociated
+            # (i.e., not premultiplied) type, and these are not supported by TIFF.
+            # You can save this to a separate output file."
+
+            # As we rarely encounter RGBA files, and mostly ones without any alpha channel data, we just warn here
+            # the visually identical check should pick up any problems
+            logger.warn("You must double check the jp2 conversion is lossless. "
+                        "{0} is an RGBA image, and the resulting jp2 may convert back to an RGB tiff "
+                        "if the alpha channel is unassociated".format(image_filepath))
+
+
         icc_needed = (require_icc_profile_for_greyscale and colour_mode == GREYSCALE) \
             or (require_icc_profile_for_colour and colour_mode not in MONOTONE_COLOUR_MODES)
 

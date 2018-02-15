@@ -125,6 +125,11 @@ class DerivativeFilesGenerator(object):
             tiff_filepath, require_icc_profile_for_colour=self.require_icc_profile_for_colour,
             require_icc_profile_for_greyscale=self.require_icc_profile_for_greyscale)
 
+        with Image.open(tiff_filepath) as tiff_pil:
+            if tiff_pil.mode == 'RGBA':
+                # some RGBA tiffs don't convert properly back from jp2 - kakadu warns about unassociated alpha channels
+                check_lossless = True
+
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as temp_tiff_file_obj:
             # only work from a temporary file if we need to - e.g. if the tiff filepath is invalid,
             # or if we need to normalise the tiff. Otherwise just use the original tiff
