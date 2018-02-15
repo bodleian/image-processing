@@ -84,7 +84,8 @@ class Kakadu(object):
 
         command_options = [self._command_path(command), '-i', input_option, '-o', output_file] + kakadu_options
 
-        self.log.debug(' '.join(command_options))
+        self.log.debug(' '.join(['"{0}"'.format(c) if ('{' in c or ' ' in c) else c for c in command_options]))
+
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
