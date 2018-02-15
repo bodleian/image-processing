@@ -25,7 +25,7 @@ class TestImageFormatConverter(object):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jp2')
             get_kakadu().kdu_compress(filepaths.STANDARD_TIF, output_file,
-                                      kakadu_options=kakadu.DEFAULT_OPTIONS + kakadu.LOSSLESS_OPTIONS)
+                                      kakadu_options=kakadu.DEFAULT_COMPRESS_OPTIONS + kakadu.LOSSLESS_OPTIONS)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
 
@@ -41,7 +41,7 @@ class TestImageFormatConverter(object):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jp2')
             get_kakadu().kdu_compress(filepaths.STANDARD_TIF, output_file,
-                                      kakadu_options=kakadu.DEFAULT_OPTIONS + kakadu.LOSSY_OPTIONS)
+                                      kakadu_options=kakadu.DEFAULT_COMPRESS_OPTIONS + kakadu.LOSSY_OPTIONS)
             assert os.path.isfile(output_file)
             validation.validate_jp2(output_file)
             # lossy conversions to jp2 don't seem to produce deterministic results, even if we only look at the pixels
@@ -52,4 +52,4 @@ class TestImageFormatConverter(object):
             output_file = os.path.join(output_folder, 'output.jp2')
             with pytest.raises(exceptions.KakaduError):
                 get_kakadu().kdu_compress(filepaths.INVALID_TIF, output_file,
-                                          kakadu_options=kakadu.DEFAULT_OPTIONS + kakadu.LOSSLESS_OPTIONS)
+                                          kakadu_options=kakadu.DEFAULT_COMPRESS_OPTIONS + kakadu.LOSSLESS_OPTIONS)

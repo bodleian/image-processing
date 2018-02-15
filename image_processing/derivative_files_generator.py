@@ -8,8 +8,9 @@ import logging
 import tempfile
 import io
 
-from image_processing import conversion, validation
-from image_processing.kakadu import Kakadu, DEFAULT_OPTIONS, LOSSLESS_OPTIONS
+from image_processing import conversion, validation, kakadu
+from image_processing.kakadu import Kakadu
+from PIL import Image
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
 DEFAULT_XMP_FILENAME = 'xmp.xml'
@@ -29,13 +30,15 @@ class DerivativeFilesGenerator(object):
     def __init__(self, kakadu_base_path,
                  jpg_high_quality_value=DEFAULT_JPG_HIGH_QUALITY_VALUE,
                  jpg_thumbnail_resize_value=DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE,
+                 kakadu_compress_options=kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS,
                  use_default_filenames=True,
                  require_icc_profile_for_greyscale=False,
                  require_icc_profile_for_colour=True):
         """
         :param kakadu_base_path: a filepath you can find kdu_compress and kdu_expand at
-        :param jpg_high_quality_value:
-        :param jpg_thumbnail_resize_value:
+        :param jpg_high_quality_value: between 0 and 95
+        :param jpg_thumbnail_resize_value: between 0 and 1
+        :param kakadu_compress_options: options for kdu_compress to create a lossless jp2 file
         :param use_default_filenames: use the filenames specified in this module instead of using the original filename
         :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile
         note: bitonal images don't need icc profiles even if this is true
@@ -47,6 +50,7 @@ class DerivativeFilesGenerator(object):
         self.require_icc_profile_for_greyscale = require_icc_profile_for_greyscale
         self.require_icc_profile_for_colour = require_icc_profile_for_colour
         self.use_default_filenames = use_default_filenames
+        self.kakadu_compress_options = kakadu_compress_options
 
         self.kakadu = Kakadu(kakadu_base_path=kakadu_base_path)
 
@@ -169,7 +173,12 @@ class DerivativeFilesGenerator(object):
         :param output_folder:
         :return:
         """
-        self.kakadu.kdu_compress(tiff_file, jp2_filepath, kakadu_options=DEFAULT_OPTIONS + LOSSLESS_OPTIONS)
+        kakadu_options = self.kakadu_compress_options
+        with Image.open(tiff_file) as tiff_pil:
+            if tiff_pil.mode == 'RGBA':
+                if kakadu.ALPHA_OPTION not in kakadu_options:
+                    kakadu_options += kakadu.ALPHA_OPTION
+        self.kakadu.kdu_compress(tiff_file, jp2_filepath, kakadu_options=kakadu_options)
         validation.validate_jp2(jp2_filepath)
         self.log.debug('Lossless jp2 file {0} generated'.format(jp2_filepath))
 
