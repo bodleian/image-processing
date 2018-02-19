@@ -95,10 +95,8 @@ class DerivativeFilesGenerator(object):
             lossless_filepath = os.path.join(output_folder,
                                              self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
             self.generate_jp2_from_tiff(scratch_tiff_filepath, lossless_filepath)
+            self.validate_jp2_conversion(scratch_tiff_filepath, lossless_filepath, check_lossless=check_lossless)
             generated_files.append(lossless_filepath)
-
-            if check_lossless:
-                self.check_conversion_was_lossless(scratch_tiff_filepath, lossless_filepath)
 
         self.log.debug("Successfully generated derivatives for {0} in {1}".format(jpg_filepath, output_folder))
 
@@ -162,10 +160,8 @@ class DerivativeFilesGenerator(object):
 
             lossless_filepath = os.path.join(output_folder, self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
             self.generate_jp2_from_tiff(normalised_tiff_filepath, lossless_filepath)
+            self.validate_jp2_conversion(normalised_tiff_filepath, lossless_filepath, check_lossless=check_lossless)
             generated_files.append(lossless_filepath)
-
-            if check_lossless:
-                self.check_conversion_was_lossless(tiff_filepath, lossless_filepath)
 
             self.log.debug("Successfully generated derivatives for {0} in {1}".format(tiff_filepath, output_folder))
 
@@ -186,8 +182,12 @@ class DerivativeFilesGenerator(object):
                     kakadu_options += [kakadu.ALPHA_OPTION]
 
         self.kakadu.kdu_compress(tiff_file, jp2_filepath, kakadu_options=kakadu_options)
-        validation.validate_jp2(jp2_filepath)
         self.log.debug('Lossless jp2 file {0} generated'.format(jp2_filepath))
+
+    def validate_jp2_conversion(self, tiff_file, jp2_filepath, check_lossless=True):
+        validation.validate_jp2(jp2_filepath)
+        if check_lossless:
+            self.check_conversion_was_lossless(tiff_file, jp2_filepath)
 
     def extract_xmp(self, image_file, xmp_file_path):
         """
