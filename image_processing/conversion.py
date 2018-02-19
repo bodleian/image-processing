@@ -6,6 +6,10 @@ import logging
 from PIL import Image
 from libxmp import XMPFiles
 
+"""
+Convert tiff to/from jpg while preserving technical metadata and icc profiles
+"""
+
 
 def convert_to_tiff(input_filepath, output_filepath):
     """
