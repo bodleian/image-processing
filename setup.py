@@ -4,13 +4,13 @@ with open("README.md", 'r') as f:
       long_description = f.read()
 
 setup(name='image_processing',
-      version='1.5.0',
+      version='1.6.0',
       description='Digital Bodleian image processing library',
       url='http://gitlab.bodleian.ox.ac.uk/digital.bodleian/image-processing',
-      #license="",
+      license="MIT",
       long_description=long_description,
-      author='Bodleian Libraries',
-      #author_email='',
+      author='Mel Mason',
+      author_email='mel.mason@bodleian.ox.ac.uk',
       packages=['image_processing'],
       install_requires=['Pillow', 'jpylyzer', 'python-xmp-toolkit']
 )
