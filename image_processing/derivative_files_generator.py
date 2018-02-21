@@ -154,11 +154,13 @@ class DerivativeFilesGenerator(object):
                 generated_files += [xmp_file_path]
 
             if include_tiff:
-                output_tiff_filepath = os.path.join(output_folder, self._get_filename(DEFAULT_TIFF_FILENAME, source_file_name))
+                output_tiff_filepath = os.path.join(output_folder,
+                                                    self._get_filename(DEFAULT_TIFF_FILENAME, source_file_name))
                 shutil.copy(tiff_filepath, output_tiff_filepath)
                 generated_files += [output_tiff_filepath]
 
-            lossless_filepath = os.path.join(output_folder, self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
+            lossless_filepath = os.path.join(output_folder,
+                                             self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
             self.generate_jp2_from_tiff(normalised_tiff_filepath, lossless_filepath)
             self.validate_jp2_conversion(normalised_tiff_filepath, lossless_filepath, check_lossless=check_lossless)
             generated_files.append(lossless_filepath)
@@ -169,9 +171,9 @@ class DerivativeFilesGenerator(object):
 
     def generate_jp2_from_tiff(self, tiff_file, jp2_filepath):
         """
-        Create lossless jp2 in output_folder, and validates it
+        Create lossless jp2 at filepath, and validates it
         :param tiff_file:
-        :param output_folder:
+        :param jp2_filepath:
         :return:
         """
         kakadu_options = list(self.kakadu_compress_options)
@@ -224,8 +226,8 @@ class DerivativeFilesGenerator(object):
         Get a filename for the derivative file specified by default_filename
         If use_default_filenames is set, just use the default value provided
         Otherwise, create one from the original filename
-        :param orig_filename:
         :param default_filename:
+        :param source_file_name:
         :return:
         """
         if self.use_default_filenames:

@@ -4,6 +4,7 @@ import os
 import uuid
 import shutil
 
+
 @contextmanager
 def temporary_folder(name='test'):
     """
