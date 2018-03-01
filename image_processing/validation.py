@@ -31,6 +31,30 @@ def validate_jp2(image_file):
     logger.debug('{0} is a valid jp2 file'.format(image_file))
 
 
+def _to_bytes_generator(pil_image, min_buffer_size=65536):
+    """
+    An iterator version of the PIL.Image.tobytes method
+    The PIL implementation stores the data in a separate array, doubling the memory usage
+    :param pil_image: PIL.Image instance
+    :param min_buffer_size:
+    :return:
+    """
+    pil_image.load()
+    e = Image._getencoder(pil_image.mode, 'raw', pil_image.mode)
+    e.setimage(pil_image.im)
+
+    # This encoder fails if the buffer is not large enough to hold one full line of data - see RawEncode.c
+    bufsize = max(min_buffer_size, pil_image.size[0] * 4)
+
+    while True:
+        l, s, d = e.encode(bufsize)
+        yield d
+        if s:
+            break
+    if s < 0:
+        raise RuntimeError("encoder error %d in tobytes" % s)
+
+
 def generate_pixel_checksum(image_filepath):
     """
     Generate a checksum unique to this image's pixel values
@@ -44,12 +68,16 @@ def generate_pixel_checksum(image_filepath):
 def generate_pixel_checksum_from_pil_image(pil_image):
     """
     Generate a checksum unique to this image's pixel values
-    :param pil_image: image object created using PIL.Image.open
+    :param pil_image: PIL.Image instance
     :return:
     """
     logger = logging.getLogger(__name__)
     logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
-    return sha256(pil_image.tobytes()).hexdigest()
+
+    hash = sha256()
+    for data in _to_bytes_generator(pil_image):
+        hash.update(data)
+    return hash.hexdigest()
 
 
 def check_visually_identical(source_filepath, converted_filepath, source_pixel_checksum=None):
