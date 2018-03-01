@@ -40,7 +40,7 @@ def generate_pixel_checksum(image_filepath):
     logger = logging.getLogger(__name__)
     with Image.open(image_filepath) as pil_image:
         logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
-        pixels = repr(list(pil_image.getdata()))
+        pixels = pil_image.tobytes()
         return sha256(pixels).hexdigest()
 
 
