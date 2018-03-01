@@ -37,11 +37,20 @@ def generate_pixel_checksum(image_filepath):
     :param image_filepath:
     :return:
     """
-    logger = logging.getLogger(__name__)
     with Image.open(image_filepath) as pil_image:
-        logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
-        pixels = pil_image.tobytes()
-        return sha256(pixels).hexdigest()
+        return generate_pixel_checksum_from_pil_image(pil_image)
+
+
+def generate_pixel_checksum_from_pil_image(pil_image):
+    """
+    Generate a checksum unique to this image's pixel values
+    :param pil_image: image object created using PIL.Image.open
+    :return:
+    """
+    logger = logging.getLogger(__name__)
+    logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
+    pixels = pil_image.tobytes()
+    return sha256(pixels).hexdigest()
 
 
 def check_visually_identical(source_filepath, converted_filepath, source_pixel_checksum=None):
@@ -62,25 +71,26 @@ def check_visually_identical(source_filepath, converted_filepath, source_pixel_c
     check_colour_profiles_match(source_filepath, converted_filepath)
 
     with Image.open(source_filepath) as source_image:
+        if not source_pixel_checksum:
+            source_pixel_checksum = generate_pixel_checksum_from_pil_image(source_image)
+        source_is_bitonal = source_image.mode == BITONAL
+
+    if source_is_bitonal:
+        # we need to handle bitonal images differently, as they're converted into 8 bit greyscale.
+        # No information is lost in the conversion, but the getbytes method used by the pixel checksum picks up the difference
         with Image.open(converted_filepath) as converted_image:
+            bitonal_converted_image = converted_image.convert('1')
+            converted_pixel_checksum = generate_pixel_checksum_from_pil_image(bitonal_converted_image)
+    else:
+        converted_pixel_checksum = generate_pixel_checksum(converted_filepath)
 
-            if source_pixel_checksum:
-                pixels_identical = generate_pixel_checksum(converted_filepath) == source_pixel_checksum
-            else:
-                logger.debug('Loading pixels of images into memory to compare. '
-                             'If this crashes, the machine probably needs more memory')
-                source_pixels = list(source_image.getdata())
-                converted_pixels = list(converted_image.getdata())
+    if not converted_pixel_checksum == source_pixel_checksum:
+        raise exceptions.ValidationError(
+            'Converted file {0} does not visually match original {1}'
+            .format(converted_filepath, source_filepath)
+        )
 
-                pixels_identical = source_pixels == converted_pixels
-
-            if not pixels_identical:
-                raise exceptions.ValidationError(
-                    'Converted file {0} does not visually match original {1}'
-                    .format(converted_filepath, source_filepath)
-                )
-
-            logger.debug('{0} and {1} are equivalent'.format(source_filepath, converted_filepath))
+    logger.debug('{0} and {1} are equivalent'.format(source_filepath, converted_filepath))
 
 
 def check_colour_profiles_match(source_filepath, converted_filepath):
@@ -146,7 +156,6 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
             logger.warn("You must double check the jp2 conversion is lossless. "
                         "{0} is an RGBA image, and the resulting jp2 may convert back to an RGB tiff "
                         "if the alpha channel is unassociated".format(image_filepath))
-
 
         icc_needed = (require_icc_profile_for_greyscale and colour_mode == GREYSCALE) \
             or (require_icc_profile_for_colour and colour_mode not in MONOTONE_COLOUR_MODES)
