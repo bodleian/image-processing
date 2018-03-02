@@ -44,15 +44,17 @@ def _to_bytes_generator(pil_image, min_buffer_size=65536):
     e.setimage(pil_image.im)
 
     # This encoder fails if the buffer is not large enough to hold one full line of data - see RawEncode.c
-    bufsize = max(min_buffer_size, pil_image.size[0] * 4)
+    buffer_size = max(min_buffer_size, pil_image.size[0] * 4)
 
-    while True:
-        l, s, d = e.encode(bufsize)
-        yield d
-        if s:
-            break
-    if s < 0:
-        raise RuntimeError("encoder error %d in tobytes" % s)
+    # signal is negative for errors, 1 for finished, and 0 otherwise
+    length, signal, data = e.encode(buffer_size)
+    while signal == 0:
+        yield data
+        length, signal, data = e.encode(buffer_size)
+    if signal > 0:
+        yield data
+    else:
+        raise RuntimeError("encoder error {0} in tobytes when reading image pixel data".format(signal))
 
 
 def generate_pixel_checksum(image_filepath):
@@ -104,7 +106,8 @@ def check_visually_identical(source_filepath, converted_filepath, source_pixel_c
 
     if source_is_bitonal:
         # we need to handle bitonal images differently, as they're converted into 8 bit greyscale.
-        # No information is lost in the conversion, but the getbytes method used by the pixel checksum picks up the difference
+        # No information is lost in the conversion, but the tobytes
+        #  method used by the pixel checksum picks up the difference
         with Image.open(converted_filepath) as converted_image:
             bitonal_converted_image = converted_image.convert('1')
             converted_pixel_checksum = generate_pixel_checksum_from_pil_image(bitonal_converted_image)
