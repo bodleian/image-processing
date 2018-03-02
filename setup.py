@@ -4,7 +4,7 @@ with open("README.md", 'r') as f:
       long_description = f.read()
 
 setup(name='image_processing',
-      version='1.6.0',
+      version='1.6.1',
       description='Digital Bodleian image processing library',
       url='http://gitlab.bodleian.ox.ac.uk/digital.bodleian/image-processing',
       license="MIT",
