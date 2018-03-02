@@ -31,17 +31,55 @@ def validate_jp2(image_file):
     logger.debug('{0} is a valid jp2 file'.format(image_file))
 
 
+def _to_bytes_generator(pil_image, min_buffer_size=65536):
+    """
+    An iterator version of the PIL.Image.tobytes method
+    The PIL implementation stores the data in a separate array, doubling the memory usage
+    :param pil_image: PIL.Image instance
+    :param min_buffer_size:
+    :return:
+    """
+    pil_image.load()
+    e = Image._getencoder(pil_image.mode, 'raw', pil_image.mode)
+    e.setimage(pil_image.im)
+
+    # This encoder fails if the buffer is not large enough to hold one full line of data - see RawEncode.c
+    buffer_size = max(min_buffer_size, pil_image.size[0] * 4)
+
+    # signal is negative for errors, 1 for finished, and 0 otherwise
+    length, signal, data = e.encode(buffer_size)
+    while signal == 0:
+        yield data
+        length, signal, data = e.encode(buffer_size)
+    if signal > 0:
+        yield data
+    else:
+        raise RuntimeError("encoder error {0} in tobytes when reading image pixel data".format(signal))
+
+
 def generate_pixel_checksum(image_filepath):
     """
     Generate a checksum unique to this image's pixel values
     :param image_filepath:
     :return:
     """
-    logger = logging.getLogger(__name__)
     with Image.open(image_filepath) as pil_image:
-        logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
-        pixels = repr(list(pil_image.getdata()))
-        return sha256(pixels).hexdigest()
+        return generate_pixel_checksum_from_pil_image(pil_image)
+
+
+def generate_pixel_checksum_from_pil_image(pil_image):
+    """
+    Generate a checksum unique to this image's pixel values
+    :param pil_image: PIL.Image instance
+    :return:
+    """
+    logger = logging.getLogger(__name__)
+    logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
+
+    hash_alg = sha256()
+    for data in _to_bytes_generator(pil_image):
+        hash_alg.update(data)
+    return hash_alg.hexdigest()
 
 
 def check_visually_identical(source_filepath, converted_filepath, source_pixel_checksum=None):
@@ -62,25 +100,27 @@ def check_visually_identical(source_filepath, converted_filepath, source_pixel_c
     check_colour_profiles_match(source_filepath, converted_filepath)
 
     with Image.open(source_filepath) as source_image:
+        if not source_pixel_checksum:
+            source_pixel_checksum = generate_pixel_checksum_from_pil_image(source_image)
+        source_is_bitonal = source_image.mode == BITONAL
+
+    if source_is_bitonal:
+        # we need to handle bitonal images differently, as they're converted into 8 bit greyscale.
+        # No information is lost in the conversion, but the tobytes
+        #  method used by the pixel checksum picks up the difference
         with Image.open(converted_filepath) as converted_image:
+            bitonal_converted_image = converted_image.convert('1')
+            converted_pixel_checksum = generate_pixel_checksum_from_pil_image(bitonal_converted_image)
+    else:
+        converted_pixel_checksum = generate_pixel_checksum(converted_filepath)
 
-            if source_pixel_checksum:
-                pixels_identical = generate_pixel_checksum(converted_filepath) == source_pixel_checksum
-            else:
-                logger.debug('Loading pixels of images into memory to compare. '
-                             'If this crashes, the machine probably needs more memory')
-                source_pixels = list(source_image.getdata())
-                converted_pixels = list(converted_image.getdata())
+    if not converted_pixel_checksum == source_pixel_checksum:
+        raise exceptions.ValidationError(
+            'Converted file {0} does not visually match original {1}'
+            .format(converted_filepath, source_filepath)
+        )
 
-                pixels_identical = source_pixels == converted_pixels
-
-            if not pixels_identical:
-                raise exceptions.ValidationError(
-                    'Converted file {0} does not visually match original {1}'
-                    .format(converted_filepath, source_filepath)
-                )
-
-            logger.debug('{0} and {1} are equivalent'.format(source_filepath, converted_filepath))
+    logger.debug('{0} and {1} are equivalent'.format(source_filepath, converted_filepath))
 
 
 def check_colour_profiles_match(source_filepath, converted_filepath):
@@ -146,7 +186,6 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
             logger.warn("You must double check the jp2 conversion is lossless. "
                         "{0} is an RGBA image, and the resulting jp2 may convert back to an RGB tiff "
                         "if the alpha channel is unassociated".format(image_filepath))
-
 
         icc_needed = (require_icc_profile_for_greyscale and colour_mode == GREYSCALE) \
             or (require_icc_profile_for_colour and colour_mode not in MONOTONE_COLOUR_MODES)
