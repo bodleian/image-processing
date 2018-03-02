@@ -76,10 +76,10 @@ def generate_pixel_checksum_from_pil_image(pil_image):
     logger = logging.getLogger(__name__)
     logger.debug('Loading pixels of image into memory. If this crashes, the machine probably needs more memory')
 
-    hash = sha256()
+    hash_alg = sha256()
     for data in _to_bytes_generator(pil_image):
-        hash.update(data)
-    return hash.hexdigest()
+        hash_alg.update(data)
+    return hash_alg.hexdigest()
 
 
 def check_visually_identical(source_filepath, converted_filepath, source_pixel_checksum=None):
