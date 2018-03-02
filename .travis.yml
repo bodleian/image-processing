@@ -5,6 +5,9 @@ python:
   - "3.6"
 cache: pip
 install:
+  - wget http://kakadusoftware.com/wp-content/uploads/2014/06/KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
+  - unzip KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
+  - sudo cp KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827 /opt/kakadu
   - pip install -r requirements.txt
 script:
   - py.test
