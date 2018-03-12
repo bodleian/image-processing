@@ -4,3 +4,5 @@ uuid==1.30
 Pillow >= 5
 jpylyzer
 python-xmp-toolkit
+sphinx
+sphinx-autobuild

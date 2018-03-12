@@ -23,8 +23,7 @@ DEFAULT_JPG_HIGH_QUALITY_VALUE = 92
 
 class DerivativeFilesGenerator(object):
     """
-    Given a source image file, generates the derivative files (preservation/display image formats, extracted
-    technical metadata etc.) we store in our repository
+    Given a source image file, generates the derivative files (preservation/display image formats, extracted technical metadata etc.) we store in our repository
     """
 
     def __init__(self, kakadu_base_path,
@@ -35,13 +34,14 @@ class DerivativeFilesGenerator(object):
                  require_icc_profile_for_greyscale=False,
                  require_icc_profile_for_colour=True):
         """
+
         :param kakadu_base_path: a filepath you can find kdu_compress and kdu_expand at
         :param jpg_high_quality_value: between 0 and 95
         :param jpg_thumbnail_resize_value: between 0 and 1
         :param kakadu_compress_options: options for kdu_compress to create a lossless jp2 file
         :param use_default_filenames: use the filenames specified in this module instead of using the original filename
-        :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile
-        note: bitonal images don't need icc profiles even if this is true
+        :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile.
+            Note: bitonal images don't need icc profiles even if this is true
         :param require_icc_profile_for_colour: raise an error if a colour image doesn't have an icc profile
         """
 
@@ -59,14 +59,14 @@ class DerivativeFilesGenerator(object):
     def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=True,
                                       check_lossless=True):
         """
-        Extracts the xmp, creates a copy of the jpg file and a validated jpeg2000 file
+        Extracts the xmp, creates a copy of the jpg file and a validated jpeg2000 file.
         Stores all in the given folder
+
         :param jpg_filepath:
         :param output_folder: the folder where the derivatives will be stored
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
-        :param check_lossless: If true, check the created jpg2000 file is visually identical to the tiff
-        created from the source file
-        :return: filepaths of created images
+        :param check_lossless: If true, check the created jpg2000 file is visually identical to the tiff created from the source file
+        :return: filepaths of created files
         """
         self.log.debug("Processing {0}".format(jpg_filepath))
         self.log.info("There may be some loss in converting from jpg to jpg2000, as jpg compression is lossy. "
@@ -105,16 +105,17 @@ class DerivativeFilesGenerator(object):
     def generate_derivatives_from_tiff(self, tiff_filepath, output_folder, include_tiff=False, save_xmp=True,
                                        create_jpg_as_thumbnail=True, check_lossless=True):
         """
-        Extracts the xmp, creates a jpg file and a validated jpeg2000 file
+        Extracts the xmp, creates a jpg file and a validated jpeg2000 file.
         Stores all in the given folder
-        :param create_jpg_as_thumbnail: create the jpg as a resized thumbnail, not a high quality image
-        Parameters for resize and quality are set on a class level
+
+        :param create_jpg_as_thumbnail: create the jpg as a resized thumbnail, not a high quality image.
+            Parameters for resize and quality are set on a class level
         :param tiff_filepath:
         :param output_folder: the folder where the related dc.xml will be stored
         :param include_tiff: Include copy of source tiff file in derivatives
         :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
-        :return: filepaths of created images
+        :return: filepaths of created files
         """
         self.log.debug("Processing {0}".format(tiff_filepath))
         source_file_name = os.path.basename(tiff_filepath)
@@ -172,9 +173,9 @@ class DerivativeFilesGenerator(object):
     def generate_jp2_from_tiff(self, tiff_file, jp2_filepath):
         """
         Create lossless jp2 at filepath, and validates it
+
         :param tiff_file:
         :param jp2_filepath:
-        :return:
         """
         kakadu_options = list(self.kakadu_compress_options)
 
@@ -194,9 +195,9 @@ class DerivativeFilesGenerator(object):
     def extract_xmp(self, image_file, xmp_file_path):
         """
         Extract the xmp (technical metadata) from the image file and save it to the xmp_file_path
+
         :param image_file:
         :param xmp_file_path:
-        :return:
         """
         xmp = conversion.get_xmp(image_file)
         # using io.open for unicode compatibility
@@ -208,9 +209,9 @@ class DerivativeFilesGenerator(object):
         """
         Visually compare the source file to the tiff generated by expanding the lossless jp2,
         and throw an exception if they don't match. Doesn't check technical metadata beyond colour profile and mode
+
         :param source_file: Must be tiff - can't convert completely losslessly from jpg to tiff
         :param lossless_jpg_2000_file:
-        :return:
         """
         self.log.debug('Checking conversion from source file {0} to jp2 file {1} was lossless'
                        .format(source_file, lossless_jpg_2000_file))
@@ -226,9 +227,9 @@ class DerivativeFilesGenerator(object):
         Get a filename for the derivative file specified by default_filename
         If use_default_filenames is set, just use the default value provided
         Otherwise, create one from the original filename
+
         :param default_filename:
         :param source_file_name:
-        :return:
         """
         if self.use_default_filenames:
             return default_filename
