@@ -17,7 +17,8 @@ ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
 
 def validate_jp2(image_file):
     """
-    Uses jpylzer (:func:`jpylyzer.jpylzer.checkOneFile`) to validate the jp2 file. Raises a :class:`ValidationError` if it fails
+    Uses jpylzer (:func:`jpylyzer.jpylzer.checkOneFile`) to validate the jp2 file.
+    Raises a :class:`ValidationError` if it's invalid
 
     :param image_file:
     :type image_file: str
@@ -133,7 +134,6 @@ def check_colour_profiles_match(source_filepath, converted_filepath):
 
     :param source_filepath:
     :param converted_filepath:
-    :return:
     """
     logger = logging.getLogger(__name__)
 
@@ -159,14 +159,13 @@ def check_colour_profiles_match(source_filepath, converted_filepath):
 def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_for_greyscale=False,
                                             require_icc_profile_for_colour=True):
     """
-    Check over the image and make sure it's in a supported and tested format for conversion to jp2
-    Raises ValidationError if there are problems
+    Check over the image and checks if it's in a supported and tested format for conversion to jp2.
+    Raises :class:`ValidationError` if it isn't
 
     :param image_filepath:
     :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile.
         Note: bitonal images don't need icc profiles even if this is true
     :param require_icc_profile_for_colour: raise an error if a colour image doesn't have an icc profile
-    :return:
     """
 
     logger = logging.getLogger(__name__)
