@@ -19,16 +19,21 @@ DEFAULT_COMPRESS_OPTIONS = [
     'Cuse_sop=yes',
     'Cuse_eph=yes',
     '-flush_period', '1024']
+"""Some default command line options for :func:`kdu_compress`, without lossy/lossless specified."""
 
 LOSSLESS_OPTIONS = [
     "Creversible=yes",
     "-rate", "-"]
+""":func:`kdu_compress` command line options which make the compression lossless"""
 
 DEFAULT_LOSSLESS_COMPRESS_OPTIONS = DEFAULT_COMPRESS_OPTIONS + LOSSLESS_OPTIONS
+"""Default lossless command line options for :func:`kdu_compress`"""
 
 LOSSY_OPTIONS = ["-rate", '3']
+""":func:`kdu_compress` command line options which make the compression lossy"""
 
 ALPHA_OPTION = '-jp2_alpha'
+""":func:`kdu_compress` command line option for images with alpha channels"""
 
 
 class Kakadu(object):
@@ -50,21 +55,21 @@ class Kakadu(object):
         """
         Converts an image file supported by kakadu to jpeg2000
         Bitonal or greyscale image files are converted to a single channel jpeg2000 file
-        :param input_filepaths: either a single filepath or a list of filepaths
-         If given three single channel files, kakadu will combine them into a single 3 channel image
+
+        :param input_filepaths: either a single filepath or a list of filepaths.
+            If given three single channel files, kakadu will combine them into a single 3 channel image
         :param output_filepath:
         :param kakadu_options: command line arguments
-        :return:
         """
         self.run_command('kdu_compress', input_filepaths, output_filepath, kakadu_options)
 
     def kdu_expand(self, input_filepath, output_filepath, kakadu_options):
         """
         Converts a jpeg2000 file to tif
+
         :param input_filepath:
         :param output_filepath:
         :param kakadu_options: command line arguments
-        :return:
         """
         self.run_command('kdu_expand', input_filepath, output_filepath, kakadu_options)
 

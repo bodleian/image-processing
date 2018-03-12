@@ -6,4 +6,5 @@ tests/output
 .cache
 /dist/
 /build/
+_build
 /*.egg-info
