@@ -13,7 +13,7 @@ from image_processing.kakadu import Kakadu
 from PIL import Image
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
-DEFAULT_XMP_FILENAME = 'xmp.xml'
+DEFAULT_EMBEDDED_METADATA_FILENAME = 'xmp.xml'
 DEFAULT_JPG_FILENAME = 'full.jpg'
 DEFAULT_LOSSLESS_JP2_FILENAME = 'full_lossless.jp2'
 
@@ -56,15 +56,15 @@ class DerivativeFilesGenerator(object):
 
         self.log = logging.getLogger(__name__)
 
-    def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_xmp=True,
+    def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_embedded_metadata=True,
                                       check_lossless=True):
         """
-        Extracts the xmp, creates a copy of the jpg file and a validated jpeg2000 file.
+        Extracts the embedded metadata, creates a copy of the jpg file and a validated jpeg2000 file.
         Stores all in the given folder
 
         :param jpg_filepath:
         :param output_folder: the folder where the derivatives will be stored
-        :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
+        :param save_embedded_metadata: If true, metadata will be extracted from the image file and preserved in a separate xml file
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the tiff created from the source file
         :return: filepaths of created files
         """
@@ -81,10 +81,11 @@ class DerivativeFilesGenerator(object):
         shutil.copy(jpg_filepath, output_jpg_filepath)
         generated_files = [output_jpg_filepath]
 
-        if save_xmp:
-            xmp_file_path = os.path.join(output_folder, self._get_filename(DEFAULT_XMP_FILENAME, source_file_name))
-            self.extract_xmp(jpg_filepath, xmp_file_path)
-            generated_files += [xmp_file_path]
+        if save_embedded_metadata:
+            embedded_metadata_file_path = os.path.join(output_folder,
+                                                       self._get_filename(DEFAULT_EMBEDDED_METADATA_FILENAME, source_file_name))
+            self.extract_embedded_metadata(jpg_filepath, embedded_metadata_file_path)
+            generated_files += [embedded_metadata_file_path]
 
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as scratch_tiff_file_obj:
             scratch_tiff_filepath = scratch_tiff_file_obj.name
@@ -102,10 +103,10 @@ class DerivativeFilesGenerator(object):
 
         return generated_files
 
-    def generate_derivatives_from_tiff(self, tiff_filepath, output_folder, include_tiff=False, save_xmp=True,
+    def generate_derivatives_from_tiff(self, tiff_filepath, output_folder, include_tiff=False, save_embedded_metadata=True,
                                        create_jpg_as_thumbnail=True, check_lossless=True):
         """
-        Extracts the xmp, creates a jpg file and a validated jpeg2000 file.
+        Extracts the embedded metadata, creates a jpg file and a validated jpeg2000 file.
         Stores all in the given folder
 
         :param create_jpg_as_thumbnail: create the jpg as a resized thumbnail, not a high quality image.
@@ -113,7 +114,7 @@ class DerivativeFilesGenerator(object):
         :param tiff_filepath:
         :param output_folder: the folder where the related dc.xml will be stored
         :param include_tiff: Include copy of source tiff file in derivatives
-        :param save_xmp: If true, metadata will be extracted from the image file and preserved in a separate xmp file
+        :param save_embedded_metadata: If true, metadata will be extracted from the image file and preserved in a separate xml file
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created files
         """
@@ -149,10 +150,11 @@ class DerivativeFilesGenerator(object):
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
 
-            if save_xmp:
-                xmp_file_path = os.path.join(output_folder, self._get_filename(DEFAULT_XMP_FILENAME, source_file_name))
-                self.extract_xmp(tiff_filepath, xmp_file_path)
-                generated_files += [xmp_file_path]
+            if save_embedded_metadata:
+                embedded_metadata_file_path = os.path.join(output_folder,
+                                                           self._get_filename(DEFAULT_EMBEDDED_METADATA_FILENAME, source_file_name))
+                self.extract_embedded_metadata(tiff_filepath, embedded_metadata_file_path)
+                generated_files += [embedded_metadata_file_path]
 
             if include_tiff:
                 output_tiff_filepath = os.path.join(output_folder,
@@ -192,18 +194,18 @@ class DerivativeFilesGenerator(object):
         if check_lossless:
             self.check_conversion_was_lossless(tiff_file, jp2_filepath)
 
-    def extract_xmp(self, image_file, xmp_file_path):
+    def extract_embedded_metadata(self, image_file, embedded_metadata_file_path):
         """
-        Extract the xmp (technical metadata) from the image file and save it to the xmp_file_path
+        Extract the embedded metadata (technical metadata) from the image file and save it to the embedded_metadata_file_path
 
         :param image_file:
-        :param xmp_file_path:
+        :param embedded_metadata_file_path:
         """
-        xmp = conversion.get_xmp(image_file)
+        embedded_metadata = conversion.get_embedded_metadata(image_file)
         # using io.open for unicode compatibility
-        with io.open(xmp_file_path, 'w') as output_xmp_file:
-            output_xmp_file.write(xmp.serialize_to_unicode())
-        self.log.debug('XMP file {0} generated'.format(xmp_file_path))
+        with io.open(embedded_metadata_file_path, 'w') as output_embedded_metadata_file:
+            output_embedded_metadata_file.write(embedded_metadata.serialize_to_unicode())
+        self.log.debug('Extracted metadata file {0} generated'.format(embedded_metadata_file_path))
 
     def check_conversion_was_lossless(self, source_file, lossless_jpg_2000_file):
         """
@@ -239,7 +241,7 @@ class DerivativeFilesGenerator(object):
             return "{0}.tiff".format(orig_filename_base)
         elif default_filename == DEFAULT_JPG_FILENAME:
             return "{0}.jpg".format(orig_filename_base)
-        elif default_filename == DEFAULT_XMP_FILENAME:
-            return "{0}_xmp.xml".format(orig_filename_base)
+        elif default_filename == DEFAULT_EMBEDDED_METADATA_FILENAME:
+            return "{0}.xml".format(orig_filename_base)
         elif default_filename == DEFAULT_LOSSLESS_JP2_FILENAME:
             return "{0}.jp2".format(orig_filename_base)

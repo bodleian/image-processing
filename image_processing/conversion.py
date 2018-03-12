@@ -13,19 +13,19 @@ Convert tiff to/from jpg while preserving technical metadata and icc profiles
 
 def convert_to_tiff(input_filepath, output_filepath):
     """
-    Convert an image file to tif, preserving ICC profile and xmp data
+    Convert an image file to tif, preserving ICC profile and embedded metadata
     :param input_filepath:
     :param output_filepath:
     """
     with Image.open(input_filepath) as input_pil:
         # this seems to use no compression by default. Specifying compression='None' means no icc is saved
         input_pil.save(output_filepath, "TIFF")
-    copy_over_xmp(input_filepath, output_filepath)
+    copy_over_embedded_metadata(input_filepath, output_filepath)
 
 
 def convert_to_jpg(input_filepath, output_filepath, resize=None, quality=None):
     """
-    Convert an image file to jpg, preserving ICC profile and xmp data
+    Convert an image file to jpg, preserving ICC profile and embedded metadata
     :param input_filepath:
     :param output_filepath:
     :param resize: if present, resize by this amount to make a thumbnail. e.g. 0.5 to make a thumbnail half the size
@@ -44,31 +44,31 @@ def convert_to_jpg(input_filepath, output_filepath, resize=None, quality=None):
             input_pil.save(output_filepath, "JPEG", quality=quality, icc_profile=icc_profile)
         else:
             input_pil.save(output_filepath, "JPEG", icc_profile=icc_profile)
-    copy_over_xmp(input_filepath, output_filepath)
+    copy_over_embedded_metadata(input_filepath, output_filepath)
 
 
-def copy_over_xmp(input_image_filepath, output_image_filepath):
+def copy_over_embedded_metadata(input_image_filepath, output_image_filepath):
     """
     Copy embedded image metadata from the input_image_filepath to the output_image_filepath
     """
-    original_xmp = get_xmp(input_image_filepath)
-    set_xmp(output_image_filepath, original_xmp)
+    original_embedded_metadata = get_embedded_metadata(input_image_filepath)
+    set_embedded_metadata(output_image_filepath, original_embedded_metadata)
 
 
-def get_xmp(image_filepath):
+def get_embedded_metadata(image_filepath):
     """
     Retrieve embedded image metadata from the image_filepath
     """
     image_xmp_file = XMPFiles(file_path=image_filepath)
-    xmp = image_xmp_file.get_xmp()
+    embedded_metadata = image_xmp_file.get_xmp()
     image_xmp_file.close_file()
-    return xmp
+    return embedded_metadata
 
 
-def set_xmp(image_filepath, xmp):
+def set_embedded_metadata(image_filepath, embedded_metadata):
     """
     Set the given embedded image metadata to the image_filepath
     """
     xmp_file = XMPFiles(file_path=image_filepath, open_forupdate=True)
-    xmp_file.put_xmp(xmp)
+    xmp_file.put_xmp(embedded_metadata)
     xmp_file.close_file()
