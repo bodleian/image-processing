@@ -72,7 +72,9 @@ See [JPEG 2000 Colour Management](JP2_colour_management.md) for some more backgr
 - Can be installed with `pip`
 
 ### Dependencies
-- [Exempi](https://libopenraw.freedesktop.org/wiki/Exempi/)
+- [Exiftool](http://owl.phy.queensu.ca/~phil/exiftool/)
+    - yum install perl-Image-ExifTool
+    - apt install exiftool
 - [Kakadu](http://kakadusoftware.com/)
     - should be compiled with libtiff support if you want to process compressed TIFFs.
     - modify the makefile `apps/make/Makefile-<OS>`. Add `-DKDU_INCLUDE_TIFF` to CFLAGS and add `-ltiff` to LIBS

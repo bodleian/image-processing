@@ -17,7 +17,7 @@ class TestImageFormatConverter(object):
     def test_converts_jpg_to_tiff_pil(self):
         with temporary_folder() as output_folder:
             tiff_file = os.path.join(output_folder, 'test.tif')
-            conversion.convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
+            conversion.Converter().convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
             assert os.path.isfile(tiff_file)
             assert filecmp.cmp(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
 
@@ -32,7 +32,7 @@ class TestImageFormatConverter(object):
     def test_converts_tif_to_jpeg(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jpg')
-            conversion.convert_to_jpg(filepaths.STANDARD_TIF, output_file, resize=None,
+            conversion.Converter().convert_to_jpg(filepaths.STANDARD_TIF, output_file, resize=None,
                                       quality=derivative_files_generator.DEFAULT_JPG_HIGH_QUALITY_VALUE)
             assert os.path.isfile(output_file)
             assert filecmp.cmp(output_file, filepaths.HIGH_QUALITY_JPG_FROM_STANDARD_TIF)
