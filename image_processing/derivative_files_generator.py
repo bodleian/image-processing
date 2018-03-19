@@ -6,7 +6,6 @@ import os
 import shutil
 import logging
 import tempfile
-import io
 
 from image_processing import conversion, validation, kakadu
 from image_processing.kakadu import Kakadu
@@ -20,20 +19,23 @@ DEFAULT_LOSSLESS_JP2_FILENAME = 'full_lossless.jp2'
 DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE = 0.6
 DEFAULT_JPG_HIGH_QUALITY_VALUE = 92
 
+DEFAULT_EXIFTOOL_PATH = "exiftool"
+DEFAULT_KAKADU_BASE_PATH = ""
+
 
 class DerivativeFilesGenerator(object):
     """
     Given a source image file, generates the derivative files (preservation/display image formats, extracted technical metadata etc.) we store in our repository
     """
 
-    def __init__(self, kakadu_base_path,
+    def __init__(self, kakadu_base_path=DEFAULT_KAKADU_BASE_PATH,
                  jpg_high_quality_value=DEFAULT_JPG_HIGH_QUALITY_VALUE,
                  jpg_thumbnail_resize_value=DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE,
                  kakadu_compress_options=kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS,
                  use_default_filenames=True,
                  require_icc_profile_for_greyscale=False,
                  require_icc_profile_for_colour=True,
-                 exiftool_path="exiftool"):
+                 exiftool_path=DEFAULT_EXIFTOOL_PATH):
         """
 
         :param kakadu_base_path: a filepath you can find kdu_compress and kdu_expand at
