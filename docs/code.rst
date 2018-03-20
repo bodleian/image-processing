@@ -2,6 +2,11 @@
 API Reference
 =============
 
+Exceptions
+----------
+.. automodule:: image_processing.exceptions
+    :members:
+
 DerivativeFilesGenerator
 ------------------------
 .. automodule:: image_processing.derivative_files_generator
@@ -19,13 +24,7 @@ Conversion
 .. automodule:: image_processing.conversion
     :members:
 
-Exceptions
-----------
-.. automodule:: image_processing.exceptions
-   :members:
-
 Kakadu
 ------
-
 .. automodule:: image_processing.kakadu
     :members:
