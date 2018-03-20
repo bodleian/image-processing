@@ -6,19 +6,21 @@ import os
 import shutil
 import logging
 import tempfile
-import io
 
 from image_processing import conversion, validation, kakadu
 from image_processing.kakadu import Kakadu
 from PIL import Image
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
-DEFAULT_EMBEDDED_METADATA_FILENAME = 'xmp.xml'
+DEFAULT_EMBEDDED_METADATA_FILENAME = 'full.xmp'
 DEFAULT_JPG_FILENAME = 'full.jpg'
 DEFAULT_LOSSLESS_JP2_FILENAME = 'full_lossless.jp2'
 
 DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE = 0.6
 DEFAULT_JPG_HIGH_QUALITY_VALUE = 92
+
+DEFAULT_EXIFTOOL_PATH = "exiftool"
+DEFAULT_KAKADU_BASE_PATH = ""
 
 
 class DerivativeFilesGenerator(object):
@@ -26,13 +28,14 @@ class DerivativeFilesGenerator(object):
     Given a source image file, generates the derivative files (preservation/display image formats, extracted technical metadata etc.) we store in our repository
     """
 
-    def __init__(self, kakadu_base_path,
+    def __init__(self, kakadu_base_path=DEFAULT_KAKADU_BASE_PATH,
                  jpg_high_quality_value=DEFAULT_JPG_HIGH_QUALITY_VALUE,
                  jpg_thumbnail_resize_value=DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE,
                  kakadu_compress_options=kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS,
                  use_default_filenames=True,
                  require_icc_profile_for_greyscale=False,
-                 require_icc_profile_for_colour=True):
+                 require_icc_profile_for_colour=True,
+                 exiftool_path=DEFAULT_EXIFTOOL_PATH):
         """
 
         :param kakadu_base_path: a filepath you can find kdu_compress and kdu_expand at
@@ -43,6 +46,7 @@ class DerivativeFilesGenerator(object):
         :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile.
             Note: bitonal images don't need icc profiles even if this is true
         :param require_icc_profile_for_colour: raise an error if a colour image doesn't have an icc profile
+        :param exiftool_path: path to exiftool executable
         """
 
         self.jpg_high_quality_value = jpg_high_quality_value
@@ -51,6 +55,7 @@ class DerivativeFilesGenerator(object):
         self.require_icc_profile_for_colour = require_icc_profile_for_colour
         self.use_default_filenames = use_default_filenames
         self.kakadu_compress_options = kakadu_compress_options
+        self.converter = conversion.Converter(exiftool_path=exiftool_path)
 
         self.kakadu = Kakadu(kakadu_base_path=kakadu_base_path)
 
@@ -84,12 +89,13 @@ class DerivativeFilesGenerator(object):
         if save_embedded_metadata:
             embedded_metadata_file_path = os.path.join(output_folder,
                                                        self._get_filename(DEFAULT_EMBEDDED_METADATA_FILENAME, source_file_name))
-            self.extract_embedded_metadata(jpg_filepath, embedded_metadata_file_path)
+            self.converter.extract_xmp_to_sidecar_file(jpg_filepath, embedded_metadata_file_path)
+            self.log.debug('Extracted metadata file {0} generated'.format(embedded_metadata_file_path))
             generated_files += [embedded_metadata_file_path]
 
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as scratch_tiff_file_obj:
             scratch_tiff_filepath = scratch_tiff_file_obj.name
-            conversion.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
+            self.converter.convert_to_tiff(jpg_filepath, scratch_tiff_filepath)
 
             validation.check_colour_profiles_match(jpg_filepath, scratch_tiff_filepath)
 
@@ -145,7 +151,7 @@ class DerivativeFilesGenerator(object):
             jpg_quality = None if create_jpg_as_thumbnail else self.jpg_high_quality_value
             jpg_resize = self.jpg_thumbnail_resize_value if create_jpg_as_thumbnail else None
 
-            conversion.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath,
+            self.converter.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath,
                                       quality=jpg_quality, resize=jpg_resize)
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
@@ -153,7 +159,8 @@ class DerivativeFilesGenerator(object):
             if save_embedded_metadata:
                 embedded_metadata_file_path = os.path.join(output_folder,
                                                            self._get_filename(DEFAULT_EMBEDDED_METADATA_FILENAME, source_file_name))
-                self.extract_embedded_metadata(tiff_filepath, embedded_metadata_file_path)
+                self.converter.extract_xmp_to_sidecar_file(tiff_filepath, embedded_metadata_file_path)
+                self.log.debug('Extracted metadata file {0} generated'.format(embedded_metadata_file_path))
                 generated_files += [embedded_metadata_file_path]
 
             if include_tiff:
@@ -194,19 +201,6 @@ class DerivativeFilesGenerator(object):
         if check_lossless:
             self.check_conversion_was_lossless(tiff_file, jp2_filepath)
 
-    def extract_embedded_metadata(self, image_file, embedded_metadata_file_path):
-        """
-        Extract the embedded metadata (technical metadata) from the image file and save it to the embedded_metadata_file_path
-
-        :param image_file:
-        :param embedded_metadata_file_path:
-        """
-        embedded_metadata = conversion.get_embedded_metadata(image_file)
-        # using io.open for unicode compatibility
-        with io.open(embedded_metadata_file_path, 'w') as output_embedded_metadata_file:
-            output_embedded_metadata_file.write(embedded_metadata.serialize_to_unicode())
-        self.log.debug('Extracted metadata file {0} generated'.format(embedded_metadata_file_path))
-
     def check_conversion_was_lossless(self, source_file, lossless_jpg_2000_file):
         """
         Visually compare the source file to the tiff generated by expanding the lossless jp2,
@@ -242,6 +236,6 @@ class DerivativeFilesGenerator(object):
         elif default_filename == DEFAULT_JPG_FILENAME:
             return "{0}.jpg".format(orig_filename_base)
         elif default_filename == DEFAULT_EMBEDDED_METADATA_FILENAME:
-            return "{0}.xml".format(orig_filename_base)
+            return "{0}.xmp".format(orig_filename_base)
         elif default_filename == DEFAULT_LOSSLESS_JP2_FILENAME:
             return "{0}.jp2".format(orig_filename_base)
