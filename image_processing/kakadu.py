@@ -103,4 +103,4 @@ class Kakadu(object):
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise KakaduError('Kakadu {0} failed on {1}. Command: {2}, Error: {3}'.
-                              format(command, input_option, ' '.join(command_options), e.message))
+                              format(command, input_option, ' '.join(command_options), e))
