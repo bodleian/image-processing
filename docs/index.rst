@@ -4,13 +4,14 @@
    contain the root `toctree` directive.
 
 ==============================
-image_processing documentation
+image processing documentation
 ==============================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   readme
    code
 
 
