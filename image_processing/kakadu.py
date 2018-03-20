@@ -6,6 +6,7 @@ import os
 import subprocess
 import logging
 from image_processing.exceptions import KakaduError
+from image_processing import utils
 
 DEFAULT_COMPRESS_OPTIONS = [
     'Clevels=6',
@@ -47,6 +48,13 @@ class Kakadu(object):
         """
         self.kakadu_base_path = kakadu_base_path
         self.log = logging.getLogger(__name__)
+        if not utils.cmd_is_executable(self._command_path('kdu_compress')):
+            raise OSError("Could not find executable {0}. Check kakadu is installed and kdu_compress exists at the configured path"
+                          .format(self._command_path('kdu_compress')))
+        if not utils.cmd_is_executable(self._command_path('kdu_expand')):
+            self.log.error("Could not find executable {0}. Lossless checks will not work. "
+                           "Check kakadu is installed and kdu_expand exists at the configured path"
+                          .format(self._command_path('kdu_expand')))
 
     def _command_path(self, command):
         return os.path.join(self.kakadu_base_path, command)

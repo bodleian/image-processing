@@ -9,6 +9,7 @@ import os
 from PIL import Image
 from libxmp import XMPFiles
 
+from image_processing import utils
 from image_processing.exceptions import ImageProcessingError
 
 
@@ -18,6 +19,9 @@ class Converter(object):
     """
 
     def __init__(self, exiftool_path='exiftool'):
+        if not utils.cmd_is_executable(exiftool_path):
+            raise OSError("Could not find executable {0}. Check exiftool is installed and exists at the configured path"
+                          .format(exiftool_path))
         self.exiftool_path = exiftool_path
         self.logger = logging.getLogger(__name__)
 
