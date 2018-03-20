@@ -7,7 +7,6 @@ import logging
 
 import os
 from PIL import Image
-from libxmp import XMPFiles
 
 from image_processing import utils
 from image_processing.exceptions import ImageProcessingError

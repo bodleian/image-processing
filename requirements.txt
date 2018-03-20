@@ -3,6 +3,5 @@ pytest==2.9.0
 uuid==1.30
 Pillow >= 5
 jpylyzer
-python-xmp-toolkit
 sphinx
 sphinx-autobuild
