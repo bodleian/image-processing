@@ -11,7 +11,8 @@ Image processing documentation
     :maxdepth: 2
     :caption: Contents:
 
-    readme
+    introduction
+    digital_preservation
     jp2_colour_management
     code
 

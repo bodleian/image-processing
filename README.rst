@@ -1,9 +1,15 @@
-Introduction
-============
+Image Processing
+================
+.. inclusion-marker-intro-start
 
 Image-processing is a Python library that converts a source image (TIFF or JPEG) to a JP2 file with a focus on digital preservation and making sure the conversion is reversible.
 
 At the Bodleian we use it to generate the derivative files we ingest into Digital Bodleian for display and preservation.
+
+
+.. image:: https://readthedocs.org/projects/image-processing/badge/?version=latest
+    :target: https://image-processing.readthedocs.io/?badge=latest
+    :alt: Documentation Status
 
 
 Use cases
@@ -72,24 +78,11 @@ To just use Kakadu directly through the wrapper:
     kdu = kakadu.Kakadu(kakadu_base_path="/opt/kakadu")
     kdu.kdu_compress("input.tif", "output.jp2", kakadu_options=kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS)
 
-Digital Preservation
---------------------
 
-This package has a strong emphasis on digital preservation, as we want to use lossless JP2s as our preservation master files. It was developed with input from our digital preservation team
+.. inclusion-marker-intro-end
 
-By default it checks:
-- the JP2 is valid (using `jpylyzer`_)
-- the JP2 can be converted back into a TIFF
-- this TIFF has the same pixels as the source TIFF (or the TIFF we converted from the source JPEG)
-- this TIFF has the same colour profile and mode as the source image
+More information
+----------------
 
-It doesn't check:
-- the technical metadata is correctly copied over to the JP2 (but we do extract this to a separate file)
-- the JP2 displays as expected in viewers
-- the JPG to TIFF conversion, if the source file was a JPG (beyond checking the colour profiles match). It is a lossy conversion, so the pixels will not be identical
+See our `documentation <https://image-processing.readthedocs.io/>`__
 
-We have run tests on a wide sample of source images from our repository. We cannot share this test repository on GitHub due to copyright issues, but if you want to run your own tests these automatic lossless checks should simplify that. The full lossless checks can be disabled in production, but we'd recommend keeping them enabled if digital preservation is a concern.
-
-Note: our testing has been focused on the source images we ingest, not all possible formats. The :func:`validation.check_image_suitable_for_jp2_conversion`` function is run when generating derivatives, and should fail for image formats we have not tested.
-
-See :doc:`jp2_colour_management` for some more background information and recommendations.
