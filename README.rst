@@ -21,7 +21,7 @@ Installation
 - Compatible with both Python 2.7 and 3
 
 Dependencies
-************
+~~~~~~~~~~~~
 - `Exiftool`_
     - ``yum install perl-Image-ExifTool``
     - ``apt install exiftool``
@@ -49,7 +49,7 @@ To run a full conversion on a TIFF file, with validation, format checks, XMP ext
 
     from image_processing.derivative_files_generator import DerivativeFilesGenerator
     derivatives_gen = DerivativeFilesGenerator(kakadu_base_path="/opt/kakadu")
-    derivatives_gen.generate_derivatives_from_tiff("test.tif", "output/folder")
+    derivatives_gen.generate_derivatives_from_tiff("input.tif", "output/folder")
 
 
 To access the validation and conversion functions separately so they can be integrated into a workflow system like Goobi:
@@ -61,16 +61,16 @@ To access the validation and conversion functions separately so they can be inte
                                                kakadu_compress_options=kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS)
 
     # each of these statements can be run separately, with different instances of DerivativeFilesGenerator
-    validation.check_image_suitable_for_jp2_conversion("test.tif")
-    derivatives_gen.generate_jp2_from_tiff("test.tif", "test.jp2")
-    derivatives_gen.validate_jp2_conversion("test.tif", "test.jp2", check_lossless=True)
+    validation.check_image_suitable_for_jp2_conversion("input.tif")
+    derivatives_gen.generate_jp2_from_tiff("input.tif", "output.jp2")
+    derivatives_gen.validate_jp2_conversion("input.tif", "output.jp2", check_lossless=True)
 
 To just use Kakadu directly through the wrapper:
 ::
 
     from image_processing import kakadu
     kdu = kakadu.Kakadu(kakadu_base_path="/opt/kakadu")
-    kdu.kdu_compress("test.tif", "test.jp2", kakadu_options=kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS)
+    kdu.kdu_compress("input.tif", "output.jp2", kakadu_options=kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS)
 
 Digital Preservation
 --------------------
@@ -90,6 +90,6 @@ It doesn't check:
 
 We have run tests on a wide sample of source images from our repository. We cannot share this test repository on GitHub due to copyright issues, but if you want to run your own tests these automatic lossless checks should simplify that. The full lossless checks can be disabled in production, but we'd recommend keeping them enabled if digital preservation is a concern.
 
-Note: our testing has been focused on the source images we ingest, not all possible formats. The ``validation.check_image_suitable_for_jp2_conversion`` function is run when generating derivatives, and should fail for image formats we have not tested.
+Note: our testing has been focused on the source images we ingest, not all possible formats. The :func:`validation.check_image_suitable_for_jp2_conversion`` function is run when generating derivatives, and should fail for image formats we have not tested.
 
-See [JPEG 2000 Colour Management](JP2_colour_management.md) for some more background information and recommendations.
+See :doc:`jp2_colour_management` for some more background information and recommendations.

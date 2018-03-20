@@ -4,11 +4,10 @@ JP2 colour profiles for digital preservation
 Preservation guidelines
 -----------------------
 
-Digital preservation recommendations are that the original colour
-profile is retained in the preservation copy, and not converted.
+Digital preservation recommendations are that the original colour profile is retained in the preservation copy, and not converted.
+
     - Specified color space preferred over unspecified or unknown color space.
-    - Color space from initial creation preferred to transcoded color
-    space
+    - Color space from initial creation preferred to transcoded color space
     -- https://www.loc.gov/preservation/digital/formats/content/still\_preferences.shtml
 
 Note also that colour profile conversion can be lossy.
@@ -16,15 +15,11 @@ Note also that colour profile conversion can be lossy.
 JP2 conversion details
 ----------------------
 
-The ``-jp2_space`` parameter on ``kdu_compress`` sets the colour profile
-in the image metadata, but does not otherwise convert the image - the
-pixel values remain the same. The ``sRGB`` value sets the colour profile
-to the sRGB IEC61966-2.1 profile. (This is not the only way to set the
-colour profile)
+The ``-jp2_space`` parameter on ``kdu_compress`` sets the colour profile in the image metadata, but does not otherwise convert the image - the pixel values remain the same. The ``sRGB`` value sets the colour profile to the sRGB IEC61966-2.1 profile. (This is not the only way to set the colour profile)
 
 Kakadu (and JP2 itself) will not support CYMK images:
 
-    Only three colour channels, R (red), G (green) and B (blue), are supported by the JP2 file format. Alternatively, a luminance image may have exactly one colour channel, Y (luminance).'
+    Only three colour channels, R (red), G (green) and B (blue), are supported by the JP2 file format. Alternatively, a luminance image may have exactly one colour channel, Y (luminance).
     --`Kakadu  manual <http://kakadusoftware.com/wp-content/uploads/2014/06/Kakadu.pdf%205.2.1>`__
 
 JPX does support it, but isn't recommended for digital preservation.
