@@ -76,7 +76,8 @@ class Converter(object):
 
     def extract_xmp_to_sidecar_file(self, image_filepath, output_xmp_filepath):
         """
-        Extract embedded image metadata from the image_filepath to an xmp file
+        Extract embedded image metadata from the image_filepath to an xmp file.
+        Includes the ICC profile description.
         """
         if os.path.isfile(output_xmp_filepath):
             os.remove(output_xmp_filepath)

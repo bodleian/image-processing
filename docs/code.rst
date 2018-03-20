@@ -23,6 +23,7 @@ Exceptions
 ==========
 .. automodule:: image_processing.exceptions
    :members:
+   :show-inheritance:
 
 Kakadu
 ======
