@@ -9,8 +9,8 @@ install:
   - wget http://kakadusoftware.com/wp-content/uploads/2014/06/KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
   - unzip KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
   - sudo mv KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827 /opt/kakadu
-  - PATH=$PATH:/opt/kakadu/bin
-  - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/kakadu/bin
+  - PATH=$PATH:/opt/kakadu
+  - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/kakadu
   - export PATH
   - export LD_LIBRARY_PATH
   - pip install -r requirements.txt
