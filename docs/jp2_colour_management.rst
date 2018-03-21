@@ -8,6 +8,7 @@ Digital preservation recommendations are that the original colour profile is ret
 
     - Specified color space preferred over unspecified or unknown color space.
     - Color space from initial creation preferred to transcoded color space
+
     -- https://www.loc.gov/preservation/digital/formats/content/still\_preferences.shtml
 
 Note also that colour profile conversion can be lossy.
