@@ -1,0 +1,27 @@
+language: python
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+cache:
+  - pip: true
+  - apt: true
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:ubuntu-toolchain-r/test'
+    packages:
+      - unzip
+      - exiftool
+      - libstdc++6
+install:
+  - wget http://kakadusoftware.com/wp-content/uploads/2014/06/KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
+  - unzip KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
+  - mv KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827 /opt/kakadu
+  - PATH=$PATH:/opt/kakadu
+  - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/kakadu
+  - export PATH
+  - export LD_LIBRARY_PATH
+  - pip install -r requirements.txt
+script:
+  - py.test

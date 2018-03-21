@@ -1,10 +1,9 @@
-import filecmp
 import logging
 import os
 import sys
 from image_processing import conversion, derivative_files_generator, validation, exceptions, kakadu
 import pytest
-from .test_utils import temporary_folder, filepaths
+from .test_utils import temporary_folder, filepaths, image_files_match
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
@@ -14,12 +13,12 @@ def get_kakadu():
 
 
 class TestImageFormatConverter(object):
-    def test_converts_jpg_to_tiff_pil(self):
+    def test_converts_jpg_to_tiff(self):
         with temporary_folder() as output_folder:
             tiff_file = os.path.join(output_folder, 'test.tif')
-            conversion.convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
+            conversion.Converter().convert_to_tiff(filepaths.STANDARD_JPG, tiff_file)
             assert os.path.isfile(tiff_file)
-            assert filecmp.cmp(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
+            assert image_files_match(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
 
     def test_converts_tif_to_jpeg2000(self):
         with temporary_folder() as output_folder:
@@ -27,15 +26,15 @@ class TestImageFormatConverter(object):
             get_kakadu().kdu_compress(filepaths.STANDARD_TIF, output_file,
                                       kakadu_options=kakadu.DEFAULT_COMPRESS_OPTIONS + kakadu.LOSSLESS_OPTIONS)
             assert os.path.isfile(output_file)
-            assert filecmp.cmp(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+            assert image_files_match(output_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
 
     def test_converts_tif_to_jpeg(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jpg')
-            conversion.convert_to_jpg(filepaths.STANDARD_TIF, output_file, resize=None,
-                                      quality=derivative_files_generator.DEFAULT_JPG_HIGH_QUALITY_VALUE)
+            conversion.Converter().convert_to_jpg(filepaths.STANDARD_TIF, output_file, resize=None,
+                                                  quality=derivative_files_generator.DEFAULT_JPG_HIGH_QUALITY_VALUE)
             assert os.path.isfile(output_file)
-            assert filecmp.cmp(output_file, filepaths.HIGH_QUALITY_JPG_FROM_STANDARD_TIF)
+            assert image_files_match(output_file, filepaths.HIGH_QUALITY_JPG_FROM_STANDARD_TIF)
 
     def test_converts_tif_to_lossy_jpeg2000(self):
         with temporary_folder() as output_folder:

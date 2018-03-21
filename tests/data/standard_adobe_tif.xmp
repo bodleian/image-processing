@@ -1,0 +1,101 @@
+<?xpacket begin='﻿' id='W5M0MpCehiHzreSzNTczkc9d'?>
+<x:xmpmeta xmlns:x='adobe:ns:meta/' x:xmptk='Image::ExifTool 10.10'>
+<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+
+ <rdf:Description rdf:about=''
+  xmlns:aux='http://ns.adobe.com/exif/1.0/aux/'>
+  <aux:Firmware>P45+-M, Firmware: Main=5.1.2, Boot=1.3, FPGA=1.6.8, CPLD=2.2.4, PAVR=1.0.9, UIFC=1.0.1, TGEN=1.0.1</aux:Firmware>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:exif='http://ns.adobe.com/exif/1.0/'>
+  <exif:ApertureValue>11285/1482</exif:ApertureValue>
+  <exif:ColorSpace>65535</exif:ColorSpace>
+  <exif:ComponentsConfiguration>
+   <rdf:Seq>
+    <rdf:li>1</rdf:li>
+    <rdf:li>2</rdf:li>
+    <rdf:li>3</rdf:li>
+    <rdf:li>0</rdf:li>
+   </rdf:Seq>
+  </exif:ComponentsConfiguration>
+  <exif:DateTimeOriginal>2010-09-22T10:12:24</exif:DateTimeOriginal>
+  <exif:ExifVersion>0220</exif:ExifVersion>
+  <exif:ExposureBiasValue>0/1</exif:ExposureBiasValue>
+  <exif:ExposureProgram>0</exif:ExposureProgram>
+  <exif:ExposureTime>1/60</exif:ExposureTime>
+  <exif:FNumber>14/1</exif:FNumber>
+  <exif:FileSource>3</exif:FileSource>
+  <exif:FlashpixVersion>0100</exif:FlashpixVersion>
+  <exif:FocalLength>120/1</exif:FocalLength>
+  <exif:ISOSpeedRatings>
+   <rdf:Seq>
+    <rdf:li>50</rdf:li>
+   </rdf:Seq>
+  </exif:ISOSpeedRatings>
+  <exif:LightSource>255</exif:LightSource>
+  <exif:PixelXDimension>5714</exif:PixelXDimension>
+  <exif:PixelYDimension>4284</exif:PixelYDimension>
+  <exif:SceneType>1</exif:SceneType>
+  <exif:ShutterSpeedValue>23917/4049</exif:ShutterSpeedValue>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:exifEX='http://cipa.jp/exif/1.0/'>
+  <exifEX:BodySerialNumber>DT000151</exifEX:BodySerialNumber>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:photoshop='http://ns.adobe.com/photoshop/1.0/'>
+  <photoshop:DateCreated>2010-09-22</photoshop:DateCreated>
+  <photoshop:ICCProfile>Adobe RGB (1998)</photoshop:ICCProfile>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:tiff='http://ns.adobe.com/tiff/1.0/'>
+  <tiff:BitsPerSample>
+   <rdf:Seq>
+    <rdf:li>8</rdf:li>
+    <rdf:li>8</rdf:li>
+    <rdf:li>8</rdf:li>
+   </rdf:Seq>
+  </tiff:BitsPerSample>
+  <tiff:Compression>1</tiff:Compression>
+  <tiff:ImageLength>1020</tiff:ImageLength>
+  <tiff:ImageWidth>1350</tiff:ImageWidth>
+  <tiff:Make>Phase One</tiff:Make>
+  <tiff:Model>P45+</tiff:Model>
+  <tiff:Orientation>1</tiff:Orientation>
+  <tiff:PhotometricInterpretation>2</tiff:PhotometricInterpretation>
+  <tiff:PlanarConfiguration>1</tiff:PlanarConfiguration>
+  <tiff:PrimaryChromaticities>
+   <rdf:Seq>
+    <rdf:li>1802823/2816911</rdf:li>
+    <rdf:li>250009/757603</rdf:li>
+    <rdf:li>2500000/8333333</rdf:li>
+    <rdf:li>5000000/8333333</rdf:li>
+    <rdf:li>1250000/8333333</rdf:li>
+    <rdf:li>902257/15037617</rdf:li>
+   </rdf:Seq>
+  </tiff:PrimaryChromaticities>
+  <tiff:ResolutionUnit>2</tiff:ResolutionUnit>
+  <tiff:SamplesPerPixel>3</tiff:SamplesPerPixel>
+  <tiff:Software>Capture One 6 Macintosh</tiff:Software>
+  <tiff:WhitePoint>
+   <rdf:Seq>
+    <rdf:li>9674/30937</rdf:li>
+    <rdf:li>89083/270769</rdf:li>
+   </rdf:Seq>
+  </tiff:WhitePoint>
+  <tiff:XResolution>600/1</tiff:XResolution>
+  <tiff:YResolution>600/1</tiff:YResolution>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:xmp='http://ns.adobe.com/xap/1.0/'>
+  <xmp:CreateDate>2010-09-22T10:12:24</xmp:CreateDate>
+  <xmp:ModifyDate>2010-09-22T10:12:24</xmp:ModifyDate>
+ </rdf:Description>
+</rdf:RDF>
+</x:xmpmeta>
+<?xpacket end='w'?>
