@@ -3,11 +3,11 @@ python:
   - "2.7"
 cache: pip
 install:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get -qq update
-  - sudo apt-get install unzip
-  - sudo apt-get install exiftool
-  - sudo apt-get install libstdc++6
+  - sudo apt-get install unzip -y
+  - sudo apt-get install exiftool -y
+  - sudo apt-get install libstdc++6 -y
   - wget http://kakadusoftware.com/wp-content/uploads/2014/06/KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
   - unzip KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
   - sudo mv KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827 /opt/kakadu
