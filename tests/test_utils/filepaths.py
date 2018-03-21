@@ -7,7 +7,7 @@ LOSSY_JP2_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_lossy.jp2'
 LOSSLESS_JP2_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif.jp2'
 RESIZED_JPG_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_resized.jpg'
 HIGH_QUALITY_JPG_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_hq.jpg'
-STANDARD_TIF_XMP = 'tests/data/standard_adobe_tif_xmp.xml'
+STANDARD_TIF_XMP = 'tests/data/standard_adobe_tif.xmp'
 
 
 # Monochrome tifs
@@ -29,13 +29,20 @@ LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF = 'tests/data/greyscale_without_profi
 STANDARD_JPG = 'tests/data/standard_adobe.jpg'
 TIF_FROM_STANDARD_JPG = 'tests/data/standard_adobe_jpg.tif'
 LOSSLESS_JP2_FROM_STANDARD_JPG = 'tests/data/standard_adobe_jpg.jp2'
-STANDARD_JPG_XMP = 'tests/data/standard_adobe_jpg_xmp.xml'
+STANDARD_JPG_XMP = 'tests/data/standard_adobe_jpg.xmp'
 
 # misc tiffs
 # for testing the pixel checksum
 SMALL_TIF = 'tests/data/small.tif'
 SMALL_TIF_WITH_CHANGED_PIXELS = 'tests/data/small_different_pixel.tif'
 SMALL_TIF_WITH_CHANGED_METADATA = 'tests/data/small_different_metadata.tif'
+
+# a jpg where the metadata was transferred over using a different version of exiftool and so won't match on filecmp.cmp
+RESIZED_JPG_FROM_BILEVEL_TIF_DIFFERENT_EXIFTOOL = 'tests/data/bilevel_tif_resized_different_exiftool.jpg'
+# xmp extracted using a different version of exiftool, which won't match on filecmp.cmp
+STANDARD_TIF_XMP_DIFFERENT_EXIFTOOL = 'tests/data/standard_adobe_tif_different_exiftool.xmp'
+# a jp2 created using a different version of kakadu, which won't match using filecmp.cmp
+LOSSLESS_JP2_FROM_STANDARD_TIF_DIFFERENT_KAKADU = 'tests/data/standard_adobe_tif_kakadu_10.jp2'
 
 NO_PROFILE_TIF = 'tests/data/no_profile.tif'
 
