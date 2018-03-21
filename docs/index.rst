@@ -4,20 +4,22 @@
    contain the root `toctree` directive.
 
 ==============================
-image_processing documentation
+Image processing documentation
 ==============================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
-   code
-
+    introduction
+    digital_preservation
+    jp2_colour_management
+    code
 
 
 
 Indices and tables
-==================
+~~~~~~~~~~~~~~~~~~
 
 * :ref:`genindex`
 * :ref:`modindex`

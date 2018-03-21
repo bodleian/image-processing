@@ -3,8 +3,8 @@ import os
 
 def cmd_is_executable(cmd):
     """
-    :param cmd: filepath
-    :return: True if the cmd exists (including if it's on the user's PATH) and can be executed
+    :param cmd: filepath to an executable.
+    :return: True if the command exists (including if it is on the PATH) and can be executed
     """
     if os.path.isabs(cmd):
         paths = [""]
