@@ -3,7 +3,9 @@ python:
   - "2.7"
   - "3.5"
   - "3.6"
-cache: pip
+cache:
+  - pip: true
+  - apt: true
 addons:
   apt:
     sources:
