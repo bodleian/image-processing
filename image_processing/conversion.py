@@ -14,7 +14,7 @@ from image_processing.exceptions import ImageProcessingError
 
 class Converter(object):
     """
-    Convert tiff to/from jpg while preserving technical metadata and icc profiles
+    Convert TIFF to and from JPEG while preserving technical metadata and ICC profiles
     """
 
     def __init__(self, exiftool_path='exiftool'):
@@ -26,18 +26,18 @@ class Converter(object):
 
     def convert_to_tiff(self, input_filepath, output_filepath):
         """
-        Convert an image file to tif, preserving ICC profile and embedded metadata
+        Convert an image file to TIFF, preserving ICC profile and embedded metadata
         :param input_filepath:
         :param output_filepath:
         """
         with Image.open(input_filepath) as input_pil:
-            # this seems to use no compression by default. Specifying compression='None' means no icc is saved
+            # this seems to use no compression by default. Specifying compression='None' means no ICC is saved
             input_pil.save(output_filepath, "TIFF")
         self.copy_over_embedded_metadata(input_filepath, output_filepath)
 
     def convert_to_jpg(self, input_filepath, output_filepath, resize=None, quality=None):
         """
-        Convert an image file to jpg, preserving ICC profile and embedded metadata
+        Convert an image file to JPEG, preserving ICC profile and embedded metadata
         :param input_filepath:
         :param output_filepath:
         :param resize: if present, resize by this amount to make a thumbnail. e.g. 0.5 to make a thumbnail half the size
@@ -63,7 +63,7 @@ class Converter(object):
         Copy embedded image metadata from the input_image_filepath to the output_image_filepath
         """
         if not os.access(output_image_filepath, os.W_OK):
-            raise IOError("Couldn't write to output path {0}".format(output_image_filepath))
+            raise IOError("Could not write to output path {0}".format(output_image_filepath))
 
         command_options = [self.exiftool_path, '-tagsFromFile', input_image_filepath, '-overwrite_original',
                            output_image_filepath]
@@ -82,9 +82,9 @@ class Converter(object):
         if os.path.isfile(output_xmp_filepath):
             os.remove(output_xmp_filepath)
         if not os.access(os.path.dirname(output_xmp_filepath), os.W_OK):
-            raise IOError("Couldn't write to output path {0}".format(output_xmp_filepath))
+            raise IOError("Could not write to output path {0}".format(output_xmp_filepath))
         if not os.path.splitext(output_xmp_filepath)[1] == ".xmp":
-            raise IOError("Xmp output file {0} needs an xmp extension".format(output_xmp_filepath))
+            raise IOError("XMP output file {0} needs an xmp extension".format(output_xmp_filepath))
 
         command_options = [self.exiftool_path, '-tagsFromFile', image_filepath, '-all',
                            '-ICC_Profile:ProfileDescription>ICCProfileName',  # map icc profile name to photoshop:ICCProfile

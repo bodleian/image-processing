@@ -39,12 +39,12 @@ ALPHA_OPTION = '-jp2_alpha'
 
 class Kakadu(object):
     """
-    Python wrapper for jp2 compression and expansion functions in kakadu (http://kakadusoftware.com/)
+    Python wrapper for jp2 compression and expansion functions in Kakadu (http://kakadusoftware.com/)
     """
 
     def __init__(self, kakadu_base_path):
         """
-        :param kakadu_base_path: a filepath you can find kdu_compress and kdu_expand at
+        :param kakadu_base_path: The location of the kdu_compress and kdu_expand executables
         """
         self.kakadu_base_path = kakadu_base_path
         self.log = logging.getLogger(__name__)
@@ -64,8 +64,8 @@ class Kakadu(object):
         Converts an image file supported by kakadu to jpeg2000
         Bitonal or greyscale image files are converted to a single channel jpeg2000 file
 
-        :param input_filepaths: either a single filepath or a list of filepaths.
-            If given three single channel files, kakadu will combine them into a single 3 channel image
+        :param input_filepaths: Either a single filepath or a list of filepaths.
+            If given three single channel files, Kakadu will combine them into a single 3 channel image
         :param output_filepath:
         :param kakadu_options: command line arguments
         """
@@ -88,10 +88,10 @@ class Kakadu(object):
         # the -i parameter can have multiple files listed
         for input_file in input_files:
             if not os.access(input_file, os.R_OK):
-                raise IOError("Couldn't access image file {0} to convert".format(input_file))
+                raise IOError("Could not access image file {0} to convert".format(input_file))
 
         if not os.access(os.path.dirname(output_file), os.W_OK):
-            raise IOError("Couldn't write to output path {0}".format(output_file))
+            raise IOError("Could not write to output path {0}".format(output_file))
 
         input_option = ",".join(["{0}".format(item) for item in input_files])
 
