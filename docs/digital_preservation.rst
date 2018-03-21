@@ -1,7 +1,7 @@
 Digital Preservation
 --------------------
 
-This package has a strong emphasis on digital preservation, as we want to use lossless JP2s as our preservation master files. It was developed with input from our digital preservation team
+This package has a strong emphasis on digital preservation, as we want to use lossless JP2s as our preservation master files. It was developed with input from our digital preservation team.
 
 By default it checks:
 - the JP2 is valid (using `jpylyzer`_)
@@ -11,8 +11,8 @@ By default it checks:
 
 .. _Jpylyzer: http://jpylyzer.openpreservation.org/
 
-It doesn't check:
-- the technical metadata is correctly copied over to the JP2 (but we do extract this to a separate file)
+It does not check:
+- the technical metadata is correctly copied over to the JP2 (we extract this to a separate file)
 - the JP2 displays as expected in viewers
 - the JPG to TIFF conversion, if the source file was a JPG (beyond checking the colour profiles match). It is a lossy conversion, so the pixels will not be identical
 
