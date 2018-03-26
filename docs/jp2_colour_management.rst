@@ -81,6 +81,7 @@ Testing
 -------
 
 As well as manual visual checks, our JP2 conversion methods have all been tested by
+
 1. Compressing the TIFF to JP2
 2. Validating the JP2 with jpylyzer
 3. Expanding the JP2 to a new TIFF
