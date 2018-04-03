@@ -27,6 +27,33 @@ JPX does support it, but isn't recommended for digital preservation.
 
 JP2 only supports a restricted set of ICC profile features. For example the `sRGB v4 ICC preference profile <http://www.color.org/srgbprofiles.xalter#v4pref>`__ is not supported, and cannot be embedded into a JP2 file using Kakadu. Setting ``-jp2_space sRGB`` on ``kdu_compress`` will erase the embedded profile and so allow it to be converted. But the sRGB IEC61966-2.1 profile thus assigned is sufficiently different that in some cases there is a noticeable tint to the created JP2.
 
+.. _kdu_compress-options:
+
+kdu_compress options
+~~~~~~~~~~~~~~~~~~~~
+
+Digital Bodleian uses the following ``kdu_compress`` options (:attr:`~image_processing.kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS`) for lossless JP2 conversion:
+
+- ``Clevels=6``
+- ``Clayers=6``
+- ``Cprecincts={256,256},{256,256},{128,128}``
+- ``Stiles={512,512}``
+- ``Corder=RPCL``
+- ``ORGgen_plt=yes``
+- ``ORGtparts=R``
+- ``Cblk={64,64}``
+- ``Cuse_sop=yes``
+- ``Cuse_eph=yes``
+- ``-flush_period 1024``
+- ``Creversible=yes``
+- ``-rate -``
+
+And for RGBA images we add:
+
+- ``-jp2_alpha``
+
+Note the lack of ``-jp2_space`` parameter.
+
 Recommendations
 ---------------
 
@@ -49,7 +76,11 @@ It is possible to convert monochrome images to RGB when compressing to JP2. Thes
 RGBA colour spaces
 ~~~~~~~~~~~~~~~~~~
 
-The ``kdu_compress`` command options we use does not always preserve alpha channel information with RGBA TIFFs. As very few of our images have an alpha channel, and we have not encountered failing cases in live data (as opposed to constructed test data), we just check RGBA JP2 conversions are lossless, and otherwise treat them the same as RGB. If we had more RGBA images, we would investigate the ``-jp2_alpha`` option.
+The ``kdu_compress`` command :ref:`options <kdu_compress-options>` we use do not always preserve alpha channel information with RGBA TIFFs. We add the ``-jp2_alpha`` option, which tells kakadu to treat the 4th image component as alpha, but there is still an issue with unassociated alpha channels, which cannot be converted back to TIFF using ``kdu_expand``:
+
+    Kakadu Warning: Alpha channel cannot be identified in a TIFF file since it is of the unassociated (i.e., not premultiplied) type, and these are not supported by TIFF.  You can save this to a separate output file.
+
+As very few of our input images have an alpha channel, and we have not encountered failing cases in live data (as opposed to constructed test data), this is not a priority for us. We just make sure to check RGBA JP2 conversions are lossless, so we will catch any future failing cases.
 
 Colour profiles / modes not supported by JP2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,7 +104,7 @@ Where delivery is the priority, rather than preservation, there are two options:
 
 Historically, many browsers have not supported colour profiles and have displayed images as if they were all sRGB. This is still the case with some older versions of browsers, especially on mobile platforms. Android only started supporting colour profiles with 8.0. So (1) is the safest option to ensure colour accuracy on all browsers.
 
-However, all modern browsers now support colour profiles (as do many IIIF servers, such as IIP). So with (2) most users would still be able to view images with colour accuracy. Keeping the original colour profile also permits users with wide gamut monitors can see AdobeRGB images with the full depth of colour, rather than being limited to the narrower sRGB gamut.
+However, the latest versions of all major browsers (including Chrome, Edge, Firefox, IE, Safari, and Chrome and Safari on mobile) now support colour profiles (as do many IIIF servers, such as IIP). So with (2) most users would still be able to view images with colour accuracy. Keeping the original colour profile also permits users with wide gamut monitors can see AdobeRGB images with the full depth of colour, rather than being limited to the narrower sRGB gamut.
 
 We use the same JP2 for preservation and delivery, so we have to use (2) in any case, to avoid the lossy conversion to sRGB.
 

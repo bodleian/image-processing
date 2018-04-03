@@ -18,7 +18,7 @@ ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
 def validate_jp2(image_file):
     """
     Uses jpylyzer (:func:`jpylyzer.jpylzer.checkOneFile`) to validate the jp2 file.
-    Raises a :class:`ValidationError` if it is invalid
+    Raises a :class:`~image_processing.exceptions.ValidationError` if it is invalid
 
     :param image_file:
     :type image_file: str
@@ -88,7 +88,7 @@ def generate_pixel_checksum_from_pil_image(pil_image):
 def check_visually_identical(source_filepath, converted_filepath, source_pixel_checksum=None):
     """
     Visually compare the files (i.e. that the pixel values are identical).
-    Raises ValidationError if they don't match.
+    Raises a :class:`~image_processing.exceptions.ValidationError` if they don't match.
 
     .. note:: Does not check technical metadata beyond colour profile and mode.
 
@@ -131,7 +131,7 @@ def check_colour_profiles_match(source_filepath, converted_filepath):
     """
     Check the ICC profile and colour mode match.
     Allows greyscale and bitonal images to match, as that is how kakadu expands JP2s which were originally bitonal.
-    Raises :class:`ValidationError` if they do not match.
+    Raises :class:`~image_processing.exceptions.ValidationError` if they do not match.
 
     :param source_filepath:
     :param converted_filepath:
@@ -161,7 +161,7 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
                                             require_icc_profile_for_colour=True):
     """
     Check over the image and checks if it is in a supported and tested format for conversion to jp2.
-    Raises :class:`ValidationError` if it is not
+    Raises :class:`~image_processing.exceptions.ValidationError` if it is not
 
     :param image_filepath:
     :param require_icc_profile_for_greyscale: raise an error if a greyscale image doesn't have an icc profile.

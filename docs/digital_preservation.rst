@@ -20,6 +20,6 @@ It does not check:
 
 We have run tests on a wide sample of source images from our repository. We cannot share this test repository on GitHub due to copyright issues, but if you want to run your own tests these automatic lossless checks should simplify that. The full lossless checks can be disabled in production, but we'd recommend keeping them enabled if digital preservation is a concern.
 
-Note: our testing has been focused on the source images we ingest, not all possible formats. The :func:`validation.check_image_suitable_for_jp2_conversion` function is run when generating derivatives, and should fail for image formats we have not tested.
+Note: our testing has been focused on the source images we ingest, not all possible formats. The :func:`~image_processing.validation.check_image_suitable_for_jp2_conversion` function is run when generating derivatives, and should fail for image formats we have not tested.
 
 See :doc:`jp2_colour_management` for some more background information and recommendations.
