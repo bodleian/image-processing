@@ -20,21 +20,21 @@ DEFAULT_COMPRESS_OPTIONS = [
     'Cuse_sop=yes',
     'Cuse_eph=yes',
     '-flush_period', '1024']
-"""Some default command line options for :func:`kdu_compress`, without lossy/lossless specified."""
+"""Some default command line options for :func:`~image_processing.kakadu.Kakadu.kdu_compress`, without lossy/lossless specified."""
 
 LOSSLESS_OPTIONS = [
     "Creversible=yes",
     "-rate", "-"]
-""":func:`kdu_compress` command line options which make the compression lossless"""
+""":func:`~image_processing.kakadu.Kakadu.kdu_compress` command line options which make the compression lossless"""
 
 DEFAULT_LOSSLESS_COMPRESS_OPTIONS = DEFAULT_COMPRESS_OPTIONS + LOSSLESS_OPTIONS
-"""Default lossless command line options for :func:`kdu_compress`"""
+"""Default lossless command line options for :func:`~image_processing.kakadu.Kakadu.kdu_compress`"""
 
 LOSSY_OPTIONS = ["-rate", '3']
-""":func:`kdu_compress` command line options which make the compression lossy"""
+""":func:`~image_processing.kakadu.Kakadu.kdu_compress` command line options which make the compression lossy"""
 
 ALPHA_OPTION = '-jp2_alpha'
-""":func:`kdu_compress` command line option for images with alpha channels"""
+""":func:`~image_processing.kakadu.Kakadu.kdu_compress` command line option for images with alpha channels"""
 
 
 class Kakadu(object):
