@@ -62,6 +62,8 @@ class Converter(object):
         """
         Copy embedded image metadata from the input_image_filepath to the output_image_filepath
         """
+        if not os.access(input_image_filepath, os.R_OK):
+            raise IOError("Could not read input image path {0}".format(input_image_filepath))
         if not os.access(output_image_filepath, os.W_OK):
             raise IOError("Could not write to output path {0}".format(output_image_filepath))
 
@@ -81,7 +83,9 @@ class Converter(object):
         """
         if os.path.isfile(output_xmp_filepath):
             os.remove(output_xmp_filepath)
-        if not os.access(os.path.dirname(output_xmp_filepath), os.W_OK):
+        if not os.access(image_filepath, os.R_OK):
+            raise IOError("Could not read input image path {0}".format(image_filepath))
+        if not os.access(os.path.abspath(os.path.dirname(output_xmp_filepath)), os.W_OK):
             raise IOError("Could not write to output path {0}".format(output_xmp_filepath))
         if not os.path.splitext(output_xmp_filepath)[1] == ".xmp":
             raise IOError("XMP output file {0} needs an xmp extension".format(output_xmp_filepath))
