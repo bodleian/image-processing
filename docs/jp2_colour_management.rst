@@ -76,11 +76,11 @@ It is possible to convert monochrome images to RGB when compressing to JP2. Thes
 RGBA colour spaces
 ~~~~~~~~~~~~~~~~~~
 
-The ``kdu_compress`` command :ref:`options <kdu_compress-options>` we use does not always preserve alpha channel information with RGBA TIFFs. We add the ``-jp2_alpha`` option, which tells kakadu to treat the 4th image component as alpha, but there's still an issue with unassociated alpha channels, which can't be converted back to TIFF using ``kdu_expand``:
+The ``kdu_compress`` command :ref:`options <kdu_compress-options>` we use do not always preserve alpha channel information with RGBA TIFFs. We add the ``-jp2_alpha`` option, which tells kakadu to treat the 4th image component as alpha, but there is still an issue with unassociated alpha channels, which cannot be converted back to TIFF using ``kdu_expand``:
 
     Kakadu Warning: Alpha channel cannot be identified in a TIFF file since it is of the unassociated (i.e., not premultiplied) type, and these are not supported by TIFF.  You can save this to a separate output file.
 
-As very few of our input images have an alpha channel, and we have not encountered failing cases in live data (as opposed to constructed test data), this is not a priority for us. We just make sure to check RGBA JP2 conversions are lossless, so we'll catch any future failing cases, and otherwise treat them the same as RGB.
+As very few of our input images have an alpha channel, and we have not encountered failing cases in live data (as opposed to constructed test data), this is not a priority for us. We just make sure to check RGBA JP2 conversions are lossless, so we will catch any future failing cases.
 
 Colour profiles / modes not supported by JP2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
