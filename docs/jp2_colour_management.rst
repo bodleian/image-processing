@@ -27,32 +27,6 @@ JPX does support it, but isn't recommended for digital preservation.
 
 JP2 only supports a restricted set of ICC profile features. For example the `sRGB v4 ICC preference profile <http://www.color.org/srgbprofiles.xalter#v4pref>`__ is not supported, and cannot be embedded into a JP2 file using Kakadu. Setting ``-jp2_space sRGB`` on ``kdu_compress`` will erase the embedded profile and so allow it to be converted. But the sRGB IEC61966-2.1 profile thus assigned is sufficiently different that in some cases there is a noticeable tint to the created JP2.
 
-.. _kdu_compress-options:
-
-kdu_compress options
-~~~~~~~~~~~~~~~~~~~~
-
-Digital Bodleian uses the following ``kdu_compress`` options (:attr:`~image_processing.kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS`) for lossless JP2 conversion:
-
-- ``Clevels=6``
-- ``Clayers=6``
-- ``Cprecincts={256,256},{256,256},{128,128}``
-- ``Stiles={512,512}``
-- ``Corder=RPCL``
-- ``ORGgen_plt=yes``
-- ``ORGtparts=R``
-- ``Cblk={64,64}``
-- ``Cuse_sop=yes``
-- ``Cuse_eph=yes``
-- ``-flush_period 1024``
-- ``Creversible=yes``
-- ``-rate -``
-
-And for RGBA images we add:
-
-- ``-jp2_alpha``
-
-Note the lack of ``-jp2_space`` parameter.
 
 Recommendations
 ---------------
@@ -76,7 +50,7 @@ It is possible to convert monochrome images to RGB when compressing to JP2. Thes
 RGBA colour spaces
 ~~~~~~~~~~~~~~~~~~
 
-The ``kdu_compress`` command :ref:`options <kdu_compress-options>` we use do not always preserve alpha channel information with RGBA TIFFs. We add the ``-jp2_alpha`` option, which tells kakadu to treat the 4th image component as alpha, but there is still an issue with unassociated alpha channels, which cannot be converted back to TIFF using ``kdu_expand``:
+The ``kdu_compress`` command options we use do not always preserve alpha channel information with RGBA TIFFs. We add the ``-jp2_alpha`` option, which tells kakadu to treat the 4th image component as alpha, but there is still an issue with unassociated alpha channels, which cannot be converted back to TIFF using ``kdu_expand``:
 
     Kakadu Warning: Alpha channel cannot be identified in a TIFF file since it is of the unassociated (i.e., not premultiplied) type, and these are not supported by TIFF.  You can save this to a separate output file.
 
