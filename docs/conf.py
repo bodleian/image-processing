@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = u'image_processing'
-copyright = u'2018, Mel Mason'
+copyright = u'2018 Bodleian Libraries, University of Oxford'
 author = u'Mel Mason'
 
 # The short X.Y version
