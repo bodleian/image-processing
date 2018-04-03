@@ -90,7 +90,7 @@ class Kakadu(object):
             if not os.access(input_file, os.R_OK):
                 raise IOError("Could not access image file {0} to convert".format(input_file))
 
-        if not os.access(os.path.dirname(output_file), os.W_OK):
+        if not os.access(os.path.abspath(os.path.dirname(output_file)), os.W_OK):
             raise IOError("Could not write to output path {0}".format(output_file))
 
         input_option = ",".join(["{0}".format(item) for item in input_files])
