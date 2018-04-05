@@ -6,9 +6,9 @@ This package has a strong emphasis on digital preservation, as we want to use lo
 By default it checks:
 
 - the JP2 is valid (using `jpylyzer`_)
-- the JP2 can be converted back into a TIFF with no loss
-- this TIFF has the same pixels as the source TIFF (or the TIFF we converted from the source JPEG)
-- this TIFF has the same colour profile and mode as the source image
+- the JP2 can be converted back into a TIFF, which
+    - has the same pixels as the source TIFF (or the TIFF we converted from the source JPEG)
+    - has the same colour profile and mode as the source image
 
 .. _Jpylyzer: http://jpylyzer.openpreservation.org/
 

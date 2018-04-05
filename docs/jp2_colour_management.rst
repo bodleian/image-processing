@@ -33,7 +33,7 @@ For example the `sRGB v4 ICC preference profile <http://www.color.org/srgbprofil
 Recommendations
 ---------------
 
-When using JP2 for preservation, preserve the original colour space where possible and keep it embedded in the JP2. To ensure the broadest possible compatibility while retaining a wide colour gamut, we recommend that the colour profile in your source TIFFs are Adobe 1998. This will allow for the best colour representation through TIFF to JPEG 2000, and should display correctly in modern browsers.
+When using JP2 for preservation, preserve the original colour space where possible and keep it embedded in the JP2. To ensure the broadest possible compatibility while retaining a wide colour gamut, we recommend that the colour profile in your source TIFFs is Adobe RGB 1998. This will allow for the best colour representation through TIFF to JPEG 2000, and should display correctly in modern browsers.
 
 Supported RGB colour profiles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,7 +80,7 @@ Where delivery is the priority, rather than preservation, there are two options:
 
 Historically, many browsers have not supported colour profiles and have displayed images as if they were all sRGB. This is still the case with some older versions of browsers, especially on mobile platforms. Android only started supporting colour profiles with 8.0. So (1) is the safest option to ensure colour accuracy on all browsers.
 
-However, the latest versions of all major browsers (including Chrome, Edge, Firefox, IE, Safari, and Chrome and Safari on mobile) now support colour profiles (as do many IIIF servers, such as IIP). So with (2) most users would still be able to view images with colour accuracy. Keeping the original colour profile also permits users with wide gamut monitors can see Adobe RGB images with the full depth of colour, rather than being limited to the narrower sRGB gamut.
+However, the latest versions of all major browsers (including Chrome, Edge, Firefox, IE, Safari, and Chrome and Safari on mobile) now support colour profiles (as do many IIIF servers, such as IIP). So with (2) most users would still be able to view images with colour accuracy. Keeping the original colour profile also permits users with wide gamut monitors to see Adobe RGB 1998 images with the full depth of colour, rather than being limited to the narrower sRGB gamut.
 
 We use the same JP2 for preservation and delivery, so we have to use (2) in any case, to avoid the lossy conversion to sRGB.
 
