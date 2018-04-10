@@ -30,17 +30,14 @@ References
 ----------
 
 .. [#wellcome] `JPEG 2000 as a Preservation and Access Format for the Wellcome Trust Digital Library <http://wellcomelibrary.org/content/documents/22082/JPEG2000-preservation-format.pdf>`_
-
 .. [#kdugist] `Andrew Hankinson's notes on kdu_compress options <https://gist.github.com/ahankinson/4945722>`_
-
 .. [#czechlib] `JPEG 2000 Specifications for The National Library of the Czech Republic <https://www.iiifserver.com/doc/NationalLibraryOfTheCzechRepublicJPEG2000Profile.pdf>`_
-
 .. [#britishlib] `British Library JPEG 2000 profile <https://www.dpconline.org/docs/miscellaneous/events/524-jp2knov2010martin/file>`_
 
-5. `JPEG 2000 seminar – edited highlights #1 <http://blog.wellcomelibrary.org/2010/11/jpeg-2000-seminar-edited-highlights-1/>`_
-6. `IIPImage & An Analysis of JPEG2000 Encoding Parameters <https://www.dpconline.org/docs/miscellaneous/events/1358-2014-nov-jp2k-ruven/file>`_
-7. `JPEG 2000 profiles – examples from a range of institutions <https://www.dpconline.org/docs/miscellaneous/events/529-jp2knov2010parametercomparisonchart/file>`_
-8. `Diva.js JPEG 2000 encoding with Kakadu <https://github.com/DDMAL/diva.js/wiki/JPEG-2000-encoding-with-Kakadu>`_
-9. `JPEG2000 Implementation at Library and Archives Canada <https://www.museumsandtheweb.com/mw2007/papers/desrochers/desrochers.html>`_
+- `JPEG 2000 seminar – edited highlights #1 <http://blog.wellcomelibrary.org/2010/11/jpeg-2000-seminar-edited-highlights-1/>`_
+- `IIPImage & An Analysis of JPEG2000 Encoding Parameters <https://www.dpconline.org/docs/miscellaneous/events/1358-2014-nov-jp2k-ruven/file>`_
+- `JPEG 2000 profiles – examples from a range of institutions <https://www.dpconline.org/docs/miscellaneous/events/529-jp2knov2010parametercomparisonchart/file>`_
+- `Diva.js JPEG 2000 encoding with Kakadu <https://github.com/DDMAL/diva.js/wiki/JPEG-2000-encoding-with-Kakadu>`_
+- `JPEG2000 Implementation at Library and Archives Canada <https://www.museumsandtheweb.com/mw2007/papers/desrochers/desrochers.html>`_
 
 Note: most of these are from around 2010 - more recent examples of profiles would be welcome.
