@@ -13,6 +13,7 @@ Image processing documentation
 
     introduction
     digital_preservation
+    jp2_profile
     jp2_colour_management
     code
 
