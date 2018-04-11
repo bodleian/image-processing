@@ -16,6 +16,8 @@ Note also that colour profile conversion can be lossy.
 JP2 conversion details
 ----------------------
 
+The JPEG 2000 format supports only a restricted set of ICC Profile features.
+
 The ``-jp2_space`` parameter on ``kdu_compress`` sets the colour profile in the image metadata, but does not otherwise convert the image - the pixel values remain the same. The ``sRGB`` value sets the colour profile to the sRGB IEC61966-2.1 profile. (This is not the only way to set the colour profile)
 
 Kakadu (and JP2 itself) will not support CYMK images:
@@ -23,14 +25,15 @@ Kakadu (and JP2 itself) will not support CYMK images:
     Only three colour channels, R (red), G (green) and B (blue), are supported by the JP2 file format. Alternatively, a luminance image may have exactly one colour channel, Y (luminance).
     --`Kakadu  manual <http://kakadusoftware.com/wp-content/uploads/2014/06/Kakadu.pdf%205.2.1>`__
 
-JPX does support it, but isn't recommended for digital preservation.
+JPX does support it, but is not recommended for digital preservation.
 
-JP2 only supports a restricted set of ICC profile features. For example the `sRGB v4 ICC preference profile <http://www.color.org/srgbprofiles.xalter#v4pref>`__ is not supported, and cannot be embedded into a JP2 file using Kakadu. Setting ``-jp2_space sRGB`` on ``kdu_compress`` will erase the embedded profile and so allow it to be converted. But the sRGB IEC61966-2.1 profile thus assigned is sufficiently different that in some cases there is a noticeable tint to the created JP2.
+For example the `sRGB v4 ICC preference profile <http://www.color.org/srgbprofiles.xalter#v4pref>`__ is not supported, and cannot be embedded into a JP2 file using Kakadu. Setting ``-jp2_space sRGB`` on ``kdu_compress`` will erase the embedded profile and so allow it to be converted. The sRGB IEC61966-2.1 profile thus assigned is sufficiently different that in some cases there is a noticeable tint to the created JP2.
+
 
 Recommendations
 ---------------
 
-When using JP2 for preservation, preserve the original colour space where possible, and keep it embedded in the JP2.
+When using JP2 for preservation, preserve the original colour space where possible and keep it embedded in the JP2. To ensure the broadest possible compatibility while retaining a wide colour gamut, we recommend that the colour profile in your source TIFFs is Adobe RGB 1998. This will allow for the best colour representation through TIFF to JPEG 2000, and should display correctly in modern browsers.
 
 Supported RGB colour profiles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,7 +52,11 @@ It is possible to convert monochrome images to RGB when compressing to JP2. Thes
 RGBA colour spaces
 ~~~~~~~~~~~~~~~~~~
 
-The ``kdu_compress`` command options we use does not always preserve alpha channel information with RGBA TIFFs. As very few of our images have an alpha channel, and we have not encountered failing cases in live data (as opposed to constructed test data), we just check RGBA JP2 conversions are lossless, and otherwise treat them the same as RGB. If we had more RGBA images, we would investigate the ``-jp2_alpha`` option.
+The ``kdu_compress`` :ref:`command options <kdu_compress-options>` we use do not always preserve alpha channel information with RGBA TIFFs. We add the ``-jp2_alpha`` option, which tells kakadu to treat the 4th image component as alpha, but there is still an issue with unassociated alpha channels, which cannot be converted back to TIFF using ``kdu_expand``:
+
+    Kakadu Warning: Alpha channel cannot be identified in a TIFF file since it is of the unassociated (i.e., not premultiplied) type, and these are not supported by TIFF.  You can save this to a separate output file.
+
+As very few of our input images have an alpha channel, and we have not encountered failing cases in live data (as opposed to constructed test data), this is not a priority for us. We just make sure to check RGBA JP2 conversions are lossless, so we will catch any future failing cases.
 
 Colour profiles / modes not supported by JP2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,7 +80,7 @@ Where delivery is the priority, rather than preservation, there are two options:
 
 Historically, many browsers have not supported colour profiles and have displayed images as if they were all sRGB. This is still the case with some older versions of browsers, especially on mobile platforms. Android only started supporting colour profiles with 8.0. So (1) is the safest option to ensure colour accuracy on all browsers.
 
-However, all modern browsers now support colour profiles (as do many IIIF servers, such as IIP). So with (2) most users would still be able to view images with colour accuracy. Keeping the original colour profile also permits users with wide gamut monitors can see AdobeRGB images with the full depth of colour, rather than being limited to the narrower sRGB gamut.
+However, the latest versions of all major browsers (including Chrome, Edge, Firefox, IE, Safari, and Chrome and Safari on mobile) now support colour profiles (as do many IIIF servers, such as IIP). So with (2) most users would still be able to view images with colour accuracy. Keeping the original colour profile also permits users with wide gamut monitors to see Adobe RGB 1998 images with the full depth of colour, rather than being limited to the narrower sRGB gamut.
 
 We use the same JP2 for preservation and delivery, so we have to use (2) in any case, to avoid the lossy conversion to sRGB.
 
@@ -88,3 +95,12 @@ As well as manual visual checks, our JP2 conversion methods have all been tested
 4. Comparing the colour mode, colour profile and pixels of the original and new TIFF
 
 If any of the comparisons are not equal (with the exception of bitonal images, which we expect to produce greyscale TIFFs when converted back), the conversion is not considered lossless. This test ensures we can always return to a visually identical source TIFF file.
+
+Further Reading
+---------------
+
+For further reading on this topic, please consult the following sources:
+
+ `ICC profiles and resolution in JP2: update on 2011 D-Lib paper <http://openpreservation.org/blog/2013/07/01/icc-profiles-and-resolution-jp2-update-2011-d-lib-paper/>`_
+
+ `JP2 and colour profile limitations: a positive conclusion and findings <https://www.dpconline.org/blog/jp2-colour-profile>`_
