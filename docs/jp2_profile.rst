@@ -30,7 +30,7 @@ References
 ----------
 
 .. [#wellcome] `JPEG 2000 as a Preservation and Access Format for the Wellcome Trust Digital Library <http://wellcomelibrary.org/content/documents/22082/JPEG2000-preservation-format.pdf>`_
-.. [#kduusage] ``kdu_compress --usage`` (online copy `here <https://gist.github.com/ahankinson/4945722>`_)
+.. [#kduusage] ``kdu_compress -usage`` (online copy `here <https://gist.github.com/ahankinson/4945722>`_)
 .. [#czechlib] `JPEG 2000 Specifications for The National Library of the Czech Republic <https://www.iiifserver.com/doc/NationalLibraryOfTheCzechRepublicJPEG2000Profile.pdf>`_
 .. [#britishlib] `British Library JPEG 2000 profile <https://www.dpconline.org/docs/miscellaneous/events/524-jp2knov2010martin/file>`_
 
