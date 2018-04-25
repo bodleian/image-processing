@@ -2,11 +2,12 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
+import io
 import subprocess
 import logging
 
 import os
-from PIL import Image
+from PIL import Image, ImageCms
 
 from image_processing import utils
 from image_processing.exceptions import ImageProcessingError
@@ -100,3 +101,16 @@ class Converter(object):
         except subprocess.CalledProcessError as e:
             raise ImageProcessingError('Exiftool at {0} failed to extract metadata from {1}. Command: {2}, Error: {3}'.
                                        format(self.exiftool_path, image_filepath, ' '.join(command_options), e))
+
+    def convert_icc_profile(self, image_filepath, output_filepath, icc_profile_filepath, new_colour_mode=None):
+        with Image.open(image_filepath) as input_pil:
+            input_icc_obj = input_pil.info.get('icc_profile')
+            if input_icc_obj is None:
+                # todo: what should happen here?
+                raise ImageProcessingError("Image doesn't have a profile")
+            input_profile = ImageCms.getOpenProfile(io.BytesIO(input_icc_obj))
+
+            output_pil = ImageCms.profileToProfile(input_pil, input_profile, icc_profile_filepath,
+                                                   outputMode=new_colour_mode, inPlace=0)
+            output_pil.save(output_filepath)
+        self.copy_over_embedded_metadata(image_filepath, output_filepath)
