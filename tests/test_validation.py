@@ -11,7 +11,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 class TestValidation(object):
     def test_verifies_valid_jpeg2000(self):
-        validation.validate_jp2(filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+        validation.validate_jp2(filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF_XMP)
 
     def test_verifies_valid_lossy_jpeg2000(self):
         validation.validate_jp2(filepaths.LOSSY_JP2_FROM_STANDARD_TIF)
@@ -24,7 +24,7 @@ class TestValidation(object):
         tif_checksum = validation.generate_pixel_checksum(filepaths.STANDARD_TIF)
         assert tif_checksum == validation.generate_pixel_checksum(filepaths.STANDARD_TIF)
 
-        assert tif_checksum == validation.generate_pixel_checksum(filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+        assert tif_checksum == validation.generate_pixel_checksum(filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF_XMP)
 
         assert validation.generate_pixel_checksum(filepaths.SMALL_TIF) == \
             validation.generate_pixel_checksum(filepaths.SMALL_TIF_WITH_CHANGED_METADATA)

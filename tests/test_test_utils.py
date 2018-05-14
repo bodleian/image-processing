@@ -12,8 +12,8 @@ class TestTestUtils(object):
                                  filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF_DIFFERENT_KAKADU)
 
     def test_image_files_match_fails_on_different_images(self):
-        assert not image_files_match(filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF,
-                                     filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG)
+        assert not image_files_match(filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF_XMP,
+                                     filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG_XMP)
         assert not image_files_match(filepaths.SMALL_TIF, filepaths.SMALL_TIF_WITH_CHANGED_METADATA)
         assert not image_files_match(filepaths.SMALL_TIF, filepaths.SMALL_TIF_WITH_CHANGED_PIXELS)
 
