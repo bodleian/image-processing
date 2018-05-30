@@ -58,17 +58,21 @@ class Converter(object):
                 input_pil.save(output_filepath, "JPEG", icc_profile=icc_profile)
         self.copy_over_embedded_metadata(input_filepath, output_filepath)
 
-    def copy_over_embedded_metadata(self, input_image_filepath, output_image_filepath):
+    def copy_over_embedded_metadata(self, input_image_filepath, output_image_filepath, write_only_xmp=False):
         """
         Copy embedded image metadata from the input_image_filepath to the output_image_filepath
+
+        :param write_only_xmp: Copy all information to the same-named tags in XMP (if they exist). With JP2 it's safest to only use xmp tags, as other ones may not be supported by all software
         """
         if not os.access(input_image_filepath, os.R_OK):
             raise IOError("Could not read input image path {0}".format(input_image_filepath))
         if not os.access(output_image_filepath, os.W_OK):
             raise IOError("Could not write to output path {0}".format(output_image_filepath))
 
-        command_options = [self.exiftool_path, '-tagsFromFile', input_image_filepath, '-overwrite_original',
-                           output_image_filepath]
+        command_options = [self.exiftool_path, '-tagsFromFile', input_image_filepath, '-overwrite_original']
+        if write_only_xmp:
+            command_options += ['-xmp:all<all']
+        command_options += [output_image_filepath]
         self.logger.debug(' '.join(command_options))
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
