@@ -106,7 +106,6 @@ class Converter(object):
         with Image.open(image_filepath) as input_pil:
             input_icc_obj = input_pil.info.get('icc_profile')
             if input_icc_obj is None:
-                # todo: what should happen here?
                 raise ImageProcessingError("Image doesn't have a profile")
             input_profile = ImageCms.getOpenProfile(io.BytesIO(input_icc_obj))
 
@@ -114,3 +113,26 @@ class Converter(object):
                                                    outputMode=new_colour_mode, inPlace=0)
             output_pil.save(output_filepath)
         self.copy_over_embedded_metadata(image_filepath, output_filepath)
+
+
+def _get_bit_depths(pil_image):
+    """
+    Returns in base 10 for simplicity
+    :param pil_image:
+    :return: [255, 255, 255] or [255]
+    """
+    extrema = pil_image.getextrema()
+    # above returns either (0, 255) (for monochrome) or ((0, 255), (0,255), (0,255)) for RGB
+    if len(pil_image.getbands()) == 1:
+        extrema = extrema,
+    return [max_val for (min_val, max_val) in list(extrema)]
+
+
+# todo: errors or pass back false
+def _check_no_data_lost(orig_bit_depths, new_bit_depths):
+    if len(new_bit_depths) < len(orig_bit_depths):
+        # what about rgba?
+        pass
+    for i in range(0, min(len(orig_bit_depths), len(new_bit_depths))):
+        if new_bit_depths[i] < orig_bit_depths[i]:
+            pass
