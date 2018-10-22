@@ -12,11 +12,11 @@ The terminal commands are as follows:
 
 Lossless
 ~~~~~~~~
-``kdu_compress -i input.tif -o output.jp2 Clevels=6 Clayers=6 "Cprecincts={256,256},{256,256},{128,128}" "Stiles={512,512}" Corder=RPCL ORGgen_plt=yes ORGtparts=R "Cblk={64,64}" Cuse_sop=yes Cuse_eph=yes -flush_period 1024 Creversible=yes -rate -``
+kdu_compress -i input.tif -o output.jp2 Clevels=6 Clayers=6 "Cprecincts={256,256},{256,256},{128,128}" "Stiles={512,512}" Corder=RPCL ORGgen_plt=yes ORGtparts=R "Cblk={64,64}" Cuse_sop=yes Cuse_eph=yes -flush_period 1024 Creversible=yes -rate -
 
 Lossy
 ~~~~~
-``kdu_compress -i input.tif -o output.jp2 Clevels=6 Clayers=6 "Cprecincts={256,256},{256,256},{128,128}" "Stiles={512,512}" Corder=RPCL ORGgen_plt=yes ORGtparts=R "Cblk={64,64}" Cuse_sop=yes Cuse_eph=yes -flush_period 1024 -rate 3``
+kdu_compress -i input.tif -o output.jp2 Clevels=6 Clayers=6 "Cprecincts={256,256},{256,256},{128,128}" "Stiles={512,512}" Corder=RPCL ORGgen_plt=yes ORGtparts=R "Cblk={64,64}" Cuse_sop=yes Cuse_eph=yes -flush_period 1024 -rate 3
 
 Parameter explanation
 ~~~~~~~~~~~~~~~~~~~~~
