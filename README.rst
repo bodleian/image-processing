@@ -86,4 +86,4 @@ To just use Kakadu directly through the wrapper:
 More information
 ----------------
 
-See our `documentation <https://image-processing.readthedocs.io/>`__. If your question isn't covered there, please `submit an issue <issues>`_ or `contact us <mailto:mel.mason@bodleian.ox.ac.uk>`_.
+See our `documentation <https://image-processing.readthedocs.io/>`__. If your question isn't covered there, please `submit an issue <https://github.com/bodleian/image-processing/issues>`_ or `contact us <mailto:mel.mason@bodleian.ox.ac.uk>`_.
