@@ -6,7 +6,20 @@ JPEG2000 Profile
 Kakadu compression parameters
 -----------------------------
 
-Digital Bodleian uses the following ``kdu_compress`` options (:attr:`~image_processing.kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS`) for lossless JP2 conversion:
+Digital Bodleian uses a specific set of ``kdu_compress`` options (:attr:`~image_processing.kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS`) for lossless JP2 conversion, and alters the ``rate`` and ``Creversible`` parameters for lossy JP2 conversion.
+
+The terminal commands are as follows:
+
+Lossless
+~~~~~~~~
+kdu_compress -i input.tif -o output.jp2 Clevels=6 Clayers=6 "Cprecincts={256,256},{256,256},{128,128}" "Stiles={512,512}" Corder=RPCL ORGgen_plt=yes ORGtparts=R "Cblk={64,64}" Cuse_sop=yes Cuse_eph=yes -flush_period 1024 Creversible=yes -rate -
+
+Lossy
+~~~~~
+kdu_compress -i input.tif -o output.jp2 Clevels=6 Clayers=6 "Cprecincts={256,256},{256,256},{128,128}" "Stiles={512,512}" Corder=RPCL ORGgen_plt=yes ORGtparts=R "Cblk={64,64}" Cuse_sop=yes Cuse_eph=yes -flush_period 1024 -rate 3
+
+Parameter explanation
+~~~~~~~~~~~~~~~~~~~~~
 
 - ``Clevels=6`` Resolution levels. At least 3 are recommended to help compression. After that, the aim is to have the lowest resolution sub-image be roughly thumbnail-sized, so the optimal value is dependent on image size. [#wellcome]_
 - ``Clayers=6`` Quality layers. More layers can help with quicker decompression; you can decode only a subset of the layers when dealing with lower resolution images where quality decrease is not noticed. [#wellcome]_
