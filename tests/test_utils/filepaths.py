@@ -4,7 +4,8 @@
 STANDARD_TIF = 'tests/data/standard_adobe.tif'
 STANDARD_TIF_SINGLE_LAYER = 'tests/data/standard_adobe_tif_single_layer.tif'  # same tif but without thumbnail
 LOSSY_JP2_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_lossy.jp2'
-LOSSLESS_JP2_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif.jp2'
+LOSSLESS_JP2_FROM_STANDARD_TIF_XMP = 'tests/data/standard_adobe_tif_xmp.jp2'
+LOSSLESS_JP2_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif.jp2' # hasn't had xmp copied over using exiftool
 RESIZED_JPG_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_resized.jpg'
 HIGH_QUALITY_JPG_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_hq.jpg'
 STANDARD_TIF_XMP = 'tests/data/standard_adobe_tif.xmp'
@@ -15,20 +16,20 @@ STANDARD_TIF_XMP = 'tests/data/standard_adobe_tif.xmp'
 # tif with grayscale gamma 2.2 icc profile
 GREYSCALE_TIF = 'tests/data/greyscale_gamma.tif'
 RESIZED_JPG_FROM_GREYSCALE_TIF = 'tests/data/greyscale_gamma_tif_resized.jpg'
-LOSSLESS_JP2_FROM_GREYSCALE_TIF = 'tests/data/greyscale_gamma_tif.jp2'
+LOSSLESS_JP2_FROM_GREYSCALE_TIF_XMP = 'tests/data/greyscale_gamma_tif_xmp.jp2'
 
 BILEVEL_TIF = 'tests/data/bilevel.tif'
-LOSSLESS_JP2_FROM_BILEVEL_TIF = 'tests/data/bilevel_tif.jp2'
+LOSSLESS_JP2_FROM_BILEVEL_TIF_XMP = 'tests/data/bilevel_tif_xmp.jp2'
 RESIZED_JPG_FROM_BILEVEL_TIF = 'tests/data/bilevel_tif_resized.jpg'
 
 GREYSCALE_NO_PROFILE_TIF = 'tests/data/greyscale_without_profile.tif'
 RESIZED_JPG_FROM_GREYSCALE_NO_PROFILE_TIF = 'tests/data/greyscale_without_profile_tif_resized.jpg'
-LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF = 'tests/data/greyscale_without_profile_tif.jp2'
+LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF_XMP = 'tests/data/greyscale_without_profile_tif_xmp.jp2'
 
 # adobe rgb 1998 8 bit jpg file (converted from tif) + expected derivatives
 STANDARD_JPG = 'tests/data/standard_adobe.jpg'
 TIF_FROM_STANDARD_JPG = 'tests/data/standard_adobe_jpg.tif'
-LOSSLESS_JP2_FROM_STANDARD_JPG = 'tests/data/standard_adobe_jpg.jp2'
+LOSSLESS_JP2_FROM_STANDARD_JPG_XMP = 'tests/data/standard_adobe_jpg_xmp.jp2'
 STANDARD_JPG_XMP = 'tests/data/standard_adobe_jpg.xmp'
 
 # misc tiffs
