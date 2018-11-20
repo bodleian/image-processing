@@ -9,7 +9,6 @@ import tempfile
 
 from image_processing import conversion, validation, kakadu
 from image_processing.kakadu import Kakadu
-from image_processing.exceptions import KakaduUnrestrictedICCError
 from PIL import Image
 
 DEFAULT_TIFF_FILENAME = 'full.tiff'
@@ -165,36 +164,30 @@ class DerivativeFilesGenerator(object):
                 self.log.debug('Extracted metadata file {0} generated'.format(embedded_metadata_file_path))
                 generated_files += [embedded_metadata_file_path]
 
-
-            lossless_filepath = os.path.join(output_folder,
-                                             self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
-            comparison_tiff_for_losslessness = self.generate_jp2_from_tiff(normalised_tiff_filepath, lossless_filepath)
-            if comparison_tiff_for_losslessness != normalised_tiff_filepath:
-                include_tiff = True
-
             if include_tiff:
                 output_tiff_filepath = os.path.join(output_folder,
                                                     self._get_filename(DEFAULT_TIFF_FILENAME, source_file_name))
                 shutil.copy(tiff_filepath, output_tiff_filepath)
                 generated_files += [output_tiff_filepath]
 
-            self.validate_jp2_conversion(comparison_tiff_for_losslessness, lossless_filepath, check_lossless=check_lossless)
+            lossless_filepath = os.path.join(output_folder,
+                                             self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
+            self.generate_jp2_from_tiff(normalised_tiff_filepath, lossless_filepath)
+            self.validate_jp2_conversion(normalised_tiff_filepath, lossless_filepath, check_lossless=check_lossless)
             generated_files.append(lossless_filepath)
 
             self.log.debug("Successfully generated derivatives for {0} in {1}".format(tiff_filepath, output_folder))
 
             return generated_files
 
-    def generate_jp2_from_tiff(self, tiff_file, jp2_filepath, allow_icc_conversion=False):
+    def generate_jp2_from_tiff(self, tiff_file, jp2_filepath):
         """
         Creates lossless JPEG2000 at jp2_filepath
 
 
         :param tiff_file: The source TIFF file.
         :param jp2_filepath: The output filepath
-        :return the tiff used for conversion (may differ from tiff file passed in if we needed to do conversion)
         """
-        tiff_used_for_conversion = tiff_file
         kakadu_options = list(self.kakadu_compress_options)
 
         with Image.open(tiff_file) as tiff_pil:
@@ -202,29 +195,10 @@ class DerivativeFilesGenerator(object):
                 if kakadu.ALPHA_OPTION not in kakadu_options:
                     kakadu_options += [kakadu.ALPHA_OPTION]
 
-        try:
-            self.kakadu.kdu_compress(tiff_file, jp2_filepath, kakadu_options=kakadu_options)
-        except KakaduUnrestrictedICCError as e:
-            if not allow_icc_conversion:
-                raise
-            if self.default_icc_profile_filepath is None:
-                self.log.warning('Could not convert image to a restricted ICC profile '
-                                 '- default_icc_profile_filepath is not set')
-                raise
-            self.log.exception('Possible ICC profile error when compressing JP2')
-            self.log.warning('Converting tiff to default ICC profile so kdu_compress will support it')
-            # todo: wrong scope - I need a bigger scope
-            with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as icc_converted_tiff_file_obj:
-                icc_converted_tiff_file = icc_converted_tiff_file_obj.name
-                self.converter.convert_icc_profile(tiff_file, icc_converted_tiff_file, self.default_icc_profile_filepath)
-                self.kakadu.kdu_compress(icc_converted_tiff_file, jp2_filepath, kakadu_options=kakadu_options)
-                tiff_used_for_conversion = icc_converted_tiff_file
-
+        self.kakadu.kdu_compress(tiff_file, jp2_filepath, kakadu_options=kakadu_options)
         self.log.debug('Lossless jp2 file {0} generated'.format(jp2_filepath))
         # as of v7.10.4, kakadu doesn't copy over a lot of the technical metadata, so we do that separately
         self.converter.copy_over_embedded_metadata(tiff_file, jp2_filepath, write_only_xmp=True)
-
-        return tiff_used_for_conversion
 
     def validate_jp2_conversion(self, tiff_file, jp2_filepath, check_lossless=True):
         """

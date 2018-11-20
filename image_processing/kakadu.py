@@ -5,7 +5,7 @@ from __future__ import division
 import os
 import subprocess
 import logging
-from image_processing.exceptions import KakaduError, KakaduUnrestrictedICCError
+from image_processing.exceptions import KakaduError
 from image_processing import utils
 
 DEFAULT_COMPRESS_OPTIONS = [
@@ -102,10 +102,5 @@ class Kakadu(object):
         try:
             subprocess.check_call(command_options, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            if e.returncode == 255:
-                # I can't find confirmation in the documentation
-                # but all of the errors with incompatible ICC profiles appear to have this code
-                raise KakaduUnrestrictedICCError('Kakadu {0} failed on {1}. Command: {2}, Error: {3}'.
-                                  format(command, input_option, ' '.join(command_options), e))
             raise KakaduError('Kakadu {0} failed on {1}. Command: {2}, Error: {3}'.
                               format(command, input_option, ' '.join(command_options), e))
