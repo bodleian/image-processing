@@ -60,11 +60,13 @@ class TestImageFormatConverter(object):
             output_file = os.path.join(output_folder, 'output.tif')
             conversion.Converter().convert_icc_profile(filepaths.STANDARD_TIF, output_file, filepaths.SRGB_ICC_PROFILE)
             assert os.path.isfile(output_file)
+
             with Image.open(filepaths.STANDARD_TIF) as input_pil:
                 old_icc = input_pil.info.get('icc_profile')
                 f = io.BytesIO(old_icc)
                 prf = ImageCms.ImageCmsProfile(f)
                 assert prf.profile.profile_description == "Adobe RGB (1998)"
+
             with Image.open(output_file) as output_pil:
                 new_icc = output_pil.info.get('icc_profile')
                 f = io.BytesIO(new_icc)
@@ -74,6 +76,8 @@ class TestImageFormatConverter(object):
     def test_icc_conversion_catches_16_bit_errors(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.tif')
+
             with pytest.raises(exceptions.ImageProcessingError):
                 conversion.Converter().convert_icc_profile(filepaths.TIF_16_BIT, output_file, filepaths.SRGB_ICC_PROFILE)
+
             assert not os.path.isfile(output_file)

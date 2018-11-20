@@ -123,15 +123,18 @@ class Converter(object):
         with Image.open(image_filepath) as input_pil:
             # BitsPerSample is 258 (see PIL.TiffTags.TAGS_V2). tag_v2 is populated when opening an image, but not when saving
             orig_bit_depths = input_pil.tag_v2[258]
+
             if orig_bit_depths not in [(8, 8, 8), (8,), (1,)]:
                 raise ImageProcessingError("ICC profile conversion was unsuccessful for {0}: unsupported bit depth {1} "
                                            "Note: Pillow does not support 16 bit image profile conversion."
                                            .format(image_filepath, orig_bit_depths))
+
             input_icc_obj = input_pil.info.get('icc_profile')
+
             if input_icc_obj is None:
                 raise ImageProcessingError("Image doesn't have a profile")
-            input_profile = ImageCms.getOpenProfile(io.BytesIO(input_icc_obj))
 
+            input_profile = ImageCms.getOpenProfile(io.BytesIO(input_icc_obj))
             output_pil = ImageCms.profileToProfile(input_pil, input_profile, icc_profile_filepath,
                                                    renderingIntent=ImageCms.INTENT_PERCEPTUAL,
                                                    outputMode=new_colour_mode, inPlace=0)
