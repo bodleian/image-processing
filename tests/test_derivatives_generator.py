@@ -30,7 +30,7 @@ class TestDerivativeGenerator(object):
             assert os.path.isfile(xmp_file)
             assert len(os.listdir(output_folder)) == 3
             assert image_files_match(jpg_file, filepaths.HIGH_QUALITY_JPG_FROM_STANDARD_TIF)
-            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF_XMP)
 
     def test_creates_correct_files(self):
         with temporary_folder() as output_folder:
@@ -45,7 +45,7 @@ class TestDerivativeGenerator(object):
             assert os.path.isfile(xmp_file)
             assert len(os.listdir(output_folder)) == 3
             assert image_files_match(jpg_file, filepaths.RESIZED_JPG_FROM_STANDARD_TIF)
-            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF_XMP)
 
     def test_creates_correct_files_without_default_names(self):
         with temporary_folder() as output_folder:
@@ -67,7 +67,7 @@ class TestDerivativeGenerator(object):
             assert os.path.isfile(tif_file)
             assert len(os.listdir(output_folder)) == 4
             assert image_files_match(jpg_file, filepaths.RESIZED_JPG_FROM_STANDARD_TIF)
-            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF_XMP)
             assert filecmp.cmp(tif_file, filepaths.STANDARD_TIF)
             assert xmp_files_match(xmp_file, filepaths.STANDARD_TIF_XMP)
 
@@ -87,7 +87,7 @@ class TestDerivativeGenerator(object):
             assert os.path.isfile(xmp_file)
             assert len(os.listdir(output_folder)) == 3
             assert image_files_match(jpg_file, filepaths.RESIZED_JPG_FROM_STANDARD_TIF)
-            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF_XMP)
 
     def test_includes_tiff(self):
         with temporary_folder() as output_folder:
@@ -121,7 +121,7 @@ class TestDerivativeGenerator(object):
             assert os.path.isfile(jp2_file)
             assert len(os.listdir(output_folder)) == 2
             assert image_files_match(jpg_file, filepaths.RESIZED_JPG_FROM_GREYSCALE_NO_PROFILE_TIF)
-            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF)
+            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_GREYSCALE_NO_PROFILE_TIF_XMP)
 
     def test_creates_correct_files_greyscale(self):
         validation.check_image_suitable_for_jp2_conversion(filepaths.GREYSCALE_TIF,
@@ -138,7 +138,7 @@ class TestDerivativeGenerator(object):
             assert os.path.isfile(jp2_file)
             assert len(os.listdir(output_folder)) == 2
             assert image_files_match(jpg_file, filepaths.RESIZED_JPG_FROM_GREYSCALE_TIF)
-            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_GREYSCALE_TIF)
+            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_GREYSCALE_TIF_XMP)
 
     def test_creates_correct_files_bilevel_monochrome(self):
         with temporary_folder() as output_folder:
@@ -153,7 +153,7 @@ class TestDerivativeGenerator(object):
             assert os.path.isfile(jp2_file)
             assert len(os.listdir(output_folder)) == 2
             assert image_files_match(jpg_file, filepaths.RESIZED_JPG_FROM_BILEVEL_TIF)
-            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_BILEVEL_TIF)
+            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_BILEVEL_TIF_XMP)
 
     def test_does_not_generate_embedded_metadata_file(self):
         with temporary_folder() as output_folder:
@@ -183,7 +183,7 @@ class TestDerivativeGenerator(object):
             assert len(os.listdir(output_folder)) == 3
 
             assert image_files_match(jpg_file, filepaths.RESIZED_JPG_FROM_STANDARD_TIF)
-            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF)
+            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_TIF_XMP)
             assert xmp_files_match(embedded_metadata_file, filepaths.STANDARD_TIF_XMP)
 
     def test_fails_without_icc_profile(self):
@@ -219,5 +219,5 @@ class TestDerivativeGenerator(object):
             assert os.path.isfile(embedded_metadata_file)
             assert len(os.listdir(output_folder)) == 3
             assert image_files_match(jpg_file, filepaths.STANDARD_JPG)
-            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG)
+            assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG_XMP)
             assert xmp_files_match(embedded_metadata_file, filepaths.STANDARD_JPG_XMP)

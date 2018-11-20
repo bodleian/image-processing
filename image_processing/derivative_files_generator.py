@@ -182,7 +182,8 @@ class DerivativeFilesGenerator(object):
 
     def generate_jp2_from_tiff(self, tiff_file, jp2_filepath):
         """
-        Creates lossless JPEG2000 at filepath, and validates it
+        Creates lossless JPEG2000 at jp2_filepath
+
 
         :param tiff_file: The source TIFF file.
         :param jp2_filepath: The output filepath
@@ -196,6 +197,8 @@ class DerivativeFilesGenerator(object):
 
         self.kakadu.kdu_compress(tiff_file, jp2_filepath, kakadu_options=kakadu_options)
         self.log.debug('Lossless jp2 file {0} generated'.format(jp2_filepath))
+        # as of v7.10.4, kakadu doesn't copy over a lot of the technical metadata, so we do that separately
+        self.converter.copy_over_embedded_metadata(tiff_file, jp2_filepath, write_only_xmp=True)
 
     def validate_jp2_conversion(self, tiff_file, jp2_filepath, check_lossless=True):
         """
