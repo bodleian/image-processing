@@ -1,9 +1,11 @@
+import io
 import logging
 import os
 import sys
 from image_processing import conversion, derivative_files_generator, validation, exceptions, kakadu
 import pytest
 from .test_utils import temporary_folder, filepaths, image_files_match
+from PIL import Image, ImageCms
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
@@ -52,3 +54,26 @@ class TestImageFormatConverter(object):
             with pytest.raises(exceptions.KakaduError):
                 get_kakadu().kdu_compress(filepaths.INVALID_TIF, output_file,
                                           kakadu_options=kakadu.DEFAULT_COMPRESS_OPTIONS + kakadu.LOSSLESS_OPTIONS)
+
+    def test_icc_conversion(self):
+        with temporary_folder() as output_folder:
+            output_file = os.path.join(output_folder, 'output.tif')
+            conversion.Converter().convert_icc_profile(filepaths.STANDARD_TIF, output_file, filepaths.SRGB_ICC_PROFILE)
+            assert os.path.isfile(output_file)
+            with Image.open(filepaths.STANDARD_TIF) as input_pil:
+                old_icc = input_pil.info.get('icc_profile')
+                f = io.BytesIO(old_icc)
+                prf = ImageCms.ImageCmsProfile(f)
+                assert prf.profile.profile_description == "Adobe RGB (1998)"
+            with Image.open(output_file) as output_pil:
+                new_icc = output_pil.info.get('icc_profile')
+                f = io.BytesIO(new_icc)
+                prf = ImageCms.ImageCmsProfile(f)
+                assert prf.profile.profile_description == "sRGB v4 ICC preference perceptual intent beta"
+
+    def test_icc_conversion_catches_16_bit_errors(self):
+        with temporary_folder() as output_folder:
+            output_file = os.path.join(output_folder, 'output.tif')
+            with pytest.raises(exceptions.ImageProcessingError):
+                conversion.Converter().convert_icc_profile(filepaths.TIF_16_BIT, output_file, filepaths.SRGB_ICC_PROFILE)
+            assert not os.path.isfile(output_file)

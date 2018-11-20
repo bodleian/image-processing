@@ -107,36 +107,33 @@ class Converter(object):
                                        format(self.exiftool_path, image_filepath, ' '.join(command_options), e))
 
     def convert_icc_profile(self, image_filepath, output_filepath, icc_profile_filepath, new_colour_mode=None):
+        """
+        Convert the image to a new icc profile. This is lossy, so should only be done when necessary (e.g. if jp2 doesn't support the colour profile)
+        Doesn't support 16bit images due to limitations of Pillow
+
+        Uses the perceptual rendering intent, as it's the recommended one for general photographic purposes, and loses less information on out-of-gamut colours than relative colormetric
+        However, if we're converting to a matrix profile like AdobeRGB, this will use relative colormetric instead, as perceptual intents are only supported by lookup table colour profiles
+        In practise, we should be converting to a wide gamut profile, so out-of-gamut colours will be limited anyway
+        :param image_filepath:
+        :param output_filepath:
+        :param icc_profile_filepath:
+        :param new_colour_mode:
+        :return:
+        """
         with Image.open(image_filepath) as input_pil:
+            # BitsPerSample is 258 (see PIL.TiffTags.TAGS_V2). tag_v2 is populated when opening an image, but not when saving
+            orig_bit_depths = input_pil.tag_v2[258]
+            if orig_bit_depths not in [(8, 8, 8), (8,), (1,)]:
+                raise ImageProcessingError("ICC profile conversion was unsuccessful for {0}: unsupported bit depth {1} "
+                                           "Note: Pillow does not support 16 bit image profile conversion."
+                                           .format(image_filepath, orig_bit_depths))
             input_icc_obj = input_pil.info.get('icc_profile')
             if input_icc_obj is None:
                 raise ImageProcessingError("Image doesn't have a profile")
             input_profile = ImageCms.getOpenProfile(io.BytesIO(input_icc_obj))
 
             output_pil = ImageCms.profileToProfile(input_pil, input_profile, icc_profile_filepath,
+                                                   renderingIntent=ImageCms.INTENT_PERCEPTUAL,
                                                    outputMode=new_colour_mode, inPlace=0)
             output_pil.save(output_filepath)
         self.copy_over_embedded_metadata(image_filepath, output_filepath)
-
-
-def _get_bit_depths(pil_image):
-    """
-    Returns in base 10 for simplicity
-    :param pil_image:
-    :return: [255, 255, 255] or [255]
-    """
-    extrema = pil_image.getextrema()
-    # above returns either (0, 255) (for monochrome) or ((0, 255), (0,255), (0,255)) for RGB
-    if len(pil_image.getbands()) == 1:
-        extrema = extrema,
-    return [max_val for (min_val, max_val) in list(extrema)]
-
-
-# todo: errors or pass back false
-def _check_no_data_lost(orig_bit_depths, new_bit_depths):
-    if len(new_bit_depths) < len(orig_bit_depths):
-        # what about rgba?
-        pass
-    for i in range(0, min(len(orig_bit_depths), len(new_bit_depths))):
-        if new_bit_depths[i] < orig_bit_depths[i]:
-            pass

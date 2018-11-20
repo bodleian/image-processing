@@ -38,6 +38,8 @@ SMALL_TIF = 'tests/data/small.tif'
 SMALL_TIF_WITH_CHANGED_PIXELS = 'tests/data/small_different_pixel.tif'
 SMALL_TIF_WITH_CHANGED_METADATA = 'tests/data/small_different_metadata.tif'
 
+TIF_16_BIT = 'tests/data/16_bit.tif'
+
 # a jpg where the metadata was transferred over using a different version of exiftool and so won't match on filecmp.cmp
 RESIZED_JPG_FROM_BILEVEL_TIF_DIFFERENT_EXIFTOOL = 'tests/data/bilevel_tif_resized_different_exiftool.jpg'
 # xmp extracted using a different version of exiftool, which won't match on filecmp.cmp
@@ -53,3 +55,5 @@ INVALID_TIF = 'tests/data/invalid.tif'
 
 KAKADU_BASE_PATH = '/opt/kakadu'
 DEFAULT_IMAGE_MAGICK_PATH = '/usr/bin/'
+
+SRGB_ICC_PROFILE = 'tests/data/sRGB_v4_ICC_preference.icc'
