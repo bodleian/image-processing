@@ -3,6 +3,8 @@ from __future__ import print_function
 from __future__ import division
 
 from jpylyzer.jpylyzer import checkOneFile
+from xml.etree import ElementTree
+from xml.dom import minidom
 from PIL import Image, ImageSequence
 from image_processing import exceptions
 import logging
@@ -15,20 +17,25 @@ MONOTONE_COLOUR_MODES = [GREYSCALE, BITONAL]
 ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
 
 
-def validate_jp2(image_file):
+def validate_jp2(image_file, output_file=None):
     """
     Uses jpylyzer (:func:`jpylyzer.jpylzer.checkOneFile`) to validate the jp2 file.
     Raises a :class:`~image_processing.exceptions.ValidationError` if it is invalid
 
     :param image_file:
+    :param output_file: if not None, write the jpylyzer xml output to this file
     :type image_file: str
     """
     logger = logging.getLogger(__name__)
     jp2_element = checkOneFile(image_file)
     success = jp2_element.findtext('isValidJP2') == 'True'
+    output_string = minidom.parseString(ElementTree.tostring(jp2_element)).toprettyxml(encoding='utf-8')
+    if output_file:
+        with open(output_file, 'wb') as f:
+            f.write(output_string)
     if not success:
         logger.error('{0} failed jypylzer validation'.format(image_file))
-        logger.error(str(jp2_element))
+        logger.error(output_string)
         raise exceptions.ValidationError('{0} failed jypylzer validation'.format(image_file))
     logger.debug('{0} is a valid jp2 file'.format(image_file))
 

@@ -200,7 +200,7 @@ class DerivativeFilesGenerator(object):
         # as of v7.10.4, kakadu doesn't copy over a lot of the technical metadata, so we do that separately
         self.converter.copy_over_embedded_metadata(tiff_file, jp2_filepath, write_only_xmp=True)
 
-    def validate_jp2_conversion(self, tiff_file, jp2_filepath, check_lossless=True):
+    def validate_jp2_conversion(self, tiff_file, jp2_filepath, check_lossless=True, jpylyzer_output_filepath=None):
         """
         Validate the jp2 file using jpylyzer, and check that the conversion from tif to jp2 was lossless
         Raises a :class:`~image_processing.exceptions.ValidationError` if either check fails.
@@ -208,8 +208,9 @@ class DerivativeFilesGenerator(object):
         :param tiff_file:
         :param jp2_filepath:
         :param check_lossless: if false, don't check the conversion from tif to jp2 was lossless
+        :param jpylyzer_output_filepath: write the jpylyzer xml output to this file if given
         """
-        validation.validate_jp2(jp2_filepath)
+        validation.validate_jp2(jp2_filepath, jpylyzer_output_filepath)
         if check_lossless:
             self.check_conversion_was_lossless(tiff_file, jp2_filepath)
 
