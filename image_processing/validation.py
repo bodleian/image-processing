@@ -35,7 +35,6 @@ def validate_jp2(image_file, output_file=None):
             f.write(output_string)
     if not success:
         logger.error('{0} failed jypylzer validation'.format(image_file))
-        logger.error(output_string)
         raise exceptions.ValidationError('{0} failed jypylzer validation'.format(image_file))
     logger.debug('{0} is a valid jp2 file'.format(image_file))
 
