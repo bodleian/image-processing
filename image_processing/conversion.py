@@ -124,7 +124,7 @@ class Converter(object):
             # BitsPerSample is 258 (see PIL.TiffTags.TAGS_V2). tag_v2 is populated when opening an image, but not when saving
             orig_bit_depths = input_pil.tag_v2[258]
 
-            if orig_bit_depths not in [(8, 8, 8), (8,), (1,)]:
+            if orig_bit_depths not in [(8, 8, 8, 8), (8, 8, 8), (8,), (1,)]:
                 raise ImageProcessingError("ICC profile conversion was unsuccessful for {0}: unsupported bit depth {1} "
                                            "Note: Pillow does not support 16 bit image profile conversion."
                                            .format(image_filepath, orig_bit_depths))
