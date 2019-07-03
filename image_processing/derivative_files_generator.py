@@ -111,7 +111,8 @@ class DerivativeFilesGenerator(object):
 
             jpylyzer_output_filepath = None
             if save_jpylyzer_output:
-                jpylyzer_output_filepath = self._get_filename(DEFAULT_JPYLYZER_XML_FILENAME, source_file_name)
+                jpylyzer_output_filepath = os.path.join(output_folder,
+                                                        self._get_filename(DEFAULT_JPYLYZER_XML_FILENAME, source_file_name))
 
             self.validate_jp2_conversion(scratch_tiff_filepath, lossless_filepath, check_lossless=check_lossless,
                                          jpylyzer_output_filepath=jpylyzer_output_filepath)
@@ -190,7 +191,8 @@ class DerivativeFilesGenerator(object):
 
             jpylyzer_output_filepath = None
             if save_jpylyzer_output:
-                jpylyzer_output_filepath = self._get_filename(DEFAULT_JPYLYZER_XML_FILENAME, source_file_name)
+                jpylyzer_output_filepath = os.path.join(output_folder,
+                                                        self._get_filename(DEFAULT_JPYLYZER_XML_FILENAME, source_file_name))
 
             self.validate_jp2_conversion(normalised_tiff_filepath, lossless_filepath, check_lossless=check_lossless,
                                          jpylyzer_output_filepath=jpylyzer_output_filepath)
