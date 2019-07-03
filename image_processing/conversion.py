@@ -62,7 +62,8 @@ class Converter(object):
     def copy_over_embedded_metadata(self, input_image_filepath, output_image_filepath, write_only_xmp=False):
         """
         Copy embedded image metadata from the input_image_filepath to the output_image_filepath
-
+        :param input_image_filepath: input filepath
+        :param output_image_filepath: output filepath
         :param write_only_xmp: Copy all information to the same-named tags in XMP (if they exist). With JP2 it's safest to only use xmp tags, as other ones may not be supported by all software
         """
         if not os.access(input_image_filepath, os.R_OK):
