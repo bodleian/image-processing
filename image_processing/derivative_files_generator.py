@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
+import errno
 import os
 import shutil
 import logging
@@ -83,6 +84,8 @@ class DerivativeFilesGenerator(object):
             jpg_filepath, require_icc_profile_for_colour=self.require_icc_profile_for_colour,
             require_icc_profile_for_greyscale=self.require_icc_profile_for_greyscale)
 
+        _make_dirs_if_exist(output_folder)
+
         output_jpg_filepath = os.path.join(output_folder, self._get_filename(DEFAULT_JPG_FILENAME, source_file_name))
         shutil.copy(jpg_filepath, output_jpg_filepath)
         generated_files = [output_jpg_filepath]
@@ -137,6 +140,8 @@ class DerivativeFilesGenerator(object):
                 # some RGBA tiffs don't convert properly back from jp2 - kakadu warns about unassociated alpha channels
                 check_lossless = True
 
+        _make_dirs_if_exist(output_folder)
+
         with tempfile.NamedTemporaryFile(prefix='image-processing_', suffix='.tif') as temp_tiff_file_obj:
             # only work from a temporary file if we need to - e.g. if the tiff filepath is invalid,
             # or if we need to normalise the tiff. Otherwise just use the original tiff
@@ -153,7 +158,7 @@ class DerivativeFilesGenerator(object):
             jpg_resize = self.jpg_thumbnail_resize_value if create_jpg_as_thumbnail else None
 
             self.converter.convert_to_jpg(normalised_tiff_filepath, jpeg_filepath,
-                                      quality=jpg_quality, resize=jpg_resize)
+                                          quality=jpg_quality, resize=jpg_resize)
             self.log.debug('jpeg file {0} generated'.format(jpeg_filepath))
             generated_files = [jpeg_filepath]
 
@@ -253,3 +258,17 @@ class DerivativeFilesGenerator(object):
             return "{0}.xmp".format(orig_filename_base)
         elif default_filename == DEFAULT_LOSSLESS_JP2_FILENAME:
             return "{0}.jp2".format(orig_filename_base)
+
+
+def _make_dirs_if_exist(path):
+    """
+    Create a folder if it doesn't exist. Equivalent to os.makedirs(path, exist_ok=True), but works on python 2
+    :param path: Path to create
+    """
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise

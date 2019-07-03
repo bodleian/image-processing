@@ -54,7 +54,7 @@ class Kakadu(object):
         if not utils.cmd_is_executable(self._command_path('kdu_expand')):
             self.log.error("Could not find executable {0}. Lossless checks will not work. "
                            "Check kakadu is installed and kdu_expand exists at the configured path"
-                          .format(self._command_path('kdu_expand')))
+                           .format(self._command_path('kdu_expand')))
 
     def _command_path(self, command):
         return os.path.join(self.kakadu_base_path, command)
