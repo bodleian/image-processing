@@ -14,8 +14,8 @@ setup(name='image_processing',
       packages=['image_processing'],
       install_requires=['Pillow', 'jpylyzer'],
       entry_points={
-            'console_scripts': ['convert_tiff_to_jp2=:image_processing.entry_points.generate_derivatives_from_tiff',
-                                'convert_icc=:image_processing.entry_points.convert_icc_profile'
+            'console_scripts': ['convert_tiff_to_jp2=image_processing.entry_points:generate_derivatives_from_tiff',
+                                'convert_icc=image_processing.entry_points:convert_icc_profile'
                                 ]
       }
       )
