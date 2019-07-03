@@ -23,7 +23,7 @@ def generate_derivatives_from_tiff():
                                          require_icc_profile_for_greyscale=False,
                                          use_default_filenames=False,
                                          kakadu_base_path=args.kakadu_path)
-    generator.generate_derivatives_from_tiff(args.tiff_filepath, output_folder, include_tiff=False)
+    generator.generate_derivatives_from_tiff(args.tiff_filepath, output_folder, include_tiff=False, save_jpylyzer_output=True)
     print('Files created at {0}'.format(output_folder))
 
 

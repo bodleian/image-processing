@@ -16,6 +16,7 @@ DEFAULT_TIFF_FILENAME = 'full.tiff'
 DEFAULT_EMBEDDED_METADATA_FILENAME = 'full.xmp'
 DEFAULT_JPG_FILENAME = 'full.jpg'
 DEFAULT_LOSSLESS_JP2_FILENAME = 'full_lossless.jp2'
+DEFAULT_JPYLYZER_XML_FILENAME = 'full_lossless.jp2.jpylyzer.xml'
 
 DEFAULT_JPG_THUMBNAIL_RESIZE_VALUE = 0.6
 DEFAULT_JPG_HIGH_QUALITY_VALUE = 92
@@ -64,7 +65,7 @@ class DerivativeFilesGenerator(object):
         self.log = logging.getLogger(__name__)
 
     def generate_derivatives_from_jpg(self, jpg_filepath, output_folder, save_embedded_metadata=True,
-                                      check_lossless=True):
+                                      check_lossless=True, save_jpylyzer_output=False):
         """
         Extracts the embedded metadata, creates a copy of the JPEG file and a validated JPEG2000 file.
         Stores all in the given folder.
@@ -72,6 +73,7 @@ class DerivativeFilesGenerator(object):
         :param jpg_filepath: The path to the source JPEG file.
         :param output_folder: The folder where the derivatives will be stored
         :param save_embedded_metadata: If true, metadata will be extracted from the image file and preserved in a separate xml file
+        :param save_jpylyzer_output: If true, the jyplyzer output from validating the jp2 will be preserved in a separate xml file
         :param check_lossless: If true, check the created JPEG2000 file is visually identical to the TIFF created from the source file
         :return: filepaths of created files
         """
@@ -106,7 +108,13 @@ class DerivativeFilesGenerator(object):
             lossless_filepath = os.path.join(output_folder,
                                              self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
             self.generate_jp2_from_tiff(scratch_tiff_filepath, lossless_filepath)
-            self.validate_jp2_conversion(scratch_tiff_filepath, lossless_filepath, check_lossless=check_lossless)
+
+            jpylyzer_output_filepath = None
+            if save_jpylyzer_output:
+                jpylyzer_output_filepath = self._get_filename(DEFAULT_JPYLYZER_XML_FILENAME, source_file_name)
+
+            self.validate_jp2_conversion(scratch_tiff_filepath, lossless_filepath, check_lossless=check_lossless,
+                                         jpylyzer_output_filepath=jpylyzer_output_filepath)
             generated_files.append(lossless_filepath)
 
         self.log.debug("Successfully generated derivatives for {0} in {1}".format(jpg_filepath, output_folder))
@@ -114,7 +122,7 @@ class DerivativeFilesGenerator(object):
         return generated_files
 
     def generate_derivatives_from_tiff(self, tiff_filepath, output_folder, include_tiff=False, save_embedded_metadata=True,
-                                       create_jpg_as_thumbnail=True, check_lossless=True):
+                                       create_jpg_as_thumbnail=True, check_lossless=True, save_jpylyzer_output=False):
         """
         Extracts the embedded metadata, creates a JPEG file and a validated JPEG2000 file.
         Stores all in the given folder.
@@ -125,6 +133,7 @@ class DerivativeFilesGenerator(object):
         :param output_folder: the folder where the related dc.xml will be stored
         :param include_tiff: Include copy of source tiff file in derivatives
         :param save_embedded_metadata: If true, metadata will be extracted from the image file and preserved in a separate xml file
+        :param save_jpylyzer_output: If true, the jyplyzer output from validating the jp2 will be preserved in a separate xml file
         :param check_lossless: If true, check the created jpg2000 file is visually identical to the source file
         :return: filepaths of created files
         """
@@ -178,7 +187,13 @@ class DerivativeFilesGenerator(object):
             lossless_filepath = os.path.join(output_folder,
                                              self._get_filename(DEFAULT_LOSSLESS_JP2_FILENAME, source_file_name))
             self.generate_jp2_from_tiff(normalised_tiff_filepath, lossless_filepath)
-            self.validate_jp2_conversion(normalised_tiff_filepath, lossless_filepath, check_lossless=check_lossless)
+
+            jpylyzer_output_filepath = None
+            if save_jpylyzer_output:
+                jpylyzer_output_filepath = self._get_filename(DEFAULT_JPYLYZER_XML_FILENAME, source_file_name)
+
+            self.validate_jp2_conversion(normalised_tiff_filepath, lossless_filepath, check_lossless=check_lossless,
+                                         jpylyzer_output_filepath=jpylyzer_output_filepath)
             generated_files.append(lossless_filepath)
 
             self.log.debug("Successfully generated derivatives for {0} in {1}".format(tiff_filepath, output_folder))
@@ -258,6 +273,8 @@ class DerivativeFilesGenerator(object):
             return "{0}.xmp".format(orig_filename_base)
         elif default_filename == DEFAULT_LOSSLESS_JP2_FILENAME:
             return "{0}.jp2".format(orig_filename_base)
+        elif default_filename == DEFAULT_JPYLYZER_XML_FILENAME:
+            return "{0}.jp2.jpylyzer.xml".format(orig_filename_base)
 
 
 def _make_dirs_if_exist(path):
