@@ -18,6 +18,7 @@ def generate_derivatives_from_tiff():
     output_folder = args.output_folder
     if not output_folder:
         output_folder, _ = os.path.splitext(os.path.basename(args.tiff_filepath))
+    output_folder = os.path.abspath(output_folder)
     generator = DerivativeFilesGenerator(require_icc_profile_for_colour=False,
                                          require_icc_profile_for_greyscale=False,
                                          use_default_filenames=False,
