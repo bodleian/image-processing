@@ -11,8 +11,8 @@ def generate_derivatives_from_tiff():
     """
     parser = argparse.ArgumentParser(description="Generate a JP2 from a TIFF, and check the conversion is lossless. "
                                                  "Also generates a thumbnail and records for digital preservation")
-    parser.add_argument('tiff_filepath', 'Tiff to convert')
-    parser.add_argument('-o', 'output_folder', 'Folder to create derivatives in', required=False, default=None)
+    parser.add_argument('tiff_filepath', help='Tiff to convert')
+    parser.add_argument('-o', '--output_folder', help='Folder to create derivatives in', required=False, default=None)
     args = parser.parse_args()
     output_folder = args.output_folder
     if not output_folder:
@@ -29,10 +29,10 @@ def convert_icc_profile():
     A basic command line script that runs :func:`~image_processing.conversion.Converter.convert_icc_profile`"
     """
     parser = argparse.ArgumentParser(description="Converts the icc profile of a file")
-    parser.add_argument('image_filepath', 'Tiff to convert')
-    parser.add_argument('output_image_filepath', 'Output image')
-    parser.add_argument('-i', 'icc_filepath', 'Path to an icc profile', required=True)
-    parser.add_argument('-c', 'colour_mode', 'New colour mode, if any', default=None, required=False)
+    parser.add_argument('image_filepath', help='Tiff to convert')
+    parser.add_argument('output_image_filepath', help='Output image')
+    parser.add_argument('-i', '--icc_filepath', help='Path to an icc profile', required=True)
+    parser.add_argument('-c', '--colour_mode', help='New colour mode, if any', default=None, required=False)
     args = parser.parse_args()
     converter = Converter()
     converter.convert_icc_profile(args.image_filepath, args.output_image_filepath,
