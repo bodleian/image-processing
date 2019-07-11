@@ -53,6 +53,13 @@ Quick start
 -----------
 
 To run a full conversion on a TIFF file, with validation, format checks, XMP extraction and creation of a thumbnail JPEG:
+
+From the command line:
+::
+
+    convert_tiff_to_jp2 input.tif
+
+In Python:
 ::
 
     from image_processing.derivative_files_generator import DerivativeFilesGenerator
