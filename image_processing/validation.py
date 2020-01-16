@@ -28,7 +28,12 @@ def validate_jp2(image_file, output_file=None):
     """
     logger = logging.getLogger(__name__)
     jp2_element = checkOneFile(image_file)
-    success = jp2_element.findtext('isValidJP2') == 'True'
+    is_valid_element = jp2_element.find('isValid')
+    # elements are falsey if they have no children, so we explicitly check `is None`
+    if is_valid_element is None:
+        # isValid is only in post-2.0.0 jyplyzer output. legacy output has isValidJP2 instead
+        is_valid_element = jp2_element.find('isValidJP2')
+    success = is_valid_element is not None and is_valid_element.text == 'True'
     output_string = minidom.parseString(ElementTree.tostring(jp2_element)).toprettyxml(encoding='utf-8')
     if output_file:
         with open(output_file, 'wb') as f:
