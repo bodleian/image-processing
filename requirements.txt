@@ -1,7 +1,7 @@
-py==1.4.31
-pytest==2.9.0
-uuid==1.30
-Pillow >= 5
+py>=1.4.31
+pytest>=2.9.0
+uuid>=1.30
+Pillow >= 9
 jpylyzer
 sphinx
 sphinx-autobuild
