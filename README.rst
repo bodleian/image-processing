@@ -26,7 +26,7 @@ Installation
 
 ``pip install git+https://github.com/bodleian/image-processing.git``
 
-- Compatible with both Python 2.7 and 3.5+
+- Tested on Python 3.6+
 
 Dependencies
 ~~~~~~~~~~~~
@@ -38,6 +38,8 @@ Dependencies
 - `Pillow`_ prerequisites before pip install
     - May need some image packages installed before pip installation (may not need lcms2 depending on which TIFF formats you'll be processing)
     - ``yum install lcms2 lcms2-devel libtiff libtiff-devel libjpeg libjpeg-devel``
+        - If Pillow raises "decoder jpeg2k not available" errors while running the unit tests, try installing `openjpeg2`. This should only affect the unit tests, not normal running
+        - You may need to delete and recreate the Python virtual environment for Pillow to properly link to these packages
     - The virtual environment's python binary needs to match the Python.h used by GCC. If necessary, use ``export C_INCLUDE_PATH=/usr/local/include/python2.7/``
 - `Jpylyzer`_ prerequisites before pip install
     - Needs a relatively recent pip version to install - it fails on 1.4.
