@@ -1,0 +1,28 @@
+on: [push]
+jobs:
+  Run-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+      - env:
+          LD_LIBRARY_PATH: /opt/kakadu
+      - name: Install apt dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install unzip exiftool libstdc++6
+      - name: Install Kakadu
+        run: |
+          wget http://kakadusoftware.com/wp-content/uploads/2014/06/KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
+          unzip KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
+          mv KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827 /opt/kakadu
+          echo /opt/kakadu >> $GITHUB_PATH
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Pytest
+        run: python py.test

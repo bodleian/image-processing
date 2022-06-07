@@ -7,9 +7,7 @@ Image-processing is a Python library that converts a source image (TIFF or JPEG)
 At the Bodleian we use it to generate the derivative image files we ingest into Digital Bodleian for both delivery and long-term preservation.
 
 
-.. image:: https://travis-ci.org/bodleian/image-processing.svg?branch=master
-    :target: https://travis-ci.org/bodleian/image-processing
-    :alt: Build Status
+![Build](https://github.com/bodleian/image-processing/actions/workflows/test.yml/badge.svg)
 .. image:: https://readthedocs.org/projects/image-processing/badge/?version=latest
     :target: https://image-processing.readthedocs.io/?badge=latest
     :alt: Documentation Status
