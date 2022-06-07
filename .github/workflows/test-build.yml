@@ -1,0 +1,33 @@
+name: Build
+on: [push]
+jobs:
+  Run-Tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.6", "3.8"] #todo: add more
+#    env:
+#      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:/opt/kakadu
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: '${{ matrix.python-version }}'
+      - name: Install apt dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install unzip exiftool libstdc++6
+#      - name: Install Kakadu  # todo: need to find new url for download demo, or remove this
+#        run: |
+#          wget http://kakadusoftware.com/wp-content/uploads/2014/06/KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
+#          unzip KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
+#          mv KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827 /opt/kakadu
+#          echo /opt/kakadu >> $GITHUB_PATH
+#          echo $LD_LIBRARY_PATH
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run pytest
+        run: pytest
