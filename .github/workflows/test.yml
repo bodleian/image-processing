@@ -2,14 +2,14 @@ on: [push]
 jobs:
   Run-Tests:
     runs-on: ubuntu-latest
+    env:
+      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:/opt/kakadu
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.x'
-      - env:
-          LD_LIBRARY_PATH: /opt/kakadu
       - name: Install apt dependencies
         run: |
           sudo apt-get update
@@ -20,6 +20,7 @@ jobs:
           unzip KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827.zip
           mv KDU7A2_Demo_Apps_for_Ubuntu-x86-64_170827 /opt/kakadu
           echo /opt/kakadu >> $GITHUB_PATH
+          echo $LD_LIBRARY_PATH
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
