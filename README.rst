@@ -92,7 +92,7 @@ To just use Kakadu directly through the wrapper:
 Development and Testing
 -----------------------
 
-We run a subset of our unit tests on Python versions 3.7+ using Github Actions. Tests that require Kakadu installation are skipped, as we can no longer access a demo version of Kakadu in a public repository. Any changes should be tested locally, with Kakadu installed, rather than relying on the CI testing alone. You can use requirements.txt to set up a Python virtual environment.
+We run a subset of our unit tests on Python versions 3.7+ using Github Actions. Tests that require Kakadu are skipped, as we cannot access the proprietary Kakadu executables from a public repository. Any changes should be tested locally, with Kakadu installed, rather than relying on the CI testing alone. You can use requirements.txt to set up a Python virtual environment.
 
 
 .. inclusion-marker-intro-end
