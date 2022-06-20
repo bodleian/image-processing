@@ -90,7 +90,7 @@ To just use Kakadu directly through the wrapper:
 
 
 Development and Testing
-----------------------
+-----------------------
 
 You can use requirements.txt to set up a Python virtual environment for development.
 
