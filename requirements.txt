@@ -1,5 +1,5 @@
 py==1.11.0
-pytest
+pytest==7.1.2
 uuid==1.30
 Pillow == 9.1.0
 jpylyzer==2.0.1
