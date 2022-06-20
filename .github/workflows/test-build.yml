@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.6", "3.8"] #todo: add more
+        python-version: ["3.7", "3.8", "3.9", "3.10"] #todo: add more
 #    env:
 #      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:/opt/kakadu
     steps:
@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: '${{ matrix.python-version }}'
-      - name: Install apt dependencies
+      - name: Install apt dependencies # todo does this keep breaking or is it just me accidentally cancelling it
         run: |
           sudo apt-get update
           sudo apt-get install exiftool libstdc++6
