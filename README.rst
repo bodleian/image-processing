@@ -6,9 +6,8 @@ Image-processing is a Python library that converts a source image (TIFF or JPEG)
 
 At the Bodleian we use it to generate the derivative image files we ingest into Digital Bodleian for both delivery and long-term preservation.
 
-
-.. image:: https://travis-ci.org/bodleian/image-processing.svg?branch=master
-    :target: https://travis-ci.org/bodleian/image-processing
+.. image:: https://github.com/bodleian/image-processing/actions/workflows/test-build.yml/badge.svg
+    :target: https://github.com/bodleian/image-processing/actions/workflows/test-build.yml
     :alt: Build Status
 .. image:: https://readthedocs.org/projects/image-processing/badge/?version=latest
     :target: https://image-processing.readthedocs.io/?badge=latest
@@ -26,7 +25,7 @@ Installation
 
 ``pip install git+https://github.com/bodleian/image-processing.git``
 
-- Tested on Python 3.6+
+- Tested on Python 3.8, but should work with most 3.x versions
 
 Dependencies
 ~~~~~~~~~~~~
@@ -88,6 +87,12 @@ To just use Kakadu directly through the wrapper:
     from image_processing import kakadu
     kdu = kakadu.Kakadu(kakadu_base_path="/opt/kakadu")
     kdu.kdu_compress("input.tif", "output.jp2", kakadu_options=kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS)
+
+
+Development and Testing
+-----------------------
+
+We run a subset of our unit tests on Python versions 3.7+ using Github Actions. Tests that require Kakadu are skipped, as we cannot access the proprietary Kakadu executables from a public repository. Any changes should be tested locally, with Kakadu installed, rather than relying on the CI testing alone. You can use requirements.txt to set up a Python virtual environment.
 
 
 .. inclusion-marker-intro-end
