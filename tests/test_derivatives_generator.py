@@ -4,7 +4,10 @@ import os
 import shutil
 import sys
 import pytest
+from pytest import mark
+
 from image_processing import derivative_files_generator, validation, exceptions
+from image_processing.utils import cmd_is_executable
 from .test_utils import temporary_folder, filepaths, image_files_match, xmp_files_match
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -14,6 +17,7 @@ def get_derivatives_generator():
     return derivative_files_generator.DerivativeFilesGenerator(kakadu_base_path=filepaths.KAKADU_BASE_PATH)
 
 
+@mark.skipif(not cmd_is_executable('/opt/kakadu/kdu_compress'), reason="requires kakadu installed")
 class TestDerivativeGenerator(object):
 
     def test_creates_high_quality_jpg(self):

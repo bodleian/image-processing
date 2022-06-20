@@ -25,7 +25,7 @@ Installation
 
 ``pip install git+https://github.com/bodleian/image-processing.git``
 
-- Tested on Python 3.6+
+- Tested on Python 3.8, but should work with most 3.x versions
 
 Dependencies
 ~~~~~~~~~~~~
@@ -87,6 +87,12 @@ To just use Kakadu directly through the wrapper:
     from image_processing import kakadu
     kdu = kakadu.Kakadu(kakadu_base_path="/opt/kakadu")
     kdu.kdu_compress("input.tif", "output.jp2", kakadu_options=kakadu.DEFAULT_LOSSLESS_COMPRESS_OPTIONS)
+
+
+Development and Testing
+----------------------
+
+We run a subset of our unit tests on Python versions 3.7+ using Github Actions. Tests that require Kakadu installation are skipped, as we can no longer access a demo version of Kakadu in a public repository. Any changes should be tested locally, with Kakadu installed, rather than relying on the CI testing alone.
 
 
 .. inclusion-marker-intro-end

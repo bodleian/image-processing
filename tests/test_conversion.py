@@ -2,8 +2,13 @@ import io
 import logging
 import os
 import sys
+
+from pytest import mark
+
 from image_processing import conversion, derivative_files_generator, validation, exceptions, kakadu
 import pytest
+
+from image_processing.utils import cmd_is_executable
 from .test_utils import temporary_folder, filepaths, image_files_match
 from PIL import Image, ImageCms
 
@@ -22,6 +27,7 @@ class TestImageFormatConverter(object):
             assert os.path.isfile(tiff_file)
             assert image_files_match(tiff_file, filepaths.TIF_FROM_STANDARD_JPG)
 
+    @mark.skipif(not cmd_is_executable('/opt/kakadu/kdu_compress'), reason="requires kakadu installed")
     def test_converts_tif_to_jpeg2000(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jp2')
@@ -38,6 +44,7 @@ class TestImageFormatConverter(object):
             assert os.path.isfile(output_file)
             assert image_files_match(output_file, filepaths.HIGH_QUALITY_JPG_FROM_STANDARD_TIF)
 
+    @mark.skipif(not cmd_is_executable('/opt/kakadu/kdu_compress'), reason="requires kakadu installed")
     def test_converts_tif_to_lossy_jpeg2000(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jp2')
@@ -48,6 +55,7 @@ class TestImageFormatConverter(object):
             # lossy conversions to jp2 don't seem to produce deterministic results, even if we only look at the pixels
             # validation.check_visually_identical(output_file, filepaths.LOSSY_JP2_FROM_STANDARD_TIF)
 
+    @mark.skipif(not cmd_is_executable('/opt/kakadu/kdu_compress'), reason="requires kakadu installed")
     def test_kakadu_errors_are_raised(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jp2')
