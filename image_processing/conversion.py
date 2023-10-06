@@ -52,7 +52,7 @@ class Converter(object):
                 input_pil = input_pil.convert(mode="RGB")
             if resize:
                 thumbnail_size = tuple(int(i * resize) for i in input_pil.size)
-                input_pil.thumbnail(thumbnail_size, Image.LANCZOS)
+                input_pil.thumbnail(thumbnail_size, Image.Resampling.LANCZOS)
             if quality:
                 input_pil.save(output_filepath, "JPEG", quality=quality, icc_profile=icc_profile)
             else:
@@ -137,7 +137,7 @@ class Converter(object):
 
             input_profile = ImageCms.getOpenProfile(io.BytesIO(input_icc_obj))
             output_pil = ImageCms.profileToProfile(input_pil, input_profile, icc_profile_filepath,
-                                                   renderingIntent=ImageCms.INTENT_PERCEPTUAL,
+                                                   renderingIntent=ImageCms.Intent.PERCEPTUAL,
                                                    outputMode=new_colour_mode, inPlace=0)
             output_pil.save(output_filepath)
         self.copy_over_embedded_metadata(image_filepath, output_filepath)
