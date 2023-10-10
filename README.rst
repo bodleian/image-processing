@@ -25,7 +25,7 @@ Installation
 
 ``pip install git+https://github.com/bodleian/image-processing.git``
 
-- Tested on Python 3.8, but should work with most 3.x versions
+- Mostly tested on Python 3.8, but should also work on newer 3.x versions
 
 Dependencies
 ~~~~~~~~~~~~
@@ -92,7 +92,7 @@ To just use Kakadu directly through the wrapper:
 Development and Testing
 -----------------------
 
-We run a subset of our unit tests on Python versions 3.7+ using Github Actions. Tests that require Kakadu are skipped, as we cannot access the proprietary Kakadu executables from a public repository. Any changes should be tested locally, with Kakadu installed, rather than relying on the CI testing alone. You can use requirements.txt to set up a Python virtual environment.
+We run a subset of our unit tests on Python versions 3.8+ using Github Actions. Tests that require Kakadu are skipped, as we cannot access the proprietary Kakadu executables from a public repository. Any changes should be tested locally, with Kakadu installed, rather than relying on the CI testing alone. You can use requirements.txt to set up a Python virtual environment.
 
 The tests compare directly against image files to check for regression. When updating dependencies like Pillow these test image files may sometimes no longer match, especially jpgs. The current set of test images were generated with Pillow 10.0.1, Exiftool 12.40, and Kakadu 8.2
 
