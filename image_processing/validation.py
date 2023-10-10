@@ -198,7 +198,7 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
 
             # As we rarely encounter RGBA files, and mostly ones without any alpha channel data, we just warn here
             # the visually identical check should pick up any problems
-            logger.warn("You must double check the jp2 conversion is lossless. "
+            logger.warning("You must double check the jp2 conversion is lossless. "
                         "{0} is an RGBA image, and the resulting jp2 may convert back to an RGB tiff "
                         "if the alpha channel is unassociated".format(image_filepath))
 
@@ -207,10 +207,10 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
 
         icc = image_pil.info.get('icc_profile')
         if icc is None:
-            logger.warn('No icc profile embedded in {0}'.format(image_filepath))
+            logger.warning('No icc profile embedded in {0}'.format(image_filepath))
             if icc_needed:
                 raise exceptions.ValidationError('No icc profile embedded in {0}.'.format(image_filepath))
 
         frames = len(list(ImageSequence.Iterator(image_pil)))
         if frames > 1:
-            logger.warn('File has multiple layers: only the first one will be converted')
+            logger.warning('File has multiple layers: only the first one will be converted')

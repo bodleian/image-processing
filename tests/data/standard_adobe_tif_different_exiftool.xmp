@@ -52,6 +52,11 @@
  </rdf:Description>
 
  <rdf:Description rdf:about=''
+  xmlns:prism='http://prismstandard.org/namespaces/basic/2.0/'>
+  <prism:pageCount>2</prism:pageCount>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
   xmlns:tiff='http://ns.adobe.com/tiff/1.0/'>
   <tiff:BitsPerSample>
    <rdf:Seq>
