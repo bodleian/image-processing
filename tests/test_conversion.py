@@ -67,6 +67,7 @@ class TestImageFormatConverter(object):
             conversion.Converter().convert_to_jpg(filepaths.NORMALMAP_TIF, output_file, resize=None,
                                                   quality=derivative_files_generator.DEFAULT_JPG_HIGH_QUALITY_VALUE)
             assert os.path.isfile(output_file)
+            validation.check_colour_profiles_match(filepaths.NORMALMAP_TIF, output_file)
 
 
     @mark.skipif(not cmd_is_executable('/opt/kakadu/kdu_compress'), reason="requires kakadu installed")

@@ -154,6 +154,8 @@ def check_colour_profiles_match(source_filepath, converted_filepath):
             if source_image.mode != converted_image.mode:
                 if source_image.mode == BITONAL and converted_image.mode == GREYSCALE:
                     logger.info('Converted image is greyscale, not bitonal. This is expected')
+                elif source_image.mode in ['RGBX', 'I;16'] and converted_image.mode == 'RGB':
+                    logger.info('Converted image in RGB space, but was converted from a compatible space. This is expected.')
                 else:
                     raise exceptions.ValidationError(
                         'Converted file {0} has different colour mode from {1}'
