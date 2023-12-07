@@ -14,7 +14,7 @@ from hashlib import sha256
 GREYSCALE = 'L'
 BITONAL = '1'
 MONOTONE_COLOUR_MODES = [GREYSCALE, BITONAL]
-ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
+ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', 'RGBX', 'I;16', GREYSCALE, BITONAL]
 
 
 def validate_jp2(image_file, output_file=None):

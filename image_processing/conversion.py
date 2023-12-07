@@ -50,6 +50,12 @@ class Converter(object):
                 self.logger.warning(
                     'Image is RGBA - the alpha channel will be removed from the JPEG derivative image')
                 input_pil = input_pil.convert(mode="RGB")
+            if input_pil.mode == 'I;16':
+                self.logger.warning(
+                    'Image is 16bpp - will be downsampled to 8bpp')
+                input_pil = input_pil.convert(mode="RGB")
+
+
             if resize:
                 thumbnail_size = tuple(int(i * resize) for i in input_pil.size)
                 input_pil.thumbnail(thumbnail_size, Image.Resampling.LANCZOS)
