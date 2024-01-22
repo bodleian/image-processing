@@ -1,7 +1,7 @@
 py==1.11.0
 pytest==7.1.2
 uuid==1.30
-Pillow==10.0.1
+Pillow==10.2.0
 jpylyzer==2.0.1
 Sphinx==5.0.2
 sphinx-rtd-theme==1.0.0
