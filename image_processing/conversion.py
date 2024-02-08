@@ -12,6 +12,7 @@ from PIL import Image, ImageCms
 from image_processing import utils
 from image_processing.exceptions import ImageProcessingError
 
+MAX_JPEG_DIMENSION = 65500
 
 class Converter(object):
     """
@@ -55,9 +56,13 @@ class Converter(object):
                     'Image is 16bpp - will be downsampled to 8bpp')
                 input_pil = input_pil.convert(mode="RGB")
 
-
+            # libjpeg has a maximum dimension of 65,500, which is lower than the actual maximum jpeg dimension of 65,535
+            # JPEG2000 does not have the restriction
+            # if we're not already scaling the jpeg, then clamp the thumbnail to the max supported dimensions
+            if resize is None and MAX_JPEG_DIMENSION <= max(input_pil.size):
+                resize = 1.0
             if resize:
-                thumbnail_size = tuple(int(i * resize) for i in input_pil.size)
+                thumbnail_size = tuple(min(int(i * resize), MAX_JPEG_DIMENSION) for i in input_pil.size)
                 input_pil.thumbnail(thumbnail_size, Image.Resampling.LANCZOS)
             if quality:
                 input_pil.save(output_filepath, "JPEG", quality=quality, icc_profile=icc_profile)
