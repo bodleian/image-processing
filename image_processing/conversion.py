@@ -47,11 +47,12 @@ class Converter(object):
         """
         with Image.open(input_filepath) as input_pil:
             icc_profile = input_pil.info.get('icc_profile')
-            if input_pil.mode == 'RGBA':
+            if input_pil.mode in ['RGBA', 'RGBX']:
                 self.logger.warning(
-                    'Image is RGBA - the alpha channel will be removed from the JPEG derivative image')
+                    'Image is %s - the fourth channel will be removed from the JPEG derivative image', input_pil.mode)
                 input_pil = input_pil.convert(mode="RGB")
             if input_pil.mode == 'I;16':
+                # JPEG doesn't support 16bit
                 self.logger.warning(
                     'Image is 16bpp - will be downsampled to 8bpp')
                 input_pil = input_pil.convert(mode="RGB")

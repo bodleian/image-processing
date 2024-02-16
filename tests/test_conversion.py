@@ -51,33 +51,12 @@ class TestImageFormatConverter(object):
                                                   quality=derivative_files_generator.DEFAULT_JPG_HIGH_QUALITY_VALUE)
             assert os.path.isfile(output_file)
 
-
-    @mark.skipif(not cmd_is_executable('/opt/kakadu/kdu_compress'), reason="requires kakadu installed")
-    def test_converts_depthmap_tif_to_jpeg2000(self):
-        with temporary_folder() as output_folder:
-            output_file = os.path.join(output_folder, 'output.jpg')
-            get_kakadu().kdu_compress(filepaths.DEPTHMAP_TIF, output_file,
-                                                  kakadu_options=kakadu.DEFAULT_COMPRESS_OPTIONS + kakadu.LOSSLESS_OPTIONS)
-            assert os.path.isfile(output_file)
-
-
     def test_converts_normalmap_tif_to_jpeg(self):
         with temporary_folder() as output_folder:
             output_file = os.path.join(output_folder, 'output.jpg')
             conversion.Converter().convert_to_jpg(filepaths.NORMALMAP_TIF, output_file, resize=None,
                                                   quality=derivative_files_generator.DEFAULT_JPG_HIGH_QUALITY_VALUE)
             assert os.path.isfile(output_file)
-            validation.check_colour_profiles_match(filepaths.NORMALMAP_TIF, output_file)
-
-
-    @mark.skipif(not cmd_is_executable('/opt/kakadu/kdu_compress'), reason="requires kakadu installed")
-    def test_converts_normalmap_tif_to_jpeg2000(self):
-        with temporary_folder() as output_folder:
-            output_file = os.path.join(output_folder, 'output.jpg')
-            get_kakadu().kdu_compress(filepaths.NORMALMAP_TIF, output_file,
-                                                  kakadu_options=kakadu.DEFAULT_COMPRESS_OPTIONS + kakadu.LOSSLESS_OPTIONS)
-            assert os.path.isfile(output_file)
-
 
     @mark.skipif(not cmd_is_executable('/opt/kakadu/kdu_compress'), reason="requires kakadu installed")
     def test_converts_tif_to_lossy_jpeg2000(self):

@@ -14,7 +14,7 @@ from hashlib import sha256
 GREYSCALE = 'L'
 BITONAL = '1'
 MONOTONE_COLOUR_MODES = [GREYSCALE, BITONAL]
-ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', 'RGBX', 'I;16', GREYSCALE, BITONAL]
+ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', 'RGBX', 'I;16', GREYSCALE, BITONAL]  # todo: are there any other modes we may have to consider? Need to add test for RGBX image
 
 
 def validate_jp2(image_file, output_file=None):
@@ -154,12 +154,9 @@ def check_colour_profiles_match(source_filepath, converted_filepath):
             if source_image.mode != converted_image.mode:
                 if source_image.mode == BITONAL and converted_image.mode == GREYSCALE:
                     logger.info('Converted image is greyscale, not bitonal. This is expected')
-                elif source_image.mode in ['RGBX', 'I;16'] and converted_image.mode in ['RGB', 'RGBA']:
-                    logger.info('Converted image in RGB space, but was converted from a compatible space. This is expected.')
                 else:
                     raise exceptions.ValidationError(
-                        'Converted file {0} has different colour mode from {1}'
-                        .format(converted_filepath, source_filepath)
+                        f'Converted file {converted_filepath} has different colour mode ({converted_image.mode}) from {source_filepath} ({source_image.mode})'
                     )
 
             source_icc = source_image.info.get('icc_profile')
@@ -190,6 +187,7 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
         if colour_mode not in ACCEPTED_COLOUR_MODES:
             raise exceptions.ValidationError("Unsupported colour mode {0} for {1}".format(colour_mode, image_filepath))
 
+        # todo: do I need to warn for RGBX too?
         if colour_mode == 'RGBA':
             # In some cases alpha channel data is stored in a way that means it would be lost in the conversion back to
             # tiff from jp2.

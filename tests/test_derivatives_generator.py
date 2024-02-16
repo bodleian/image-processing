@@ -225,3 +225,28 @@ class TestDerivativeGenerator(object):
             assert image_files_match(jpg_file, filepaths.STANDARD_JPG)
             assert image_files_match(jp2_file, filepaths.LOSSLESS_JP2_FROM_STANDARD_JPG_XMP)
             assert xmp_files_match(embedded_metadata_file, filepaths.STANDARD_JPG_XMP)
+
+    def test_converts_depthmap_tif_to_jpeg2000_losslessly(self):
+        """
+        Check transformations of 16 bit depthmap images do not lose data
+        :return:
+        """
+        with temporary_folder() as output_folder:
+            generator = get_derivatives_generator()
+            output_file = os.path.join(output_folder, 'output.jp2')
+            generator.generate_jp2_from_tiff(filepaths.DEPTHMAP_TIF, output_file)
+            assert os.path.isfile(output_file)
+            generator.check_conversion_was_lossless(filepaths.DEPTHMAP_TIF, output_file)
+
+    def test_converts_normalmap_tif_to_jpeg2000_losslessly(self):
+        """
+        Check transformations of RGBA normal map images do not lose data
+        :return:
+        """
+        with temporary_folder() as output_folder:
+            generator = get_derivatives_generator()
+            output_file = os.path.join(output_folder, 'output.jp2')
+            # note that this method has specific handling for files with alpha channels that the direct converter method does not
+            generator.generate_jp2_from_tiff(filepaths.NORMALMAP_TIF, output_file)
+            assert os.path.isfile(output_file)
+            generator.check_conversion_was_lossless(filepaths.NORMALMAP_TIF, output_file)

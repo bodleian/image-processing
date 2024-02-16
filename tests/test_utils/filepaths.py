@@ -2,8 +2,8 @@
 
 # adobe rgb 1998 8 bit tiff file (our most common input format) + expected derivatives
 STANDARD_TIF = 'tests/data/standard_adobe.tif'
-DEPTHMAP_TIF = 'tests/data/depth_map.tif'
-NORMALMAP_TIF = 'tests/data/normal_map.tif'
+DEPTHMAP_TIF = 'tests/data/depth_map.tif'  # 16 bit (I;16) archiox image
+NORMALMAP_TIF = 'tests/data/normal_map.tif'  # RGBA archiox image
 STANDARD_TIF_SINGLE_LAYER = 'tests/data/standard_adobe_tif_single_layer.tif'  # same tif but without thumbnail
 LOSSY_JP2_FROM_STANDARD_TIF = 'tests/data/standard_adobe_tif_lossy.jp2'
 LOSSLESS_JP2_FROM_STANDARD_TIF_XMP = 'tests/data/standard_adobe_tif_xmp.jp2'
