@@ -216,6 +216,11 @@ class DerivativeFilesGenerator(object):
             if tiff_pil.mode == 'RGBA':
                 if kakadu.ALPHA_OPTION not in kakadu_options:
                     kakadu_options += [kakadu.ALPHA_OPTION]
+            elif tiff_pil.mode == 'RGBX':
+                self.log.warning('Input tiff has colour mode RGBX. It will be converted to RGBA')
+                if kakadu.ALPHA_OPTION not in kakadu_options:
+                    kakadu_options += [kakadu.ALPHA_OPTION]
+
 
         self.kakadu.kdu_compress(tiff_file, jp2_filepath, kakadu_options=kakadu_options)
         self.log.debug('Lossless jp2 file {0} generated'.format(jp2_filepath))

@@ -14,7 +14,7 @@ from hashlib import sha256
 GREYSCALE = 'L'
 BITONAL = '1'
 MONOTONE_COLOUR_MODES = [GREYSCALE, BITONAL]
-ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', 'RGBX', 'I;16', GREYSCALE, BITONAL]  # todo: are there any other modes we may have to consider? Need to add test for RGBX image
+ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', 'RGBX', 'I;16', GREYSCALE, BITONAL]
 
 
 def validate_jp2(image_file, output_file=None):
@@ -154,6 +154,8 @@ def check_colour_profiles_match(source_filepath, converted_filepath):
             if source_image.mode != converted_image.mode:
                 if source_image.mode == BITONAL and converted_image.mode == GREYSCALE:
                     logger.info('Converted image is greyscale, not bitonal. This is expected')
+                elif source_image.mode == 'RGBX' and converted_image.mode == 'RGBA':
+                    logger.info('Converted image in RGBA space, but was converted from RGBX. This is expected.')
                 else:
                     raise exceptions.ValidationError(
                         f'Converted file {converted_filepath} has different colour mode ({converted_image.mode}) from {source_filepath} ({source_image.mode})'
