@@ -189,8 +189,10 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
         if colour_mode not in ACCEPTED_COLOUR_MODES:
             raise exceptions.ValidationError("Unsupported colour mode {0} for {1}".format(colour_mode, image_filepath))
 
-        # todo: do I need to warn for RGBX too?
-        if colour_mode == 'RGBA':
+        if colour_mode == 'RGBX':
+            logger.warning("{0} is RGBX and will convert to a RGBA jp2, preserving the pixel information but losing the colour mode".format(image_filepath))
+
+        if colour_mode in ['RGBA', 'RGBX']:
             # In some cases alpha channel data is stored in a way that means it would be lost in the conversion back to
             # tiff from jp2.
             # "Kakadu Warning:
@@ -200,9 +202,10 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
 
             # As we rarely encounter RGBA files, and mostly ones without any alpha channel data, we just warn here
             # the visually identical check should pick up any problems
-            logger.warning("You must double check the jp2 conversion is lossless. "
-                        "{0} is an RGBA image, and the resulting jp2 may convert back to an RGB tiff "
-                        "if the alpha channel is unassociated".format(image_filepath))
+            logger.warning("You must check the jp2 conversion is lossless. "
+                            "{0} will convert to a RGBA jp2, and may convert back to an RGB tiff "
+                            "if the alpha channel is unassociated."
+                           "The usual visually identical check will detect this if run".format(image_filepath))
 
         icc_needed = (require_icc_profile_for_greyscale and colour_mode == GREYSCALE) \
             or (require_icc_profile_for_colour and colour_mode not in MONOTONE_COLOUR_MODES)
