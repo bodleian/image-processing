@@ -14,7 +14,7 @@ from hashlib import sha256
 GREYSCALE = 'L'
 BITONAL = '1'
 MONOTONE_COLOUR_MODES = [GREYSCALE, BITONAL]
-ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', GREYSCALE, BITONAL]
+ACCEPTED_COLOUR_MODES = ['RGB', 'RGBA', 'RGBX', 'I;16', GREYSCALE, BITONAL]
 
 
 def validate_jp2(image_file, output_file=None):
@@ -154,10 +154,11 @@ def check_colour_profiles_match(source_filepath, converted_filepath):
             if source_image.mode != converted_image.mode:
                 if source_image.mode == BITONAL and converted_image.mode == GREYSCALE:
                     logger.info('Converted image is greyscale, not bitonal. This is expected')
+                elif source_image.mode == 'RGBX' and converted_image.mode == 'RGBA':
+                    logger.info('Converted image in RGBA space, but was converted from RGBX. This is expected.')
                 else:
                     raise exceptions.ValidationError(
-                        'Converted file {0} has different colour mode from {1}'
-                        .format(converted_filepath, source_filepath)
+                        f'Converted file {converted_filepath} has different colour mode ({converted_image.mode}) from {source_filepath} ({source_image.mode})'
                     )
 
             source_icc = source_image.info.get('icc_profile')
@@ -188,7 +189,10 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
         if colour_mode not in ACCEPTED_COLOUR_MODES:
             raise exceptions.ValidationError("Unsupported colour mode {0} for {1}".format(colour_mode, image_filepath))
 
-        if colour_mode == 'RGBA':
+        if colour_mode == 'RGBX':
+            logger.warning("{0} is RGBX and will convert to a RGBA jp2, preserving the pixel information but losing the colour mode".format(image_filepath))
+
+        if colour_mode in ['RGBA', 'RGBX']:
             # In some cases alpha channel data is stored in a way that means it would be lost in the conversion back to
             # tiff from jp2.
             # "Kakadu Warning:
@@ -198,9 +202,10 @@ def check_image_suitable_for_jp2_conversion(image_filepath, require_icc_profile_
 
             # As we rarely encounter RGBA files, and mostly ones without any alpha channel data, we just warn here
             # the visually identical check should pick up any problems
-            logger.warning("You must double check the jp2 conversion is lossless. "
-                        "{0} is an RGBA image, and the resulting jp2 may convert back to an RGB tiff "
-                        "if the alpha channel is unassociated".format(image_filepath))
+            logger.warning("You must check the jp2 conversion is lossless. "
+                            "{0} will convert to a RGBA jp2, and may convert back to an RGB tiff "
+                            "if the alpha channel is unassociated."
+                           "The usual visually identical check will detect this if run".format(image_filepath))
 
         icc_needed = (require_icc_profile_for_greyscale and colour_mode == GREYSCALE) \
             or (require_icc_profile_for_colour and colour_mode not in MONOTONE_COLOUR_MODES)

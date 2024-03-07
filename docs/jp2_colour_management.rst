@@ -58,6 +58,11 @@ The ``kdu_compress`` :ref:`command options <kdu_compress-options>` we use do not
 
 As very few of our input images have an alpha channel, and we have not encountered failing cases in live data (as opposed to constructed test data), this is not a priority for us. We just make sure to check RGBA JP2 conversions are lossless, so we will catch any future failing cases.
 
+RGBX colour mode
+~~~~~~~~~~~~~~~~~~
+
+I could not find a simple way to convert an RGBX TIFF to an RGBX JP2, though it's possible more work would produce one. In our particular use case it's always clear whether the image should be interpreted as RGBA or RGBX, so we convert RGBX images to RGBA, preserving all of the pixel data but not the colour mode. The program logs a warning when converting RGBX files because of this.
+
 Colour profiles / modes not supported by JP2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

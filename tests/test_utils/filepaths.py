@@ -49,6 +49,10 @@ LOSSLESS_JP2_FROM_STANDARD_TIF_DIFFERENT_KAKADU = 'tests/data/standard_adobe_tif
 
 NO_PROFILE_TIF = 'tests/data/no_profile.tif'
 
+# tifs from our archiox project, which can have unusual colour modes
+DEPTHMAP_TIF = 'tests/data/depth_map.tif'  # 16 bit (I;16) archiox image
+NORMALMAP_TIF = 'tests/data/normal_map.tif'  # RGBX archiox image (compressed, as decompression with Image Magick converts it to RGBA)
+
 # just truncated files
 INVALID_JP2 = 'tests/data/invalid.jp2'
 INVALID_TIF = 'tests/data/invalid.tif'
